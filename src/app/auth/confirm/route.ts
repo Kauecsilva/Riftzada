@@ -24,7 +24,10 @@ export async function GET(request: NextRequest) {
 
   if (error) {
     console.error("[auth] confirm", error.message);
-    return NextResponse.redirect(new URL("/entrar?erro=link", request.url));
+    // Com ?code= o Supabase já confirmou o e-mail antes de redirecionar. A troca por sessão só
+    // falha quando o link é aberto em outro navegador (ex.: app do Gmail), sem o cookie do cadastro.
+    const confirmed = code && destination !== "/redefinir-senha";
+    return NextResponse.redirect(new URL(confirmed ? "/entrar?confirmado=1" : "/entrar?erro=link", request.url));
   }
   const target = type === "recovery" ? "/redefinir-senha" : destination;
   return NextResponse.redirect(new URL(`${target}${target === "/" ? "?bemvindo=1" : ""}`, request.url));
