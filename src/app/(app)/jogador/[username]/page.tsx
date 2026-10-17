@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Library, LogOut, Shield } from "lucide-react";
-import { DeckCard } from "@/components/decks/DeckCard";
 import { PostCard } from "@/components/feed/PostCard";
 import { ListingCard } from "@/components/market/ListingCard";
 import { AchievementList } from "@/components/profile/AchievementList";
@@ -14,7 +13,6 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import { FlashToast } from "@/components/ui/Toast";
 import { earnedAchievements } from "@/lib/domain/achievements";
 import { shortDate } from "@/lib/format";
-import { getDecks } from "@/server/queries/decks";
 import { getPosts } from "@/server/queries/feed";
 import { getListings } from "@/server/queries/market";
 import { getPlayerResults, getPlayerStats, getProfileByUsername } from "@/server/queries/profiles";
@@ -31,14 +29,13 @@ export default async function PlayerPage({ params, searchParams }: PageProps<"/j
   if (!profile) notFound();
   const mine = profile.id === session.userId;
 
-  const [stats, results, decks, listings, posts] = await Promise.all([
+  const [stats, results, listings, posts] = await Promise.all([
     getPlayerStats(profile.id),
     getPlayerResults(profile.id, 10),
-    getDecks({ authorId: profile.id, limit: 6 }),
     getListings({ sellerId: profile.id, limit: 6 }),
     getPosts({ authorId: profile.id, limit: 3 }),
   ]);
-  const achievements = earnedAchievements(stats, { decks: decks.length, listings: listings.length });
+  const achievements = earnedAchievements(stats, { decks: 0, listings: listings.length });
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
@@ -60,7 +57,7 @@ export default async function PlayerPage({ params, searchParams }: PageProps<"/j
         <AchievementList items={achievements} />
       </section>
 
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div>
         <section aria-labelledby="historico">
           <SectionHeader id="historico" title="Histórico" />
           {results.length ? (
@@ -83,14 +80,6 @@ export default async function PlayerPage({ params, searchParams }: PageProps<"/j
           )}
         </section>
 
-        <section aria-labelledby="decks">
-          <SectionHeader id="decks" title="Decks" />
-          {decks.length ? (
-            <ul className="space-y-3">{decks.map((d) => <li key={d.id}><DeckCard deck={d} /></li>)}</ul>
-          ) : (
-            <p className="card p-4 text-sm text-muted">{mine ? <>Mostra pra galera o que você está cozinhando. <Link href="/decks/novo" className="font-semibold text-rift-strong">Publicar deck</Link></> : "Nenhum deck publicado."}</p>
-          )}
-        </section>
       </div>
 
       {listings.length > 0 && (

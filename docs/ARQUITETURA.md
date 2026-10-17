@@ -147,7 +147,8 @@ Todas as tabelas têm `id uuid` (exceto junções), `created_at`, RLS ligado, e 
 | `post_images` | id, post_id, path, position, width, height | Até 4 fotos por post. |
 | `post_likes` | post_id, user_id | Fase 2 (tabela já criada). |
 | `post_comments` | id, post_id, author_id, body, is_hidden | Fase 2. |
-| `events` | id, community_id, name, description, starts_at, location, max_players?, status, image_path?, signup_url?, format?, player_count?, results_image_path?, results_notes?, created_by | `player_count` é preenchido no resultado (pode haver quem jogou sem conta). |
+| `stores` | id, community_id, owner_id → profiles, name (único por comunidade), address?, instagram?, description? | Qualquer membro cadastra a própria loja (migration 0009). O dono cria/edita/apaga os eventos da loja; admin pode tudo. |
+| `events` | id, community_id, store_id? → stores, series_id?, name, description, starts_at, location, max_players?, status, image_path?, signup_url?, format?, player_count?, results_image_path?, results_notes?, created_by | `player_count` é preenchido no resultado (pode haver quem jogou sem conta). |
 | `event_participants` | event_id, user_id, status, created_at | "Vou jogar" = `going`; ao registrar resultado o admin confirma quem `played`. |
 | `event_results` | id, event_id, placement (1..), user_id?, guest_name?, legend_id → cards?, deck_id?, record ("4-1"), notes | `user_id` **ou** `guest_name` (jogador sem conta). Único por (evento, jogador). |
 | `decks` | id, community_id, author_id, name, legend_id → cards, description, visibility, event_id?, record?, placement?, created_at | Fase 2 na UI completa; MVP já mostra e cria. |
@@ -282,6 +283,8 @@ Decks aparecem no MVP numa versão simples porque o "+" e o seed já pedem; curt
 | `/decks/[id]`, `/decks/novo` | Deck | Lenda, autor, resultado, lista por seção, copiar lista, compartilhar. Novo deck por lista colada. |
 | `/jogador/[username]` | Perfil | Foto, nome, @, bio, deck favorito, Instagram · torneios, títulos, 2º, top 4 · histórico de resultados · decks · anúncios ativos · posts recentes. |
 | `/perfil/editar` | Editar perfil | Foto, nome, bio, lenda favorita, Instagram, WhatsApp e se quer mostrá-lo. |
+| `/arena/lojas` | Lojas | Cada loja com endereço, Instagram e agenda (semanal numa linha só: "Toda quarta · 19:30"). |
+| `/loja`, `/loja/[id]/eventos/novo` | Minha loja | Cadastro da loja e dos eventos dela. "Repetir toda semana" cria uma data por semana (4, 8 ou 12) com o mesmo `series_id`; "Mais semanas" estende. Resultado continua só com o admin. |
 | `/admin` | Painel | Atalhos: novo evento, registrar resultado, moderação, usuários, ranking. |
 | `/admin/eventos`, `/admin/eventos/novo`, `/admin/eventos/[id]` | Eventos | Criar, editar, excluir, mudar status. |
 | `/admin/eventos/[id]/resultado` | Registrar resultado | Quem jogou (checklist dos "Vou jogar"), nº de jogadores, top 4 (jogador ou convidado, lenda, record), foto, observações, "publicar campeão no mural". |
@@ -324,6 +327,8 @@ Toda tela tem `loading.tsx` com skeleton, estado vazio com texto leve e erros co
 **Etapa 13–15 — Refinamento, responsividade, testes** Revisar 360/390/430/768/1440, acessibilidade, testes de domínio e de RLS.
 
 **Etapa 16 — Deploy** Criar projeto Supabase, aplicar migrations, configurar Auth (URLs de redirect, SMTP), variáveis na Vercel, primeiro admin.
+
+**Lojas (out/2026)** Lojas cadastram eventos avulsos e semanais. A aba de decks saiu da navegação (`/decks` redireciona para a Home); tabelas e telas continuam no código para voltar quando fizer sentido.
 
 **Fase 2** Curtidas, comentários, conquistas automáticas, TV Mode, deck completo com catálogo, histórico avançado, mercado melhorado.
 

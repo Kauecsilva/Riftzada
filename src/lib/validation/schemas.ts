@@ -27,16 +27,19 @@ export const newPasswordSchema = z
   .object({ password, confirm: z.string() })
   .refine((v) => v.password === v.confirm, { message: "As senhas não batem", path: ["confirm"] });
 
+/** "@fulano", "instagram.com/fulano" ou "fulano" viram "fulano"; vazio vira null. */
+const instagram = z
+  .string()
+  .trim()
+  .transform((v) => v.replace(/^@/, "").replace(/^https?:\/\/(www\.)?instagram\.com\//, "").replace(/\/$/, ""))
+  .pipe(z.union([z.literal(""), z.string().regex(/^[A-Za-z0-9_.]{1,30}$/, "Instagram inválido")]))
+  .transform((v) => v || null);
+
 export const profileSchema = z.object({
   displayName: requiredText(1, 40, "Nome"),
   bio: optionalText(160),
   favoriteLegendId: optionalUuid,
-  instagram: z
-    .string()
-    .trim()
-    .transform((v) => v.replace(/^@/, "").replace(/^https?:\/\/(www\.)?instagram\.com\//, "").replace(/\/$/, ""))
-    .pipe(z.union([z.literal(""), z.string().regex(/^[A-Za-z0-9_.]{1,30}$/, "Instagram inválido")]))
-    .transform((v) => v || null),
+  instagram,
   whatsapp: z
     .string()
     .transform((v) => v.replace(/\D/g, ""))
@@ -125,6 +128,22 @@ export const eventSchema = z.object({
     .pipe(z.union([z.literal(""), z.url({ protocol: /^https$/, message: "O link precisa começar com https://" })]))
     .transform((v) => v || null),
   imagePath: optionalText(200),
+});
+
+export const storeSchema = z.object({
+  id: optionalUuid,
+  name: requiredText(2, 60, "Nome da loja"),
+  address: optionalText(120),
+  instagram,
+  description: optionalText(500),
+});
+
+/** Evento cadastrado por uma loja. "Toda semana" cria uma data por semana. */
+export const storeEventSchema = eventSchema.extend({
+  storeId: uuid,
+  status: z.enum(["scheduled", "live", "cancelled"]).default("scheduled"),
+  repeatWeekly: checkbox,
+  weeks: optionalInt(2, 12).transform((v) => v ?? 8),
 });
 
 const placementRow = z.object({

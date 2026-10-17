@@ -42,7 +42,7 @@ export default async function AdminRankingPage() {
       </section>
       <section className="card p-5">
         <h2 className="mb-1 font-display text-lg font-bold">Lendas cadastradas</h2>
-        <p className="mb-4 text-sm text-muted">Usadas no resultado, nos decks e no perfil. Alimentam o futuro “Meta da Riftzada”.</p>
+        <p className="mb-4 text-sm text-muted">Usadas no resultado e no perfil. Alimentam o futuro “Meta da Riftzada”.</p>
         <p className="mb-4 text-sm">{legends.map((l) => l.name.split(",")[0]).join(" · ") || "Nenhuma ainda."}</p>
         <LegendForm />
       </section>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Crown, Layers, Pin, Sparkles } from "lucide-react";
+import { Crown, Pin, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Photo } from "@/components/ui/Photo";
 import { Podium } from "@/components/arena/Podium";
@@ -65,14 +65,7 @@ export function PostCard({ post, canDelete, canModerate }: { post: Post; canDele
 
       {champion && post.event && post.event.podium.length > 0 && <Podium results={post.event.podium.slice(0, 3)} compact />}
 
-      {post.kind === "deck" && post.deck && (
-        <>
-          <DeckMiniCard deck={post.deck} />
-          <Link href={`/decks/${post.deck.id}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-energy hover:underline">
-            <Layers size={16} aria-hidden /> Ver deck
-          </Link>
-        </>
-      )}
+      {post.kind === "deck" && post.deck && <DeckMiniCard deck={post.deck} />}
     </article>
   );
 }
