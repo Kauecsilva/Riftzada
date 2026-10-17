@@ -13,9 +13,25 @@ export function cardImageUrl(url: string | null): string | null {
   }
 }
 
-/** Foto do anunciante; sem foto, a imagem oficial da carta do catálogo. */
+/** Capa do anúncio: a imagem oficial da carta; sem carta do catálogo, a foto do anunciante. */
 export function listingImageUrl(listing: Pick<Listing, "imageUrl" | "card">): string | null {
-  return listing.imageUrl ?? listing.card?.imageUrl ?? null;
+  return listing.card?.imageUrl ?? listing.imageUrl ?? null;
+}
+
+export type ListingPhoto = { url: string; kind: "official" | "seller" };
+
+/** Fotos do anúncio na ordem de exibição: primeiro a oficial da carta, depois a tirada pelo anunciante. */
+export function listingPhotos(listing: Pick<Listing, "imageUrl" | "card">): ListingPhoto[] {
+  const photos: ListingPhoto[] = [];
+  if (listing.card?.imageUrl) photos.push({ url: listing.card.imageUrl, kind: "official" });
+  if (listing.imageUrl && listing.imageUrl !== listing.card?.imageUrl) photos.push({ url: listing.imageUrl, kind: "seller" });
+  return photos;
+}
+
+/** "está vendendo", "está trocando" ou "está vendendo ou trocando" essa carta. */
+export function offerVerb(listing: Pick<Listing, "kind" | "acceptsTrade">): string {
+  if (listing.kind === "trade") return "está trocando";
+  return listing.acceptsTrade ? "está vendendo ou trocando" : "está vendendo";
 }
 
 /** "Origins · OGN-007 · Epic" */
