@@ -176,3 +176,76 @@ do $$ begin
 exception when insufficient_privilege then null;
 end $$;
 rollback;
+
+-- ---------- Preços de referência (TCGplayer) ----------
+begin;
+-- Mesma carta com pontuação diferente no nome; caixa lacrada (sem Number) e subtipo estranho ficam de fora
+select pg_temp.check(public.upsert_tcgplayer_prices('ogn',
+  '[{"productId": 653045, "name": "Kai''Sa, Daughter of the Void", "url": "https://www.tcgplayer.com/product/653045", "extendedData": [{"name": "Number", "value": "247/298"}]},
+    {"productId": 1, "name": "Origins Booster Box", "extendedData": []}]',
+  '[{"productId": 653045, "lowPrice": 48.0, "marketPrice": 53.21, "subTypeName": "Foil"},
+    {"productId": 653045, "lowPrice": 1.0, "marketPrice": 1.0, "subTypeName": "Weird"},
+    {"productId": 1, "lowPrice": 100.0, "marketPrice": 120.0, "subTypeName": "Normal"}]') = 1, 'Grava 1 preço do TCGplayer');
+select pg_temp.check((select low_cents from card_prices where card_id = '00000000-0000-4000-8000-200000000002' and finish = 'foil') = 4800, 'Menor preço em centavos de dólar');
+select pg_temp.login('00000000-0000-4000-8000-100000000002'); -- João
+select pg_temp.check((select count(*) from card_prices) = 1, 'Logado lê os preços');
+do $$ begin
+  perform public.sync_card_prices();
+  raise exception 'FALHOU: usuário rodou a sincronização de preços';
+exception when insufficient_privilege then null;
+end $$;
+rollback;
+
+-- ---------- Ofertas ----------
+begin;
+-- Rafael vende a Kai'Sa por R$ 90 e aceita ofertas a partir de R$ 50
+select pg_temp.login('00000000-0000-4000-8000-100000000003');
+update public.market_listings set accepts_offers = true, min_offer_cents = 5000 where id = '00000000-0000-4000-8000-500000000001';
+
+select pg_temp.login('00000000-0000-4000-8000-100000000002'); -- João
+do $$ begin
+  perform public.make_listing_offer('00000000-0000-4000-8000-500000000001', 9000);
+  raise exception 'FALHOU: oferta igual ao preço';
+exception when invalid_parameter_value then null;
+end $$;
+do $$ begin
+  perform public.make_listing_offer('00000000-0000-4000-8000-500000000001', 4000);
+  raise exception 'FALHOU: oferta abaixo do mínimo';
+exception when invalid_parameter_value then null;
+end $$;
+do $$ begin
+  insert into public.listing_offers (listing_id, buyer_id, amount_cents) values ('00000000-0000-4000-8000-500000000001', '00000000-0000-4000-8000-100000000002', 6000);
+  raise exception 'FALHOU: inseriu oferta sem passar pela função';
+exception when insufficient_privilege then null;
+end $$;
+select public.make_listing_offer('00000000-0000-4000-8000-500000000001', 6000, 'Fecha por 60?');
+-- Refazer a oferta atualiza a mesma linha
+select set_config('test.offer', public.make_listing_offer('00000000-0000-4000-8000-500000000001', 7000)::text, true);
+select pg_temp.check((select count(*) from listing_offers) = 1 and (select amount_cents from listing_offers) = 7000, 'Uma oferta em aberto por comprador');
+
+select pg_temp.login('00000000-0000-4000-8000-100000000004'); -- Pedro
+select pg_temp.check((select count(*) from listing_offers) = 0, 'Terceiro não vê a oferta');
+do $$ begin
+  perform public.respond_listing_offer(current_setting('test.offer')::uuid, 'accept');
+  raise exception 'FALHOU: terceiro respondeu oferta';
+exception when insufficient_privilege then null;
+end $$;
+
+select pg_temp.login('00000000-0000-4000-8000-100000000003'); -- Rafael (vendedor)
+do $$ begin
+  perform public.make_listing_offer('00000000-0000-4000-8000-500000000001', 6000);
+  raise exception 'FALHOU: vendedor ofertou no próprio anúncio';
+exception when insufficient_privilege then null;
+end $$;
+do $$ begin
+  perform public.respond_listing_offer((select id from public.listing_offers limit 1), 'counter', 9500);
+  raise exception 'FALHOU: contraproposta acima do preço';
+exception when invalid_parameter_value then null;
+end $$;
+select pg_temp.check(public.respond_listing_offer((select id from listing_offers limit 1), 'counter', 8000) = 'countered', 'Vendedor faz contraproposta');
+
+select pg_temp.login('00000000-0000-4000-8000-100000000002'); -- João aceita a contraproposta
+select pg_temp.check(public.respond_listing_offer((select id from listing_offers limit 1), 'accept') = 'accepted', 'Comprador aceita a contraproposta');
+select pg_temp.check((select amount_cents from listing_offers) = 8000, 'Oferta fecha no valor da contraproposta');
+select pg_temp.check((select status from market_listings where id = '00000000-0000-4000-8000-500000000001') = 'reserved', 'Anúncio de 1 unidade fica reservado');
+rollback;

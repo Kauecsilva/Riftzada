@@ -2,9 +2,9 @@ import "server-only";
 import { isDemoMode } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import * as demo from "@/lib/demo/store";
-import type { Listing, ListingKind } from "@/types/domain";
+import type { Listing, ListingKind, ListingOffer } from "@/types/domain";
 import { getCommunityId } from "../session";
-import { LISTING_FIELDS, mapListing, type ListingRow } from "./mappers";
+import { LISTING_FIELDS, mapListing, mapOffer, OFFER_FIELDS, type ListingRow, type OfferRow } from "./mappers";
 
 export type ListingFilter = { kind?: ListingKind; search?: string; sellerId?: string; includeDone?: boolean; includeHidden?: boolean; limit?: number };
 
@@ -58,4 +58,20 @@ export async function getSharedWhatsapp(userId: string): Promise<string | null> 
     .eq("user_id", userId)
     .maybeSingle();
   return data?.share_whatsapp ? data.whatsapp : null;
+}
+
+/** Ofertas do anúncio: o vendedor vê todas, o comprador só as dele (a RLS decide). Em aberto primeiro. */
+export async function getListingOffers(listingId: string): Promise<ListingOffer[]> {
+  if (isDemoMode) return demo.demoOffers(listingId);
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("listing_offers")
+    .select(OFFER_FIELDS)
+    .eq("listing_id", listingId)
+    .order("updated_at", { ascending: false })
+    .limit(50)
+    .returns<OfferRow[]>();
+  if (error) throw error;
+  const open = (o: ListingOffer) => (o.status === "pending" || o.status === "countered" ? 0 : 1);
+  return data.map(mapOffer).sort((a, b) => open(a) - open(b));
 }

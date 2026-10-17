@@ -2,7 +2,7 @@
 // Uso: npm run seed:sql
 import { writeFileSync } from "node:fs";
 import {
-  COMMUNITY_ID, DEMO_PASSWORD, demoCards, demoDecks, demoEvents, demoListings, demoParticipants, demoPosts,
+  COMMUNITY_ID, DEMO_PASSWORD, demoCards, demoDecks, demoEvents, demoListings, demoOffers, demoParticipants, demoPosts,
   demoRankingEntries, demoRankingRules, demoResults, demoUsers, USERS, type RelDate,
 } from "../src/lib/demo/fixtures.ts";
 
@@ -68,8 +68,15 @@ sql += rows("public.event_results",
 
 sql += "\n-- Mercado\n";
 sql += rows("public.market_listings",
-  ["id", "community_id", "seller_id", "kind", "card_name", "set_name", "variant", "condition", "quantity", "price_cents", "accepts_trade", "description", "image_path", "status", "created_at"],
-  demoListings.map((l) => [q(l.id), q(COMMUNITY_ID), q(l.sellerId), q(l.kind), q(l.cardName), q(l.setName), q(l.variant), q(l.condition), q(l.quantity), q(l.priceCents), q(l.acceptsTrade), q(l.description), q(l.imagePath), q(l.status), at(l.createdAt)]));
+  ["id", "community_id", "seller_id", "kind", "card_name", "set_name", "variant", "condition", "quantity", "price_cents", "accepts_trade", "description", "image_path", "status", "created_at",
+    "price_base", "price_base_cents", "discount_pct", "liga_price_cents", "liga_language", "liga_condition", "accepts_offers", "min_offer_cents"],
+  demoListings.map((l) => [q(l.id), q(COMMUNITY_ID), q(l.sellerId), q(l.kind), q(l.cardName), q(l.setName), q(l.variant), q(l.condition), q(l.quantity), q(l.priceCents), q(l.acceptsTrade), q(l.description), q(l.imagePath), q(l.status), at(l.createdAt),
+    q(l.pricing?.base), q(l.pricing?.baseCents), q(l.pricing?.discountPct), q(l.pricing?.liga?.priceCents), q(l.pricing?.liga?.language), q(l.pricing?.liga?.condition),
+    q(l.minOfferCents !== undefined), q(l.minOfferCents)]));
+
+sql += rows("public.listing_offers",
+  ["id", "listing_id", "buyer_id", "amount_cents", "counter_cents", "message", "status", "created_at"],
+  demoOffers.map((o) => [q(o.id), q(o.listingId), q(o.buyerId), q(o.amountCents), q(o.counterCents), q(o.message), q(o.status), at(o.createdAt)]));
 
 sql += "\n-- Mural\n";
 sql += rows("public.posts",

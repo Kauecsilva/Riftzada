@@ -3,7 +3,8 @@
 // (gerado por `npm run seed:sql`). Datas são relativas a "hoje" para o seed nunca envelhecer.
 
 import type {
-  CardCondition, DeckSection, DeckVisibility, EventStatus, ListingKind, ListingStatus, MemberRole, PostKind,
+  CardCondition, DeckSection, DeckVisibility, EventStatus, LigaLanguage, ListingKind, ListingStatus, MemberRole, OfferStatus, PostKind,
+  PriceBase,
 } from "@/types/domain";
 
 /** Dias a partir de hoje (negativo = passado) e horário em São Paulo. */
@@ -172,10 +173,14 @@ export type DemoListing = {
   id: string; sellerId: string; kind: ListingKind; cardName: string; setName: string | null; variant: string | null;
   condition: CardCondition; quantity: number; priceCents: number | null; acceptsTrade: boolean; description: string | null;
   imagePath: string | null; status: ListingStatus; createdAt: RelDate;
+  /** Preço sugerido (base + desconto), Liga informada pelo vendedor e ofertas */
+  pricing?: { base: PriceBase; baseCents: number; discountPct: number; liga?: { priceCents: number; language: LigaLanguage; condition: CardCondition } };
+  minOfferCents?: number | null;
 };
 
 export const demoListings: DemoListing[] = [
-  { id: l(1), sellerId: USERS.rafael, kind: "sell", cardName: "Kai'Sa, Survivor", setName: "Origins", variant: "Foil", condition: "nm", quantity: 1, priceCents: 9000, acceptsTrade: true, description: "Saiu no booster de ontem, direto pro sleeve.", imagePath: "demo/card-kaisa.svg", status: "available", createdAt: { days: -1, at: "18:10" } },
+  { id: l(1), sellerId: USERS.rafael, kind: "sell", cardName: "Kai'Sa, Survivor", setName: "Origins", variant: "Foil", condition: "nm", quantity: 1, priceCents: 9000, acceptsTrade: true, description: "Saiu no booster de ontem, direto pro sleeve.", imagePath: "demo/card-kaisa.svg", status: "available", createdAt: { days: -1, at: "18:10" },
+    pricing: { base: "liga", baseCents: 10000, discountPct: 10, liga: { priceCents: 10000, language: "en", condition: "nm" } }, minOfferCents: 6000 },
   { id: l(2), sellerId: USERS.pedro, kind: "sell", cardName: "Jinx, Loose Cannon", setName: "Origins", variant: "Showcase", condition: "nm", quantity: 1, priceCents: 12000, acceptsTrade: false, description: "A famosa. Só venda, desculpa galera.", imagePath: "demo/card-jinx.svg", status: "reserved", createdAt: { days: -3, at: "20:30" } },
   { id: l(3), sellerId: USERS.bia, kind: "trade", cardName: "Viktor, Innovator", setName: "Origins", variant: null, condition: "lp", quantity: 2, priceCents: null, acceptsTrade: true, description: "Troco por Runas de Mind ou cartas da Ahri.", imagePath: null, status: "available", createdAt: { days: -2, at: "12:00" } },
   { id: l(4), sellerId: USERS.thiago, kind: "want", cardName: "Fury Rune", setName: "Origins", variant: null, condition: "nm", quantity: 6, priceCents: 1500, acceptsTrade: true, description: "Montando meu primeiro deck, alguém tem sobrando?", imagePath: null, status: "available", createdAt: { days: 0, at: "09:15" } },
@@ -214,4 +219,10 @@ export const demoRankingRules = { pointsByPlacement: [100, 70, 50, 50], particip
 
 export const demoRankingEntries = [
   { id: "00000000-0000-4000-8000-800000000001", userId: USERS.thiago, points: 20, reason: "Bônus de boas-vindas da Liga", createdAt: { days: -10, at: "12:00" } as RelDate },
+];
+
+export type DemoOffer = { id: string; listingId: string; buyerId: string; amountCents: number; counterCents: number | null; message: string | null; status: OfferStatus; createdAt: RelDate };
+
+export const demoOffers: DemoOffer[] = [
+  { id: "00000000-0000-4000-8000-b00000000001", listingId: l(1), buyerId: USERS.joao, amountCents: 7500, counterCents: null, message: "Fecha por 75 e te encontro no sábado?", status: "pending", createdAt: { days: 0, at: "10:30" } },
 ];

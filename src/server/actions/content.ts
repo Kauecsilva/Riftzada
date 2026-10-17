@@ -9,7 +9,9 @@ import { parseDecklist } from "@/lib/domain/decklist";
 import { isOwnMediaPath } from "@/lib/images";
 import { createClient } from "@/lib/supabase/server";
 import { formToObject, zodErrorState, type ActionState } from "@/lib/validation/common";
-import { deckSchema, listingSchema, listingStatusSchema, postSchema, profileSchema } from "@/lib/validation/schemas";
+import {
+  deckSchema, listingSchema, listingStatusSchema, offerResponseSchema, offerSchema, postSchema, profileSchema,
+} from "@/lib/validation/schemas";
 import { requireSession } from "../session";
 import { dbError, demoBlocked } from "./helpers";
 
@@ -129,6 +131,9 @@ export async function toggleRsvp(eventId: string, going: boolean): Promise<Actio
 // ---------- Mercado ----------
 
 function listingRow(v: ReturnType<typeof listingSchema.parse>) {
+  // Base do preço, Liga e ofertas só fazem sentido em venda
+  const sell = v.kind === "sell";
+  const base = sell && v.priceBase && v.priceBaseCents != null ? { base: v.priceBase, cents: v.priceBaseCents } : null;
   return {
     kind: v.kind,
     card_id: v.cardId,
@@ -140,6 +145,14 @@ function listingRow(v: ReturnType<typeof listingSchema.parse>) {
     quantity: v.quantity,
     price_cents: v.price,
     accepts_trade: v.kind === "trade" ? true : v.acceptsTrade,
+    price_base: base?.base ?? null,
+    price_base_cents: base?.cents ?? null,
+    discount_pct: base ? (v.discountPct ?? 0) : null,
+    liga_price_cents: sell ? v.ligaPrice : null,
+    liga_language: sell && v.ligaPrice != null ? v.ligaLanguage : null,
+    liga_condition: sell && v.ligaPrice != null ? v.ligaCondition : null,
+    accepts_offers: sell && v.acceptsOffers,
+    min_offer_cents: sell && v.acceptsOffers ? v.minOffer : null,
     description: v.description,
   };
 }
@@ -195,6 +208,53 @@ export async function setListingStatus(id: string, status: string): Promise<Acti
   revalidatePath("/mercado");
   revalidatePath(`/mercado/${id}`);
   return { ok: true, message: "Status atualizado." };
+}
+
+// Ofertas: toda regra (abaixo do preço, mínimo, quem responde o quê) mora nas funções do banco.
+function offerError(error: { message: string; code?: string }): ActionState {
+  if (error.message.includes("below the price")) return { ok: false, message: "A oferta tem que ficar abaixo do preço pedido." };
+  if (error.message.includes("below the minimum")) return { ok: false, message: "Essa oferta está abaixo do mínimo que o vendedor aceita." };
+  if (error.message.includes("does not accept offers")) return { ok: false, message: "Esse anúncio não está aceitando ofertas agora." };
+  if (error.message.includes("counter must be")) return { ok: false, message: "A contraproposta tem que ficar entre a oferta e o preço pedido." };
+  if (error.message.includes("is not pending") || error.message.includes("invalid action")) return { ok: false, message: "Essa oferta já foi respondida." };
+  return dbError(error);
+}
+
+export async function makeOffer(_: ActionState, form: FormData): Promise<ActionState> {
+  const blocked = demoBlocked();
+  if (blocked) return blocked;
+  await requireSession();
+  const parsed = offerSchema.safeParse(formToObject(form));
+  if (!parsed.success) return zodErrorState(parsed.error);
+  const { listingId, amount, message } = parsed.data;
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("make_listing_offer", { target_listing: listingId, amount, note: message });
+  if (error) return offerError(error);
+  revalidatePath(`/mercado/${listingId}`);
+  return { ok: true, message: "Oferta enviada! Agora é com o vendedor." };
+}
+
+const OFFER_DONE: Record<string, string> = {
+  accepted: "Oferta aceita! Combinem a entrega.",
+  declined: "Oferta recusada.",
+  countered: "Contraproposta enviada.",
+  withdrawn: "Oferta retirada.",
+};
+
+export async function respondOffer(listingId: string, offerId: string, action: string, counter?: string): Promise<ActionState> {
+  const blocked = demoBlocked();
+  if (blocked) return blocked;
+  await requireSession();
+  const parsed = offerResponseSchema.safeParse({ offerId, action, counter });
+  if (!parsed.success) return zodErrorState(parsed.error);
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("respond_listing_offer", {
+    target_offer: parsed.data.offerId, action: parsed.data.action, counter: parsed.data.counter,
+  });
+  if (error) return offerError(error);
+  revalidatePath("/mercado");
+  revalidatePath(`/mercado/${listingId}`);
+  return { ok: true, message: OFFER_DONE[data as string] ?? "Pronto." };
 }
 
 export async function deleteListing(id: string): Promise<ActionState> {

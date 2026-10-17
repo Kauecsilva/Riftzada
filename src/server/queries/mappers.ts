@@ -5,7 +5,8 @@ import { cardImageUrl } from "@/lib/cards";
 import { mediaUrl } from "@/lib/images";
 import type {
   CardCondition, DeckDetail, DeckSection, DeckSummary, DeckVisibility, EventResult, EventStatus, EventSummary,
-  CardSummary, Legend, Listing, ListingKind, ListingStatus, MiniProfile, PlayerStats, PostKind, Profile, RankingRow,
+  CardSummary, Legend, LigaLanguage, Listing, ListingKind, ListingOffer, ListingStatus, MiniProfile, OfferStatus, PlayerStats, PostKind,
+  PriceBase, Profile, RankingRow,
 } from "@/types/domain";
 
 export const MINI = "id, username, display_name, avatar_path";
@@ -149,10 +150,14 @@ export function mapCard(row: CardRow): CardSummary {
 }
 
 export const LISTING_FIELDS = `id, kind, card_name, collection_item_id, card:cards!market_listings_card_id_fkey(${CARD_FIELDS}), set_name, variant, condition, quantity, price_cents, accepts_trade,
+  price_base, price_base_cents, discount_pct, liga_price_cents, liga_language, liga_condition, accepts_offers, min_offer_cents,
   description, image_path, status, is_hidden, created_at, seller:profiles!market_listings_seller_id_fkey(${MINI})`;
 export type ListingRow = {
   id: string; kind: ListingKind; card_name: string; collection_item_id: string | null; card: CardRow | null; set_name: string | null; variant: string | null; condition: CardCondition;
   quantity: number; price_cents: number | null; accepts_trade: boolean; description: string | null; image_path: string | null;
+  price_base: PriceBase | null; price_base_cents: number | null; discount_pct: number | null;
+  liga_price_cents: number | null; liga_language: LigaLanguage | null; liga_condition: CardCondition | null;
+  accepts_offers: boolean; min_offer_cents: number | null;
   status: ListingStatus; is_hidden: boolean; created_at: string; seller: MiniRow;
 };
 
@@ -169,6 +174,12 @@ export function mapListing(row: ListingRow): Listing {
     quantity: row.quantity,
     priceCents: row.price_cents,
     acceptsTrade: row.accepts_trade,
+    priceBase: row.price_base,
+    priceBaseCents: row.price_base_cents,
+    discountPct: row.discount_pct,
+    liga: row.liga_price_cents != null ? { priceCents: row.liga_price_cents, language: row.liga_language, condition: row.liga_condition } : null,
+    acceptsOffers: row.accepts_offers,
+    minOfferCents: row.min_offer_cents,
     description: row.description,
     imageUrl: mediaUrl(row.image_path),
     imagePath: row.image_path,
@@ -186,3 +197,22 @@ export type PostRow = {
   id: string; kind: PostKind; body: string | null; created_at: string; is_featured: boolean; is_hidden: boolean;
   event_id: string | null; deck_id: string | null; author: MiniRow; post_images: { path: string; position: number }[];
 };
+
+export const OFFER_FIELDS = `id, amount_cents, counter_cents, message, status, created_at, updated_at, buyer:profiles!listing_offers_buyer_id_fkey(${MINI})`;
+export type OfferRow = {
+  id: string; amount_cents: number; counter_cents: number | null; message: string | null; status: OfferStatus;
+  created_at: string; updated_at: string; buyer: MiniRow;
+};
+
+export function mapOffer(row: OfferRow): ListingOffer {
+  return {
+    id: row.id,
+    buyer: mapMini(row.buyer),
+    amountCents: row.amount_cents,
+    counterCents: row.counter_cents,
+    message: row.message,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}

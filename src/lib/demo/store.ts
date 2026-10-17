@@ -4,12 +4,12 @@
 import { computePlayerStats, computeRanking, hallOfFame, type StatsInput } from "@/lib/domain/stats";
 import { mediaUrl } from "@/lib/images";
 import type {
-  CardSummary, CollectionItem, DeckDetail, DeckSummary, EventDetail, EventResult, EventSummary, FeedItem, FinishedEvent, Legend, Listing, Member,
-  MiniProfile, Post, Profile, RankingRow,
+  CardSummary, CollectionItem, DeckDetail, DeckSummary, EventDetail, EventResult, EventSummary, FeedItem, FinishedEvent, Legend, Listing,
+  ListingOffer, Member, MiniProfile, Post, PriceReference, Profile, RankingRow,
 } from "@/types/domain";
 import { resolveRelDate } from "./dates";
 import {
-  demoCards, demoCollection, demoDecks, demoEvents, demoListings, demoParticipants, demoPosts, demoRankingEntries, demoRankingRules,
+  demoCards, demoCollection, demoDecks, demoEvents, demoListings, demoOffers as demoOfferRows, demoParticipants, demoPosts, demoRankingEntries, demoRankingRules,
   demoResults, demoUsers, USERS,
 } from "./fixtures";
 
@@ -245,6 +245,12 @@ function listing(id: string): Listing {
     quantity: item.quantity,
     priceCents: item.priceCents,
     acceptsTrade: item.acceptsTrade,
+    priceBase: item.pricing?.base ?? null,
+    priceBaseCents: item.pricing?.baseCents ?? null,
+    discountPct: item.pricing?.discountPct ?? null,
+    liga: item.pricing?.liga ?? null,
+    acceptsOffers: item.minOfferCents !== undefined,
+    minOfferCents: item.minOfferCents ?? null,
     description: item.description,
     imageUrl: mediaUrl(item.imagePath),
     imagePath: item.imagePath,
@@ -261,6 +267,28 @@ export function demoListingsList(): Listing[] {
 
 export function demoListing(id: string): Listing | null {
   return demoListings.some((l) => l.id === id) ? listing(id) : null;
+}
+
+/** No modo demo o usuário é o Kauê: vê as ofertas dos anúncios dele e as que ele fez. */
+export function demoOffers(listingId: string): ListingOffer[] {
+  const seller = demoListings.find((l) => l.id === listingId)?.sellerId;
+  return demoOfferRows
+    .filter((o) => o.listingId === listingId && (seller === DEMO_USER_ID || o.buyerId === DEMO_USER_ID))
+    .map((o) => {
+      const at = resolveRelDate(o.createdAt);
+      return { id: o.id, buyer: mini(o.buyerId), amountCents: o.amountCents, counterCents: o.counterCents, message: o.message, status: o.status, createdAt: at, updatedAt: at };
+    });
+}
+
+/** Preço fictício do TCGplayer (US$ 18 o menor anúncio) para o formulário funcionar no demo. */
+export function demoPriceReference(cardId: string): PriceReference {
+  if (!demoCards.some((c) => c.id === cardId)) return { tcgplayer: [], usdBrl: null, rateUpdatedAt: null };
+  const now = new Date().toISOString();
+  return {
+    tcgplayer: [{ finish: "normal", lowCents: 1800, marketCents: 2150, productUrl: "https://www.tcgplayer.com/search/riftbound-league-of-legends-trading-card-game/product", updatedAt: now }],
+    usdBrl: 5.08,
+    rateUpdatedAt: now,
+  };
 }
 
 // ---------- Mural ----------
