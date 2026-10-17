@@ -5,12 +5,13 @@ import { computePlayerStats, computeRanking, hallOfFame, type StatsInput } from 
 import { mediaUrl } from "@/lib/images";
 import type {
   CardSummary, CollectionItem, DeckDetail, DeckSummary, EventDetail, EventResult, EventSummary, FeedItem, FinishedEvent, Legend, Listing,
-  ListingOffer, Member, MiniProfile, Post, PriceReference, Profile, RankingRow,
+  ListingOffer, Member, MiniProfile, Post, PriceReference, Profile, RankingRow, Store,
 } from "@/types/domain";
 import { resolveRelDate } from "./dates";
+import { demoStoreEvents, demoStores, type DemoStoreEvent } from "./stores";
 import {
   demoCards, demoCollection, demoDecks, demoEvents, demoListings, demoOffers as demoOfferRows, demoParticipants, demoPosts, demoRankingEntries, demoRankingRules,
-  demoResults, demoUsers, USERS,
+  demoResults, demoUsers, USERS, type DemoEvent,
 } from "./fixtures";
 
 export const DEMO_USER_ID = USERS.kaue;
@@ -81,8 +82,11 @@ export function demoMembers(): Member[] {
 
 // ---------- Arena ----------
 
+const allEvents = (): (DemoEvent | DemoStoreEvent)[] => [...demoEvents, ...demoStoreEvents];
+
 function eventSummary(id: string): EventSummary {
-  const event = demoEvents.find((e) => e.id === id)!;
+  const event = allEvents().find((e) => e.id === id)!;
+  const store = "storeId" in event ? demoStores.find((st) => st.id === event.storeId) : undefined;
   const going = demoParticipants.filter((p) => p.eventId === id && p.status === "going");
   return {
     id: event.id,
@@ -98,6 +102,8 @@ function eventSummary(id: string): EventSummary {
     goingCount: going.length,
     isGoing: going.some((p) => p.userId === DEMO_USER_ID),
     playerCount: event.playerCount,
+    store: store ? { id: store.id, name: store.name } : null,
+    seriesId: "seriesId" in event ? event.seriesId : null,
   };
 }
 
@@ -125,7 +131,7 @@ function finishedEvent(id: string): FinishedEvent {
 }
 
 export function demoUpcomingEvents(): EventSummary[] {
-  return demoEvents
+  return allEvents()
     .filter((e) => e.status === "scheduled" || e.status === "live")
     .map((e) => eventSummary(e.id))
     .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
@@ -139,11 +145,11 @@ export function demoFinishedEvents(): FinishedEvent[] {
 }
 
 export function demoAllEvents(): EventSummary[] {
-  return demoEvents.map((e) => eventSummary(e.id)).sort((a, b) => b.startsAt.localeCompare(a.startsAt));
+  return allEvents().map((e) => eventSummary(e.id)).sort((a, b) => b.startsAt.localeCompare(a.startsAt));
 }
 
 export function demoEvent(id: string): EventDetail | null {
-  const event = demoEvents.find((e) => e.id === id);
+  const event = allEvents().find((e) => e.id === id);
   if (!event) return null;
   return {
     ...eventSummary(id),
@@ -154,6 +160,19 @@ export function demoEvent(id: string): EventDetail | null {
     resultsImageUrl: mediaUrl(event.resultsImagePath),
     resultsNotes: event.resultsNotes,
   };
+}
+
+// ---------- Lojas ----------
+
+export function demoStoreList(): Store[] {
+  return demoStores.map((st) => ({ id: st.id, name: st.name, address: st.address, instagram: st.instagram, description: st.description, owner: mini(st.ownerId) }));
+}
+
+export function demoStoreEventList(storeId: string): EventSummary[] {
+  return demoStoreEvents
+    .filter((e) => e.storeId === storeId)
+    .map((e) => eventSummary(e.id))
+    .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
 }
 
 function statsInput(): StatsInput {

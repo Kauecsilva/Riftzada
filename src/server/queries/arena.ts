@@ -1,5 +1,6 @@
 import "server-only";
 import { uniqueLegends } from "@/lib/cards";
+import { nextOfEachSeries } from "@/lib/domain/schedule";
 import { isDemoMode } from "@/lib/env";
 import { mediaUrl } from "@/lib/images";
 import { createClient } from "@/lib/supabase/server";
@@ -11,8 +12,9 @@ import {
   type EventRow, type MiniRow, type RankingViewRow, type ResultRow, type StatsRow,
 } from "./mappers";
 
+/** Próximos eventos. Do evento semanal aparece só a próxima data. */
 export async function getUpcomingEvents(limit = 20): Promise<EventSummary[]> {
-  if (isDemoMode) return demo.demoUpcomingEvents().slice(0, limit);
+  if (isDemoMode) return nextOfEachSeries(demo.demoUpcomingEvents()).slice(0, limit);
   const [supabase, communityId, session] = await Promise.all([createClient(), getCommunityId(), getSession()]);
   const { data, error } = await supabase
     .from("events")
@@ -20,10 +22,10 @@ export async function getUpcomingEvents(limit = 20): Promise<EventSummary[]> {
     .eq("community_id", communityId)
     .in("status", ["scheduled", "live"])
     .order("starts_at", { ascending: true })
-    .limit(limit)
+    .limit(Math.min(limit * 5, 200))
     .returns<EventRow[]>();
   if (error) throw error;
-  return data.map((row) => mapEvent(row, session?.userId ?? null));
+  return nextOfEachSeries(data.map((row) => mapEvent(row, session?.userId ?? null))).slice(0, limit);
 }
 
 export async function getNextEvent(): Promise<EventSummary | null> {

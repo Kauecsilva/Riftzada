@@ -6,7 +6,7 @@ import { mediaUrl } from "@/lib/images";
 import type {
   CardCondition, DeckDetail, DeckSection, DeckSummary, DeckVisibility, EventResult, EventStatus, EventSummary,
   CardSummary, Legend, LigaLanguage, Listing, ListingKind, ListingOffer, ListingStatus, MiniProfile, OfferStatus, PlayerStats, PostKind,
-  PriceBase, Profile, RankingRow,
+  PriceBase, Profile, RankingRow, Store,
 } from "@/types/domain";
 
 export const MINI = "id, username, display_name, avatar_path";
@@ -55,11 +55,12 @@ export function mapRanking(row: RankingViewRow): RankingRow {
 
 // ---------- Eventos ----------
 export const EVENT_FIELDS =
-  "id, name, description, format, starts_at, location, max_players, status, image_path, signup_url, player_count, results_image_path, results_notes, event_participants(user_id, status)";
+  "id, name, description, format, starts_at, location, max_players, status, image_path, signup_url, player_count, results_image_path, results_notes, series_id, store:stores!events_store_id_fkey(id, name), event_participants(user_id, status)";
 export type EventRow = {
   id: string; name: string; description: string | null; format: string | null; starts_at: string; location: string;
   max_players: number | null; status: EventStatus; image_path: string | null; signup_url: string | null;
   player_count: number | null; results_image_path: string | null; results_notes: string | null;
+  series_id: string | null; store: { id: string; name: string } | null;
   event_participants: { user_id: string; status: string }[];
 };
 
@@ -79,7 +80,17 @@ export function mapEvent(row: EventRow, viewerId: string | null): EventSummary {
     goingCount: going.length,
     isGoing: Boolean(viewerId && going.some((p) => p.user_id === viewerId)),
     playerCount: row.player_count,
+    store: row.store,
+    seriesId: row.series_id,
   };
+}
+
+// ---------- Lojas ----------
+export const STORE_FIELDS = `id, name, address, instagram, description, owner:profiles!stores_owner_id_fkey(${MINI})`;
+export type StoreRow = { id: string; name: string; address: string | null; instagram: string | null; description: string | null; owner: MiniRow };
+
+export function mapStore(row: StoreRow): Store {
+  return { id: row.id, name: row.name, address: row.address, instagram: row.instagram, description: row.description, owner: mapMini(row.owner) };
 }
 
 export const RESULT_FIELDS = `id, event_id, placement, guest_name, record, notes,

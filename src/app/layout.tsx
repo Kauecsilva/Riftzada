@@ -11,7 +11,7 @@ const sans = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swa
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: { default: "Riftzada", template: "%s · Riftzada" },
-  description: "A comunidade local de Riftbound. Torneios, decks, trocas e resenha.",
+  description: "A comunidade local de Riftbound. Torneios, lojas, trocas e resenha.",
   applicationName: "Riftzada",
   appleWebApp: { capable: true, title: "Riftzada", statusBarStyle: "black-translucent" },
   icons: { icon: "/icons/icon.svg", apple: "/icons/apple-touch-icon.png" },

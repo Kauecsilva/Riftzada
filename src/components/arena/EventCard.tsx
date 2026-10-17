@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { CalendarDays, MapPin, Users } from "lucide-react";
+import { CalendarDays, MapPin, Repeat, Store, Users } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Photo } from "@/components/ui/Photo";
 import { countdown, eventWhen } from "@/lib/format";
 import { EVENT_STATUS } from "@/lib/domain/labels";
+import { weeklyLabel } from "@/lib/domain/schedule";
 import type { EventSummary } from "@/types/domain";
 import { RsvpButton } from "./RsvpButton";
 
@@ -11,6 +12,8 @@ export function EventMeta({ event }: { event: EventSummary }) {
   return (
     <ul className="space-y-1.5 text-sm text-muted">
       <li className="flex items-center gap-2"><CalendarDays size={16} aria-hidden /> <span>{eventWhen(event.startsAt)}</span></li>
+      {event.seriesId && <li className="flex items-center gap-2"><Repeat size={16} aria-hidden /> {weeklyLabel(event.startsAt)}</li>}
+      {event.store && <li className="flex items-center gap-2"><Store size={16} aria-hidden /> {event.store.name}</li>}
       <li className="flex items-center gap-2"><MapPin size={16} aria-hidden /> {event.location}</li>
       <li className="flex items-center gap-2">
         <Users size={16} aria-hidden />
