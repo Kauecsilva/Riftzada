@@ -9,11 +9,13 @@ import { Badge, KindTag } from "@/components/ui/Badge";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Photo } from "@/components/ui/Photo";
 import { FlashToast } from "@/components/ui/Toast";
-import { listingImageUrl } from "@/lib/cards";
+import Link from "next/link";
+import { Avatar } from "@/components/ui/Avatar";
+import { listingPhotos, offerVerb } from "@/lib/cards";
 import { CONDITION, LISTING_STATUS } from "@/lib/domain/labels";
 import { formatPrice } from "@/lib/format";
 import { moderateListing } from "@/server/actions/admin";
-import { getListing, getSharedWhatsapp } from "@/server/queries/market";
+import { getListing, getOffersFor, getSharedWhatsapp } from "@/server/queries/market";
 import { canModerate, requireSession } from "@/server/session";
 
 export async function generateMetadata({ params }: PageProps<"/mercado/[id]">): Promise<Metadata> {
@@ -26,7 +28,11 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
   const listing = await getListing(id);
   if (!listing) notFound();
   const mine = listing.seller.id === session.userId;
-  const whatsapp = mine ? null : await getSharedWhatsapp(listing.seller.id);
+  const [whatsapp, offers] = await Promise.all([
+    mine ? null : getSharedWhatsapp(listing.seller.id),
+    listing.kind === "want" && listing.status !== "done" ? getOffersFor(listing) : [],
+  ]);
+  const photos = listingPhotos(listing);
 
   const details = [
     ["Expansão", listing.setName],
@@ -42,7 +48,26 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
       {query.salvo && <FlashToast text="Anúncio salvo!" />}
       <PageHeader title={listing.cardName} back="/mercado" />
       <div className="grid gap-6 md:grid-cols-2">
-        <Photo src={listingImageUrl(listing)} alt={listing.cardName} ratio="3/4" priority className="rounded-[28px] border border-line" sizes="(min-width: 768px) 440px, 100vw" />
+        <div className="space-y-4">
+          {photos.length === 0 && <Photo src={null} alt={listing.cardName} ratio="3/4" className="rounded-[28px] border border-line" />}
+          {photos.map((photo, i) => (
+            <figure key={photo.url}>
+              <Photo
+                src={photo.url}
+                alt={photo.kind === "official" ? `${listing.cardName}, imagem oficial` : `${listing.cardName}, foto de ${listing.seller.displayName}`}
+                ratio="3/4"
+                priority={i === 0}
+                className="rounded-[28px] border border-line"
+                sizes="(min-width: 768px) 440px, 100vw"
+              />
+              {photos.length > 1 && (
+                <figcaption className="mt-2 text-center text-xs text-muted">
+                  {photo.kind === "official" ? "Imagem oficial da carta" : `Foto de ${listing.seller.displayName}`}
+                </figcaption>
+              )}
+            </figure>
+          ))}
+        </div>
         <div className="space-y-5">
           <div className="flex flex-wrap items-center gap-2">
             <KindTag kind={listing.kind} />
@@ -53,6 +78,28 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
           <p className="font-display text-4xl font-extrabold">
             {listing.priceCents != null ? formatPrice(listing.priceCents) : listing.kind === "want" ? "A combinar" : "Só troca"}
           </p>
+          {listing.kind === "want" && listing.status !== "done" && (offers.length > 0 || mine) && (
+            <section aria-labelledby="ofertas" className="card p-4">
+              <h2 id="ofertas" className="font-semibold">Quem tem essa carta</h2>
+              {offers.length === 0 ? (
+                <p className="mt-1 text-sm text-muted">Ninguém está vendendo ou trocando essa carta agora.</p>
+              ) : (
+                <ul className="mt-2 space-y-1">
+                  {offers.map((offer) => (
+                    <li key={offer.id}>
+                      <Link href={`/mercado/${offer.id}`} className="-mx-2 flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-surface-2">
+                        <Avatar name={offer.seller.displayName} src={offer.seller.avatarUrl} size={28} />
+                        <span className="min-w-0 flex-1 text-sm">
+                          <strong>{offer.seller.displayName}</strong> {offerVerb(offer)} essa carta
+                        </span>
+                        {offer.priceCents != null && <span className="font-display font-bold">{formatPrice(offer.priceCents)}</span>}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          )}
           <dl className="card divide-y divide-line">
             {details.map(([label, value]) => (
               <div key={label} className="flex justify-between gap-4 px-4 py-3 text-sm">

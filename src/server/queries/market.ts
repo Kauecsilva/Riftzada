@@ -33,6 +33,36 @@ export async function getListings(filter: ListingFilter = {}): Promise<Listing[]
   return data.map(mapListing);
 }
 
+/**
+ * Quem está vendendo ou trocando a carta de uma procura: anúncios disponíveis de outras pessoas,
+ * pela carta do catálogo ou, sem ela, pelo nome digitado.
+ */
+export async function getOffersFor(want: Pick<Listing, "card" | "cardName" | "seller">, limit = 12): Promise<Listing[]> {
+  const name = want.cardName.trim().toLowerCase();
+  if (isDemoMode) {
+    return demo
+      .demoListingsList()
+      .filter((l) => l.kind !== "want" && l.status === "available" && !l.isHidden && l.seller.id !== want.seller.id
+        && (want.card ? l.card?.id === want.card.id : l.cardName.trim().toLowerCase() === name))
+      .slice(0, limit);
+  }
+  const [supabase, communityId] = await Promise.all([createClient(), getCommunityId()]);
+  let query = supabase
+    .from("market_listings")
+    .select(LISTING_FIELDS)
+    .eq("community_id", communityId)
+    .in("kind", ["sell", "trade"])
+    .eq("status", "available")
+    .eq("is_hidden", false)
+    .neq("seller_id", want.seller.id);
+  query = want.card
+    ? query.eq("card_id", want.card.id)
+    : query.ilike("card_name", want.cardName.trim().replace(/[%_\\]/g, (m) => `\\${m}`));
+  const { data, error } = await query.order("created_at", { ascending: false }).limit(limit).returns<ListingRow[]>();
+  if (error) throw error;
+  return data.map(mapListing);
+}
+
 export async function getListing(id: string): Promise<Listing | null> {
   if (isDemoMode) return demo.demoListing(id);
   const [supabase, communityId] = await Promise.all([createClient(), getCommunityId()]);

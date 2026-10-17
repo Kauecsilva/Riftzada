@@ -180,6 +180,7 @@ export const demoListings: DemoListing[] = [
   { id: l(3), sellerId: USERS.bia, kind: "trade", cardName: "Viktor, Innovator", setName: "Origins", variant: null, condition: "lp", quantity: 2, priceCents: null, acceptsTrade: true, description: "Troco por Runas de Mind ou cartas da Ahri.", imagePath: null, status: "available", createdAt: { days: -2, at: "12:00" } },
   { id: l(4), sellerId: USERS.thiago, kind: "want", cardName: "Fury Rune", setName: "Origins", variant: null, condition: "nm", quantity: 6, priceCents: 1500, acceptsTrade: true, description: "Montando meu primeiro deck, alguém tem sobrando?", imagePath: null, status: "available", createdAt: { days: 0, at: "09:15" } },
   { id: l(5), sellerId: USERS.kaue, kind: "sell", cardName: "Brazen Buccaneer", setName: "Origins", variant: null, condition: "nm", quantity: 3, priceCents: 1000, acceptsTrade: true, description: null, imagePath: "demo/card-generic.svg", status: "done", createdAt: { days: -9, at: "15:00" } },
+  { id: l(6), sellerId: USERS.pedro, kind: "sell", cardName: "Fury Rune", setName: "Origins", variant: null, condition: "nm", quantity: 4, priceCents: 300, acceptsTrade: true, description: "Sobrou do pré-release.", imagePath: null, status: "available", createdAt: { days: -1, at: "21:40" } },
 ];
 
 export type DemoCollectionItem = {
