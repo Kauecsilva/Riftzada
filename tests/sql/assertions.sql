@@ -107,3 +107,72 @@ select pg_temp.check((select is_featured from posts where id = '00000000-0000-40
 update public.ranking_rules set points_by_placement = '{200,100,50,50}' where community_id = '00000000-0000-4000-8000-000000000001';
 select pg_temp.check((select points from ranking where username = 'joao') = 430, 'Mudar a regra recalcula o ranking');
 rollback;
+
+-- ---------- Catálogo (Riftcodex) ----------
+begin;
+select pg_temp.check(public.upsert_riftcodex_cards($j$[
+  {"id": "rc-1", "name": "Vi - Piltover Enforcer (Signature)", "collector_number": 229,
+   "attributes": {"energy": null, "might": null, "power": null},
+   "classification": {"type": "Legend", "supertype": null, "rarity": "Rare", "domain": ["Fury", "Order"]},
+   "text": {"plain": "When you conquer, ready a unit."}, "set": {"set_id": "UNL", "label": "Unleashed"},
+   "media": {"image_url": "https://cmsassets.rgpub.io/vi.png", "artist": "Jonathan Santoro"},
+   "metadata": {"alternate_art": false, "overnumbered": false, "signature": true}},
+  {"id": "rc-2", "name": "Jinx - Rebel", "collector_number": 7,
+   "attributes": {"energy": 4, "might": 4, "power": 1},
+   "classification": {"type": "Unit", "supertype": "Champion", "rarity": "Epic", "domain": ["Chaos"]},
+   "set": {"set_id": "ogn", "label": "Origins"}, "media": {"image_url": "http://inseguro.dev/x.png"}, "metadata": {}},
+  {"id": "rc-3", "name": "Sem tipo conhecido", "collector_number": 1, "classification": {"type": "Token"}, "set": {"set_id": "OGN"}},
+  {"name": "sem id"}
+]$j$) = 3, 'Importa 3 cartas e ignora a sem id');
+select pg_temp.check((select card_type from cards where external_id = 'rc-1') = 'legend', 'Legend vira lenda');
+select pg_temp.check((select card_type from cards where external_id = 'rc-2') = 'champion', 'Unidade campeã vira champion');
+select pg_temp.check((select card_type from cards where external_id = 'rc-3') = 'other', 'Tipo desconhecido vira other');
+select pg_temp.check((select public_code from cards where external_id = 'rc-2') = 'OGN-007', 'Código montado do set + número');
+select pg_temp.check((select domains from cards where external_id = 'rc-1') = '{Fury,Order}', 'Domínios em array');
+select pg_temp.check((select image_url from cards where external_id = 'rc-2') is null, 'Imagem sem https é descartada');
+select pg_temp.check((select is_signature from cards where external_id = 'rc-1'), 'Assinatura marcada');
+-- Rodar de novo atualiza em vez de duplicar
+select public.upsert_riftcodex_cards('[{"id": "rc-2", "name": "Jinx - Rebel", "collector_number": 7, "classification": {"rarity": "Showcase"}, "set": {"set_id": "OGN"}}]');
+select pg_temp.check((select count(*) from cards where external_id = 'rc-2') = 1, 'Upsert não duplica');
+select pg_temp.check((select rarity from cards where external_id = 'rc-2') = 'Showcase', 'Upsert atualiza');
+rollback;
+
+begin;
+select pg_temp.login('00000000-0000-4000-8000-100000000001'); -- Kauê (admin)
+do $$ begin
+  perform public.upsert_riftcodex_cards('[]');
+  raise exception 'FALHOU: usuário rodou a importação';
+exception when insufficient_privilege then null;
+end $$;
+rollback;
+
+-- ---------- Coleção ----------
+begin;
+select pg_temp.login('00000000-0000-4000-8000-100000000002'); -- João
+insert into public.collection_items (id, user_id, card_id, quantity)
+values ('00000000-0000-4000-8000-a00000000001', '00000000-0000-4000-8000-100000000002', '00000000-0000-4000-8000-200000000001', 2);
+-- Anuncia a partir da coleção
+insert into public.market_listings (community_id, seller_id, kind, card_id, card_name, collection_item_id)
+values ('00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-100000000002', 'sell', '00000000-0000-4000-8000-200000000001', 'Jinx, Loose Cannon', '00000000-0000-4000-8000-a00000000001');
+-- Mesma carta/condição/variante não duplica
+do $$ begin
+  insert into public.collection_items (user_id, card_id) values ('00000000-0000-4000-8000-100000000002', '00000000-0000-4000-8000-200000000001');
+  raise exception 'FALHOU: item duplicado na coleção';
+exception when unique_violation then null;
+end $$;
+-- Não cadastra na coleção de outra pessoa
+do $$ begin
+  insert into public.collection_items (user_id, card_id) values ('00000000-0000-4000-8000-100000000003', '00000000-0000-4000-8000-200000000002');
+  raise exception 'FALHOU: cadastrou na coleção de outro';
+exception when insufficient_privilege then null;
+end $$;
+
+select pg_temp.login('00000000-0000-4000-8000-100000000003'); -- Rafael
+select pg_temp.check((select count(*) from collection_items) = 0, 'Coleção alheia é invisível');
+do $$ begin
+  insert into public.market_listings (community_id, seller_id, kind, card_name, collection_item_id)
+  values ('00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-100000000003', 'sell', 'Jinx', '00000000-0000-4000-8000-a00000000001');
+  raise exception 'FALHOU: anunciou item da coleção de outro';
+exception when insufficient_privilege then null;
+end $$;
+rollback;

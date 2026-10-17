@@ -4,12 +4,12 @@
 import { computePlayerStats, computeRanking, hallOfFame, type StatsInput } from "@/lib/domain/stats";
 import { mediaUrl } from "@/lib/images";
 import type {
-  DeckDetail, DeckSummary, EventDetail, EventResult, EventSummary, FeedItem, FinishedEvent, Legend, Listing, Member,
+  CardSummary, CollectionItem, DeckDetail, DeckSummary, EventDetail, EventResult, EventSummary, FeedItem, FinishedEvent, Legend, Listing, Member,
   MiniProfile, Post, Profile, RankingRow,
 } from "@/types/domain";
 import { resolveRelDate } from "./dates";
 import {
-  demoCards, demoDecks, demoEvents, demoListings, demoParticipants, demoPosts, demoRankingEntries, demoRankingRules,
+  demoCards, demoCollection, demoDecks, demoEvents, demoListings, demoParticipants, demoPosts, demoRankingEntries, demoRankingRules,
   demoResults, demoUsers, USERS,
 } from "./fixtures";
 
@@ -22,6 +22,30 @@ const legendById = (id: string | null): Legend | null => {
 
 export function demoLegends(): Legend[] {
   return demoCards.map((c) => ({ id: c.id, name: c.name }));
+}
+
+// ---------- Catálogo e coleção ----------
+
+const cardSummary = (c: (typeof demoCards)[number]): CardSummary => ({
+  id: c.id, name: c.name, setName: c.setName, code: null, rarity: null, imageUrl: null,
+});
+
+export function demoSearchCards(term: string, limit: number): CardSummary[] {
+  const t = term.toLowerCase();
+  return demoCards.filter((c) => c.name.toLowerCase().includes(t)).slice(0, limit).map(cardSummary);
+}
+
+export function demoCard(id: string): CardSummary | null {
+  const card = demoCards.find((c) => c.id === id);
+  return card ? cardSummary(card) : null;
+}
+
+export function demoCollectionList(userId: string): CollectionItem[] {
+  return demoCollection
+    .filter((i) => i.userId === userId)
+    .map((i) => ({
+      id: i.id, card: demoCard(i.cardId)!, quantity: i.quantity, condition: i.condition, variant: i.variant, notes: i.notes, listing: null,
+    }));
 }
 
 function mini(id: string): MiniProfile {
@@ -208,9 +232,12 @@ export function demoDeck(id: string): DeckDetail | null {
 
 function listing(id: string): Listing {
   const item = demoListings.find((l) => l.id === id)!;
+  const card = demoCards.find((c) => c.name === item.cardName);
   return {
     id: item.id,
     kind: item.kind,
+    card: card ? cardSummary(card) : null,
+    collectionItemId: null,
     cardName: item.cardName,
     setName: item.setName,
     variant: item.variant,

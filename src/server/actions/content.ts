@@ -131,6 +131,8 @@ export async function toggleRsvp(eventId: string, going: boolean): Promise<Actio
 function listingRow(v: ReturnType<typeof listingSchema.parse>) {
   return {
     kind: v.kind,
+    card_id: v.cardId,
+    collection_item_id: v.collectionItemId,
     card_name: v.cardName,
     set_name: v.setName,
     variant: v.variant,
@@ -172,6 +174,7 @@ export async function saveListing(listingId: string | null, _: ActionState, form
   }
   revalidatePath("/mercado");
   revalidatePath("/");
+  if (parsed.data.collectionItemId) revalidatePath("/colecao");
   redirect(`/mercado/${id}?salvo=1`);
 }
 

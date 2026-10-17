@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { CardPicker } from "@/components/cards/CardPicker";
 import { Field, fieldProps } from "@/components/ui/Field";
 import { FormMessage } from "@/components/ui/FormMessage";
 import { ImageInput } from "@/components/ui/ImageInput";
@@ -9,7 +10,7 @@ import { cn } from "@/lib/cn";
 import { CONDITION, LISTING_KIND } from "@/lib/domain/labels";
 import { initialActionState } from "@/lib/validation/common";
 import { saveListing } from "@/server/actions/content";
-import type { CardCondition, Listing, ListingKind } from "@/types/domain";
+import type { CardCondition, CollectionItem, Listing, ListingKind } from "@/types/domain";
 
 const KIND_HINT: Record<ListingKind, string> = {
   sell: "Tem carta sobrando? Bota preço.",
@@ -17,13 +18,17 @@ const KIND_HINT: Record<ListingKind, string> = {
   want: "Tá procurando alguma carta.",
 };
 
-export function ListingForm({ userId, listing }: { userId: string; listing?: Listing }) {
+/** Novo anúncio, edição, ou anúncio a partir de um item da coleção (`fromCollection` já preenche tudo). */
+export function ListingForm({ userId, listing, fromCollection }: { userId: string; listing?: Listing; fromCollection?: CollectionItem }) {
   const [state, action] = useActionState(saveListing.bind(null, listing?.id ?? null), initialActionState);
   const [kind, setKind] = useState<ListingKind>(listing?.kind ?? "sell");
+  const [setName, setSetName] = useState(listing?.setName ?? fromCollection?.card.setName ?? "");
   const err = state.fieldErrors ?? {};
+  const collectionItemId = fromCollection?.id ?? listing?.collectionItemId ?? "";
 
   return (
     <form action={action} className="space-y-5" noValidate>
+      <input type="hidden" name="collectionItemId" value={collectionItemId} />
       <fieldset>
         <legend className="mb-2 text-sm font-semibold">Tá…</legend>
         <div className="grid grid-cols-3 gap-2">
@@ -39,21 +44,27 @@ export function ListingForm({ userId, listing }: { userId: string; listing?: Lis
       </fieldset>
 
       <Field label="Carta" name="cardName" error={err.cardName}>
-        <input {...fieldProps("cardName", err.cardName)} defaultValue={listing?.cardName} required maxLength={120} className="input" placeholder="Jinx, Loose Cannon" />
+        <CardPicker
+          initial={listing?.card ?? fromCollection?.card}
+          initialName={listing?.cardName}
+          allowFreeText
+          error={err.cardName}
+          onSelect={(card) => card?.setName && setSetName(card.setName)}
+        />
       </Field>
 
       <div className="grid grid-cols-2 gap-3">
         <Field label="Expansão" name="setName" error={err.setName} optional>
-          <input {...fieldProps("setName", err.setName)} defaultValue={listing?.setName ?? "Origins"} maxLength={60} className="input" />
+          <input {...fieldProps("setName", err.setName)} value={setName} onChange={(e) => setSetName(e.target.value)} maxLength={60} className="input" placeholder="Origins" />
         </Field>
         <Field label="Variante" name="variant" error={err.variant} optional>
-          <input {...fieldProps("variant", err.variant)} defaultValue={listing?.variant ?? ""} maxLength={40} className="input" placeholder="Foil, Showcase…" />
+          <input {...fieldProps("variant", err.variant)} defaultValue={listing?.variant ?? fromCollection?.variant ?? ""} maxLength={40} className="input" placeholder="Foil, Showcase…" />
         </Field>
       </div>
 
       <div className="grid grid-cols-[1fr_96px] gap-3">
         <Field label="Condição" name="condition" error={err.condition}>
-          <select {...fieldProps("condition", err.condition)} defaultValue={listing?.condition ?? "nm"} className="input">
+          <select {...fieldProps("condition", err.condition)} defaultValue={listing?.condition ?? fromCollection?.condition ?? "nm"} className="input">
             {(Object.keys(CONDITION) as CardCondition[]).map((c) => <option key={c} value={c}>{CONDITION[c].short} · {CONDITION[c].label}</option>)}
           </select>
         </Field>
@@ -75,7 +86,7 @@ export function ListingForm({ userId, listing }: { userId: string; listing?: Lis
         </label>
       )}
 
-      <Field label="Foto" name="imagePath" optional>
+      <Field label="Foto" name="imagePath" optional hint="Sem foto, o anúncio usa a imagem oficial da carta escolhida.">
         <ImageInput name="imagePath" folder="listings" userId={userId} initialUrl={listing?.imageUrl} label="Foto da carta" />
       </Field>
 

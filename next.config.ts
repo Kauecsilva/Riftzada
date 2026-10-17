@@ -7,10 +7,11 @@ const nextConfig: NextConfig = {
   // o mais simples para um app em que quase tudo depende do usuário.
   poweredByHeader: false,
   images: {
-    // Só as fotos do bucket "media" do projeto passam pelo otimizador
-    remotePatterns: supabaseHost
-      ? [{ protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/public/media/**" }]
-      : [],
+    // Só as fotos do bucket "media" do projeto e as artes do catálogo de cartas passam pelo otimizador
+    remotePatterns: [
+      ...(supabaseHost ? [{ protocol: "https" as const, hostname: supabaseHost, pathname: "/storage/v1/object/public/media/**" }] : []),
+      { protocol: "https", hostname: "cmsassets.rgpub.io", pathname: "/sanity/images/**" },
+    ],
     deviceSizes: [480, 828, 1200],
     imageSizes: [64, 128, 256],
     minimumCacheTTL: 2678400,

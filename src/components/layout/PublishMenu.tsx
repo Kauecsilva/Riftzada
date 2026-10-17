@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Camera, Layers, Plus, Tag, Trophy } from "lucide-react";
+import { Camera, Layers, Library, Plus, Tag, Trophy } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Sheet } from "@/components/ui/Sheet";
 
 const OPTIONS = [
   { href: "/publicar", label: "Publicar no mural", text: "Foto, resenha ou o pull da semana", icon: Camera, tone: "bg-rift-soft text-[#c9bfff]" },
   { href: "/mercado/novo", label: "Anunciar carta", text: "Vende, troca ou procura", icon: Tag, tone: "bg-sell/15 text-sell" },
+  { href: "/colecao", label: "Registrar na coleção", text: "Guarda o que você tem e anuncia as repetidas", icon: Library, tone: "bg-gold-soft text-gold" },
   { href: "/decks/novo", label: "Publicar deck", text: "Mostra o que você está cozinhando", icon: Layers, tone: "bg-energy/15 text-energy" },
 ];
 

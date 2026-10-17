@@ -1,10 +1,11 @@
 // Selects do Supabase e conversão das linhas para os tipos de domínio.
 // Os relacionamentos usam o nome da FK (!tabela_coluna_fkey) para nunca ficarem ambíguos.
 
+import { cardImageUrl } from "@/lib/cards";
 import { mediaUrl } from "@/lib/images";
 import type {
   CardCondition, DeckDetail, DeckSection, DeckSummary, DeckVisibility, EventResult, EventStatus, EventSummary,
-  Legend, Listing, ListingKind, ListingStatus, MiniProfile, PlayerStats, PostKind, Profile, RankingRow,
+  CardSummary, Legend, Listing, ListingKind, ListingStatus, MiniProfile, PlayerStats, PostKind, Profile, RankingRow,
 } from "@/types/domain";
 
 export const MINI = "id, username, display_name, avatar_path";
@@ -139,10 +140,18 @@ export function toDeckSummary(deck: DeckDetail): DeckSummary {
 }
 
 // ---------- Mercado ----------
-export const LISTING_FIELDS = `id, kind, card_name, set_name, variant, condition, quantity, price_cents, accepts_trade,
+// ---------- Cartas ----------
+export const CARD_FIELDS = "id, name, set_name, public_code, rarity, image_url";
+export type CardRow = { id: string; name: string; set_name: string | null; public_code: string | null; rarity: string | null; image_url: string | null };
+
+export function mapCard(row: CardRow): CardSummary {
+  return { id: row.id, name: row.name, setName: row.set_name, code: row.public_code, rarity: row.rarity, imageUrl: cardImageUrl(row.image_url) };
+}
+
+export const LISTING_FIELDS = `id, kind, card_name, collection_item_id, card:cards!market_listings_card_id_fkey(${CARD_FIELDS}), set_name, variant, condition, quantity, price_cents, accepts_trade,
   description, image_path, status, is_hidden, created_at, seller:profiles!market_listings_seller_id_fkey(${MINI})`;
 export type ListingRow = {
-  id: string; kind: ListingKind; card_name: string; set_name: string | null; variant: string | null; condition: CardCondition;
+  id: string; kind: ListingKind; card_name: string; collection_item_id: string | null; card: CardRow | null; set_name: string | null; variant: string | null; condition: CardCondition;
   quantity: number; price_cents: number | null; accepts_trade: boolean; description: string | null; image_path: string | null;
   status: ListingStatus; is_hidden: boolean; created_at: string; seller: MiniRow;
 };
@@ -151,6 +160,8 @@ export function mapListing(row: ListingRow): Listing {
   return {
     id: row.id,
     kind: row.kind,
+    card: row.card ? mapCard(row.card) : null,
+    collectionItemId: row.collection_item_id,
     cardName: row.card_name,
     setName: row.set_name,
     variant: row.variant,
