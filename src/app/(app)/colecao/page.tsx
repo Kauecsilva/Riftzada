@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
-import { Library, Search } from "lucide-react";
+import Link from "next/link";
+import { FileUp, Library, Search } from "lucide-react";
 import { CollectionAddForm } from "@/components/collection/CollectionAddForm";
 import { CollectionItemCard } from "@/components/collection/CollectionItemCard";
+import { buttonClass } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -25,6 +27,7 @@ export default async function CollectionPage({ searchParams }: PageProps<"/colec
         title="Minha coleção"
         subtitle={items.length ? `${copies} ${copies === 1 ? "carta" : "cartas"} · ${items.length} diferentes · ${listed} anunciadas` : "Registra o que você tem. Sobrou? Anuncia direto daqui."}
         back={`/jogador/${session.profile.username}`}
+        action={<Link href="/colecao/importar" className={buttonClass("secondary", "md")} aria-label="Importar CSV"><FileUp size={18} aria-hidden /><span className="hidden md:inline">Importar CSV</span></Link>}
       />
 
       <section aria-labelledby="adicionar" className="mb-8">
@@ -49,7 +52,7 @@ export default async function CollectionPage({ searchParams }: PageProps<"/colec
         ) : search ? (
           <EmptyState icon={Search} title="Nada com esse nome." text="Confere a grafia ou adiciona a carta acima." />
         ) : (
-          <EmptyState icon={Library} title="Coleção vazia por enquanto." text="Busca a primeira carta ali em cima. Abriu booster? Registra o pull." />
+          <EmptyState icon={Library} title="Coleção vazia por enquanto." text="Busca a primeira carta ali em cima ou importa a coleção de outro site." action={{ href: "/colecao/importar", label: "Importar CSV" }} />
         )}
       </section>
     </div>

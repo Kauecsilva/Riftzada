@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cardImageUrl, cardLine, listingImageUrl, uniqueLegends } from "@/lib/cards";
+import { cardImageUrl, cardLine, listingImageUrl, listingPhotos, offerVerb, uniqueLegends } from "@/lib/cards";
 import { collectionItemSchema, listingSchema } from "@/lib/validation/schemas";
 
 const CARD_ID = "00000000-0000-4000-8000-200000000001";
@@ -13,10 +13,27 @@ describe("catálogo de cartas", () => {
     expect(cardImageUrl(null)).toBeNull();
   });
 
-  it("anúncio sem foto usa a imagem da carta", () => {
+  it("capa do anúncio é a imagem oficial; sem carta, a foto do anunciante", () => {
     expect(listingImageUrl({ imageUrl: null, card })).toBe(card.imageUrl);
-    expect(listingImageUrl({ imageUrl: "/minha.jpg", card })).toBe("/minha.jpg");
+    expect(listingImageUrl({ imageUrl: "/minha.jpg", card })).toBe(card.imageUrl);
+    expect(listingImageUrl({ imageUrl: "/minha.jpg", card: null })).toBe("/minha.jpg");
     expect(listingImageUrl({ imageUrl: null, card: null })).toBeNull();
+  });
+
+  it("fotos do anúncio: oficial primeiro, depois a do anunciante", () => {
+    expect(listingPhotos({ imageUrl: "/minha.jpg", card })).toEqual([
+      { url: card.imageUrl, kind: "official" },
+      { url: "/minha.jpg", kind: "seller" },
+    ]);
+    expect(listingPhotos({ imageUrl: null, card })).toEqual([{ url: card.imageUrl, kind: "official" }]);
+    expect(listingPhotos({ imageUrl: "/minha.jpg", card: null })).toEqual([{ url: "/minha.jpg", kind: "seller" }]);
+    expect(listingPhotos({ imageUrl: null, card: null })).toEqual([]);
+  });
+
+  it("descreve a oferta de quem tem a carta", () => {
+    expect(offerVerb({ kind: "sell", acceptsTrade: false })).toBe("está vendendo");
+    expect(offerVerb({ kind: "sell", acceptsTrade: true })).toBe("está vendendo ou trocando");
+    expect(offerVerb({ kind: "trade", acceptsTrade: false })).toBe("está trocando");
   });
 
   it("linha da carta junta expansão, código e raridade", () => {

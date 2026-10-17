@@ -140,7 +140,7 @@ export function ListingForm({ userId, listing, fromCollection }: { userId: strin
         </label>
       )}
 
-      <Field label="Foto" name="imagePath" optional hint="Sem foto, o anúncio usa a imagem oficial da carta escolhida.">
+      <Field label="Foto" name="imagePath" optional hint="O anúncio mostra primeiro a imagem oficial da carta e depois a tua foto.">
         <ImageInput name="imagePath" folder="listings" userId={userId} initialUrl={listing?.imageUrl} label="Foto da carta" />
       </Field>
 

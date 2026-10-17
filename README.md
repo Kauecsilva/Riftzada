@@ -40,6 +40,7 @@ As cartas vêm do [Riftcodex](https://riftcodex.com), uma API pública e gratuit
 - No Supabase, o `pg_cron` roda `public.sync_cards_from_riftcodex()` toda segunda às 06:00 (Brasília). Para importar na hora, rode `select public.sync_cards_from_riftcodex();` no SQL Editor.
 - As imagens são servidas pelo CDN da Riot (`cmsassets.rgpub.io`), liberado no `next.config.ts`.
 - Anúncios e coleção apontam para `cards`. No anúncio, a carta fora do catálogo ainda pode ser digitada à mão.
+- Em `/colecao/importar` dá para subir a coleção por CSV: exportação da LigaRiftbound ou qualquer CSV com nome e quantidade. O casamento com o catálogo é por sigla da edição + número (regras em `src/lib/domain/collection-import.ts`).
 
 ## Preço sugerido e ofertas
 
