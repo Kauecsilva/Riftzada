@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="840" viewBox="0 0 600 840">
+<defs>
+<radialGradient id="g1" cx="30%" cy="25%" r="90%"><stop offset="0" stop-color="#5a2a1f"/><stop offset="1" stop-color="#0a0b14"/></radialGradient>
+<linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#ff9b54"/></linearGradient>
+<linearGradient id="rift" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff9b54" stop-opacity="0"/><stop offset=".5" stop-color="#ff9b54"/><stop offset="1" stop-color="#ff9b54" stop-opacity="0"/></linearGradient>
+<filter id="blur"><feGaussianBlur stdDeviation="12"/></filter>
+</defs>
+<rect width="600" height="840" fill="url(#g1)"/>
+<polygon points="307,291 291,343 235,307" fill="url(#g2)" opacity="0.08"/><polygon points="266,746 331,737 308,781" fill="url(#g2)" opacity="0.23"/><polygon points="-73,340 48,249 99,367" fill="url(#g2)" opacity="0.25"/><polygon points="53,199 117,176 113,226" fill="url(#g2)" opacity="0.30"/><polygon points="353,602 415,674 295,675" fill="url(#g2)" opacity="0.10"/><polygon points="83,601 179,494 262,605" fill="url(#g2)" opacity="0.10"/><polygon points="181,138 196,209 102,182" fill="url(#g2)" opacity="0.13"/><polygon points="506,756 524,714 566,746" fill="url(#g2)" opacity="0.20"/><polygon points="107,412 -101,385 37,273" fill="url(#g2)" opacity="0.22"/><polygon points="108,567 -45,466 157,425" fill="url(#g2)" opacity="0.08"/><polygon points="77,465 22,464 51,431" fill="url(#g2)" opacity="0.20"/><polygon points="507,315 622,345 528,399" fill="url(#g2)" opacity="0.10"/><polygon points="437,128 324,207 283,99" fill="url(#g2)" opacity="0.09"/><polygon points="328,541 297,490 375,497" fill="url(#g2)" opacity="0.32"/>
+<path d="M90,840 L270,462 L228,403 L510,0" stroke="url(#rift)" stroke-width="21" fill="none" filter="url(#blur)"/>
+<path d="M90,840 L270,462 L228,403 L510,0" stroke="#fff" stroke-opacity=".75" stroke-width="2.4" fill="none"/>
+<rect x="30" y="34" width="540" height="773" rx="30" fill="none" stroke="#f5c14b" stroke-width="7" opacity=".8"/><rect x="60" y="605" width="480" height="118" rx="18" fill="#0a0b14" opacity=".75"/><text x="300" y="680" fill="#eef0ff" font-family="sans-serif" font-weight="700" font-size="42" text-anchor="middle">ORIGINS</text>
+</svg>

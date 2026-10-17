@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+<defs>
+<radialGradient id="g1" cx="30%" cy="25%" r="90%"><stop offset="0" stop-color="#4a1f6b"/><stop offset="1" stop-color="#0a0b14"/></radialGradient>
+<linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#c08cff"/></linearGradient>
+<linearGradient id="rift" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c08cff" stop-opacity="0"/><stop offset=".5" stop-color="#c08cff"/><stop offset="1" stop-color="#c08cff" stop-opacity="0"/></linearGradient>
+<filter id="blur"><feGaussianBlur stdDeviation="8"/></filter>
+</defs>
+<rect width="400" height="400" fill="url(#g1)"/>
+<polygon points="231,299 125,270 214,221" fill="url(#g2)" opacity="0.08"/><polygon points="123,61 224,118 102,150" fill="url(#g2)" opacity="0.22"/><polygon points="195,272 228,244 246,278" fill="url(#g2)" opacity="0.12"/><polygon points="430,47 299,52 359,-29" fill="url(#g2)" opacity="0.24"/><polygon points="212,168 88,205 105,112" fill="url(#g2)" opacity="0.09"/><polygon points="392,202 355,220 351,188" fill="url(#g2)" opacity="0.31"/><polygon points="34,188 27,153 74,167" fill="url(#g2)" opacity="0.23"/><polygon points="77,293 42,278 78,265" fill="url(#g2)" opacity="0.28"/><polygon points="100,174 183,128 197,201" fill="url(#g2)" opacity="0.17"/><polygon points="97,282 -20,346 -40,243" fill="url(#g2)" opacity="0.24"/><polygon points="112,104 209,148 106,184" fill="url(#g2)" opacity="0.11"/><polygon points="114,110 128,176 40,150" fill="url(#g2)" opacity="0.20"/><polygon points="-38,325 41,302 30,361" fill="url(#g2)" opacity="0.13"/><polygon points="229,186 104,175 180,105" fill="url(#g2)" opacity="0.21"/>
+<path d="M60,400 L180,220 L152,192 L340,0" stroke="url(#rift)" stroke-width="14" fill="none" filter="url(#blur)"/>
+<path d="M60,400 L180,220 L152,192 L340,0" stroke="#fff" stroke-opacity=".75" stroke-width="1.6" fill="none"/>
+<g opacity=".9"><circle cx="200" cy="168" r="64" fill="#eef0ff"/><path d="M56,400 Q64,248 200,248 Q336,248 344,400 Z" fill="#eef0ff"/></g>
+</svg>

@@ -1,26 +1,166 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ---------- Design system da Riftzada ----------
+   "Noite de torneio": fundo escuro azul-arroxeado, acento rift (violeta) para ação,
+   energy (ciano) para o que está vivo, gold só para prestígio (campeão, 1º lugar, Hall).
+   Use sempre os tokens (bg-surface, text-muted, text-gold…), nunca cores soltas. */
+@theme {
+  --color-bg: #0a0b14;
+  --color-surface: #131527;
+  --color-surface-2: #1b1e36;
+  --color-surface-3: #252945;
+  --color-line: #2a2e4f;
+  --color-ink: #eef0ff;
+  --color-muted: #9aa0c7;
+  --color-faint: #6b7199;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-rift: #7b61ff;
+  --color-rift-strong: #8f79ff;
+  --color-rift-soft: #2a2358;
+  --color-energy: #36e2d3;
+  --color-gold: #f5c14b;
+  --color-gold-soft: #3a2f14;
+  --color-silver: #c9cee6;
+  --color-bronze: #d58a54;
+  --color-sell: #ff6b7f;
+  --color-trade: #36e2d3;
+  --color-want: #f5c14b;
+  --color-danger: #ff5470;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --radius-card: 20px;
+  --radius-hero: 28px;
+
+  --shadow-float: 0 10px 30px -10px rgb(0 0 0 / 0.6);
+  --shadow-glow: 0 8px 28px -6px rgb(123 97 255 / 0.55);
+
+  --animate-sheet-in: sheet-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-fade-in: fade-in 0.18s ease-out;
+  --animate-shimmer: shimmer 1.4s linear infinite;
+
+  @keyframes sheet-in {
+    from { transform: translateY(24px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  html {
+    color-scheme: dark;
+    background: var(--color-bg);
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    background:
+      radial-gradient(1200px 600px at 10% -10%, rgb(123 97 255 / 0.14), transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, rgb(54 226 211 / 0.07), transparent 60%),
+      var(--color-bg);
+    background-attachment: fixed;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100dvh;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-rift-strong);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  ::selection {
+    background: var(--color-rift);
+    color: white;
+  }
+  input, select, textarea, button {
+    font: inherit;
+  }
+}
+
+@layer components {
+  /* Cartão padrão */
+  .card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+  }
+  /* Brilho do skeleton */
+  .skeleton {
+    background: linear-gradient(90deg, var(--color-surface-2) 0%, var(--color-surface-3) 50%, var(--color-surface-2) 100%);
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+    border-radius: 12px;
+  }
+  /* Texto com o degradê da marca */
+  .text-brand {
+    background: linear-gradient(100deg, #b4a6ff 0%, var(--color-rift) 45%, var(--color-energy) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .text-prestige {
+    background: linear-gradient(100deg, #ffe39a 0%, var(--color-gold) 50%, #e49b2f 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* Campos de formulário */
+  .input {
+    width: 100%;
+    min-height: 48px;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+    padding: 12px 14px;
+    color: var(--color-ink);
+    transition: border-color 0.15s, background-color 0.15s;
+  }
+  .input::placeholder {
+    color: var(--color-faint);
+  }
+  .input:hover {
+    border-color: var(--color-surface-3);
+  }
+  .input:focus {
+    outline: none;
+    border-color: var(--color-rift);
+    background: var(--color-surface);
+  }
+  .input[aria-invalid="true"] {
+    border-color: var(--color-danger);
+  }
+  textarea.input {
+    min-height: 110px;
+    resize: vertical;
+  }
+  select.input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%239aa0c7' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+  }
+}
+
+/* Espaço para a barra inferior + área segura do iPhone */
+.pb-nav {
+  padding-bottom: calc(96px + env(safe-area-inset-bottom));
+}
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
