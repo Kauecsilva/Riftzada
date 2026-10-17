@@ -9,7 +9,7 @@ Skills vendorizadas para que toda sessão do Claude Code (local ou na nuvem) nes
 | [firecrawl/firecrawl-claude-plugin](https://github.com/firecrawl/firecrawl-claude-plugin) | firecrawl, firecrawl-developer-index, firecrawl-research-index (+ servidor MCP em `/.mcp.json`) |
 | [anthropics/skills](https://github.com/anthropics/skills) | webapp-testing, mcp-builder |
 | [supabase/agent-skills](https://github.com/supabase/agent-skills) | supabase, supabase-postgres-best-practices |
-| [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | react-best-practices, composition-patterns, react-view-transitions, web-design-guidelines, writing-guidelines, deploy-to-vercel, vercel-cli-with-tokens, vercel-optimize |
+| [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | vercel-react-best-practices, vercel-composition-patterns, vercel-react-view-transitions, web-design-guidelines, writing-guidelines, deploy-to-vercel, vercel-cli-with-tokens, vercel-optimize |
 | [anthropics/claude-code](https://github.com/anthropics/claude-code/tree/main/plugins/frontend-design) | frontend-design |
 | [shadcn-ui/ui](https://ui.shadcn.com/docs/skills) | shadcn |
 
