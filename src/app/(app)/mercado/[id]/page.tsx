@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { EyeOff, Repeat } from "lucide-react";
+import { EyeOff, HandCoins, Repeat } from "lucide-react";
 import { AuthorLine } from "@/components/feed/AuthorLine";
 import { InterestButton } from "@/components/market/InterestButton";
+import { OfferBox } from "@/components/market/OfferBox";
+import { OffersPanel } from "@/components/market/OffersPanel";
 import { OwnerActions } from "@/components/market/OwnerActions";
+import { PriceReferenceNote } from "@/components/market/PriceReferenceNote";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Badge, KindTag } from "@/components/ui/Badge";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -15,7 +18,7 @@ import { listingPhotos, offerVerb } from "@/lib/cards";
 import { CONDITION, LISTING_STATUS } from "@/lib/domain/labels";
 import { formatPrice } from "@/lib/format";
 import { moderateListing } from "@/server/actions/admin";
-import { getListing, getOffersFor, getSharedWhatsapp } from "@/server/queries/market";
+import { getListing, getListingOffers, getOffersFor, getSharedWhatsapp } from "@/server/queries/market";
 import { canModerate, requireSession } from "@/server/session";
 
 export async function generateMetadata({ params }: PageProps<"/mercado/[id]">): Promise<Metadata> {
@@ -28,8 +31,9 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
   const listing = await getListing(id);
   if (!listing) notFound();
   const mine = listing.seller.id === session.userId;
-  const [whatsapp, offers] = await Promise.all([
+  const [whatsapp, offers, holders] = await Promise.all([
     mine ? null : getSharedWhatsapp(listing.seller.id),
+    listing.kind === "sell" ? getListingOffers(listing.id) : [],
     listing.kind === "want" && listing.status !== "done" ? getOffersFor(listing) : [],
   ]);
   const photos = listingPhotos(listing);
@@ -73,19 +77,21 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
             <KindTag kind={listing.kind} />
             <Badge tone={listing.status === "available" ? "energy" : listing.status === "reserved" ? "gold" : "neutral"}>{LISTING_STATUS[listing.status]}</Badge>
             {listing.acceptsTrade && <Badge tone="energy"><Repeat size={12} aria-hidden /> Aceita troca</Badge>}
+            {listing.kind === "sell" && listing.acceptsOffers && <Badge tone="gold"><HandCoins size={12} aria-hidden /> Aceita ofertas</Badge>}
             {listing.isHidden && <Badge tone="danger"><EyeOff size={12} aria-hidden /> Oculto pela moderação</Badge>}
           </div>
           <p className="font-display text-4xl font-extrabold">
             {listing.priceCents != null ? formatPrice(listing.priceCents) : listing.kind === "want" ? "A combinar" : "Só troca"}
           </p>
-          {listing.kind === "want" && listing.status !== "done" && (offers.length > 0 || mine) && (
+          <PriceReferenceNote listing={listing} />
+          {listing.kind === "want" && listing.status !== "done" && (holders.length > 0 || mine) && (
             <section aria-labelledby="ofertas" className="card p-4">
               <h2 id="ofertas" className="font-semibold">Quem tem essa carta</h2>
-              {offers.length === 0 ? (
+              {holders.length === 0 ? (
                 <p className="mt-1 text-sm text-muted">Ninguém está vendendo ou trocando essa carta agora.</p>
               ) : (
                 <ul className="mt-2 space-y-1">
-                  {offers.map((offer) => (
+                  {holders.map((offer) => (
                     <li key={offer.id}>
                       <Link href={`/mercado/${offer.id}`} className="-mx-2 flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-surface-2">
                         <Avatar name={offer.seller.displayName} src={offer.seller.avatarUrl} size={28} />
@@ -111,9 +117,19 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
           {listing.description && <p className="leading-relaxed whitespace-pre-line">{listing.description}</p>}
           <div className="card p-4"><AuthorLine author={listing.seller} at={listing.createdAt}>anunciou</AuthorLine></div>
           {mine ? (
-            <OwnerActions id={listing.id} status={listing.status} />
+            <>
+              <OwnerActions id={listing.id} status={listing.status} />
+              {listing.kind === "sell" && (listing.acceptsOffers || offers.length > 0) && (
+                <OffersPanel listingId={listing.id} offers={offers} priceCents={listing.priceCents} />
+              )}
+            </>
           ) : (
-            listing.status !== "done" && <InterestButton listing={listing} whatsapp={whatsapp} />
+            <>
+              {listing.kind === "sell" && ((listing.acceptsOffers && listing.status === "available") || offers.length > 0) && (
+                <OfferBox listing={listing} offers={offers} />
+              )}
+              {listing.status !== "done" && <InterestButton listing={listing} whatsapp={whatsapp} />}
+            </>
           )}
           {!mine && canModerate(session) && (
             <ActionButton action={moderateListing.bind(null, listing.id, !listing.isHidden)} confirm={listing.isHidden ? undefined : "Ocultar este anúncio da comunidade?"}>

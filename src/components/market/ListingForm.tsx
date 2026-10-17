@@ -8,9 +8,11 @@ import { ImageInput } from "@/components/ui/ImageInput";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { cn } from "@/lib/cn";
 import { CONDITION, LISTING_KIND } from "@/lib/domain/labels";
+import { centsToInput, discountLabel, parseBrl } from "@/lib/domain/pricing";
 import { initialActionState } from "@/lib/validation/common";
 import { saveListing } from "@/server/actions/content";
 import type { CardCondition, CollectionItem, Listing, ListingKind } from "@/types/domain";
+import { PriceSuggestion, type AppliedPrice } from "./PriceSuggestion";
 
 const KIND_HINT: Record<ListingKind, string> = {
   sell: "Tem carta sobrando? Bota preço.",
@@ -23,7 +25,18 @@ export function ListingForm({ userId, listing, fromCollection }: { userId: strin
   const [state, action] = useActionState(saveListing.bind(null, listing?.id ?? null), initialActionState);
   const [kind, setKind] = useState<ListingKind>(listing?.kind ?? "sell");
   const [setName, setSetName] = useState(listing?.setName ?? fromCollection?.card.setName ?? "");
+  const [card, setCard] = useState(listing?.card ?? fromCollection?.card ?? null);
+  const [variant, setVariant] = useState(listing?.variant ?? fromCollection?.variant ?? "");
+  const [price, setPrice] = useState(centsToInput(listing?.priceCents));
+  const [applied, setApplied] = useState<AppliedPrice | null>(
+    listing?.priceBase && listing.priceBaseCents != null && listing.priceCents != null
+      ? { base: listing.priceBase, baseCents: listing.priceBaseCents, discountPct: listing.discountPct ?? 0, cents: listing.priceCents }
+      : null,
+  );
+  const [acceptsOffers, setAcceptsOffers] = useState(listing?.acceptsOffers ?? false);
   const err = state.fieldErrors ?? {};
+  // A base e o desconto só valem enquanto o preço for o sugerido; mexeu no valor, vira preço livre
+  const priceFromSuggestion = kind === "sell" && applied != null && parseBrl(price) === applied.cents ? applied : null;
   const collectionItemId = fromCollection?.id ?? listing?.collectionItemId ?? "";
 
   return (
@@ -49,7 +62,10 @@ export function ListingForm({ userId, listing, fromCollection }: { userId: strin
           initialName={listing?.cardName}
           allowFreeText
           error={err.cardName}
-          onSelect={(card) => card?.setName && setSetName(card.setName)}
+          onSelect={(picked) => {
+            setCard(picked);
+            if (picked?.setName) setSetName(picked.setName);
+          }}
         />
       </Field>
 
@@ -58,7 +74,7 @@ export function ListingForm({ userId, listing, fromCollection }: { userId: strin
           <input {...fieldProps("setName", err.setName)} value={setName} onChange={(e) => setSetName(e.target.value)} maxLength={60} className="input" placeholder="Origins" />
         </Field>
         <Field label="Variante" name="variant" error={err.variant} optional>
-          <input {...fieldProps("variant", err.variant)} defaultValue={listing?.variant ?? fromCollection?.variant ?? ""} maxLength={40} className="input" placeholder="Foil, Showcase…" />
+          <input {...fieldProps("variant", err.variant)} value={variant} onChange={(e) => setVariant(e.target.value)} maxLength={40} className="input" placeholder="Foil, Showcase…" />
         </Field>
       </div>
 
@@ -73,10 +89,48 @@ export function ListingForm({ userId, listing, fromCollection }: { userId: strin
         </Field>
       </div>
 
+      {kind === "sell" && (
+        <PriceSuggestion
+          cardId={card?.id ?? null}
+          cardName={card?.name ?? listing?.cardName ?? ""}
+          variant={variant}
+          listing={listing}
+          onApply={(next) => {
+            setApplied(next);
+            setPrice(centsToInput(next.cents));
+          }}
+        />
+      )}
+
       {kind !== "trade" && (
-        <Field label={kind === "want" ? "Quanto pagaria" : "Preço"} name="price" error={err.price} optional hint="Em reais. Deixa vazio para combinar.">
-          <input {...fieldProps("price", err.price, "hint")} inputMode="decimal" defaultValue={listing?.priceCents != null ? (listing.priceCents / 100).toFixed(2).replace(".", ",") : ""} className="input" placeholder="120,00" />
+        <Field label={kind === "want" ? "Quanto pagaria" : "Preço"} name="price" error={err.price} optional
+          hint={priceFromSuggestion ? `${discountLabel(priceFromSuggestion.base, priceFromSuggestion.discountPct)}. Em reais.` : "Em reais. Deixa vazio para combinar."}>
+          <input {...fieldProps("price", err.price, "hint")} inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} className="input" placeholder="120,00" />
         </Field>
+      )}
+      {priceFromSuggestion && (
+        <>
+          <input type="hidden" name="priceBase" value={priceFromSuggestion.base} />
+          <input type="hidden" name="priceBaseCents" value={priceFromSuggestion.baseCents} />
+          <input type="hidden" name="discountPct" value={priceFromSuggestion.discountPct} />
+        </>
+      )}
+
+      {kind === "sell" && (
+        <div className="space-y-3 rounded-2xl border border-line bg-surface-2 p-4">
+          <label className="flex cursor-pointer items-center gap-3">
+            <input type="checkbox" name="acceptsOffers" checked={acceptsOffers} onChange={(e) => setAcceptsOffers(e.target.checked)} className="size-5 accent-rift" />
+            <span>
+              <span className="block text-sm font-medium">Aceito ofertas abaixo do preço</span>
+              <span className="block text-xs text-faint">O comprador oferece um valor; você aceita, recusa ou faz uma contraproposta.</span>
+            </span>
+          </label>
+          {acceptsOffers && (
+            <Field label="Oferta mínima" name="minOffer" error={err.minOffer} optional hint="Ofertas abaixo disso nem chegam.">
+              <input {...fieldProps("minOffer", err.minOffer, "hint")} inputMode="decimal" defaultValue={centsToInput(listing?.minOfferCents)} className="input" placeholder="80,00" />
+            </Field>
+          )}
+        </div>
       )}
 
       {kind !== "trade" && (

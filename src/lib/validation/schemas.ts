@@ -2,6 +2,7 @@
 // os atributos HTML (required, maxLength) só ajudam o usuário antes do envio.
 
 import { z } from "zod";
+import { parseBrl } from "@/lib/domain/pricing";
 import { checkbox, optionalInt, optionalText, optionalUuid, record, requiredText, uuid } from "./common";
 
 const email = z.email("E-mail inválido").trim().toLowerCase();
@@ -59,6 +60,20 @@ export const postSchema = z
 
 const condition = z.enum(["nm", "lp", "mp", "hp", "damaged"]);
 
+/** Valor em reais digitado ("1.200,50" ou "12.5") → centavos; vazio vira null. */
+const brl = (message: string) =>
+  z
+    .string()
+    .optional()
+    .transform((v, ctx) => {
+      const cents = parseBrl(v);
+      if (Number.isNaN(cents)) {
+        ctx.addIssue({ code: "custom", message });
+        return z.NEVER;
+      }
+      return cents;
+    });
+
 export const listingSchema = z.object({
   kind: z.enum(["sell", "trade", "want"]),
   cardId: optionalUuid,
@@ -68,25 +83,30 @@ export const listingSchema = z.object({
   variant: optionalText(40),
   condition,
   quantity: z.coerce.number().int().min(1, "Quantidade mínima 1").max(99),
-  price: z
-    .string()
-    .trim()
-    .optional()
-    .transform((v, ctx) => {
-      // "1.200,50" (pt-BR) ou "12.5": com vírgula, o ponto é milhar
-      let clean = (v ?? "").replace(/[R$\s]/g, "");
-      if (clean.includes(",")) clean = clean.replace(/\./g, "").replace(",", ".");
-      if (!clean) return null;
-      const value = Number(clean);
-      if (!Number.isFinite(value) || value < 0 || value > 1_000_000) {
-        ctx.addIssue({ code: "custom", message: "Preço inválido" });
-        return z.NEVER;
-      }
-      return Math.round(value * 100);
-    }),
+  price: brl("Preço inválido"),
   acceptsTrade: checkbox,
+  priceBase: z.union([z.enum(["liga", "tcgplayer"]), z.literal("")]).optional().transform((v) => v || null),
+  priceBaseCents: optionalInt(0, 100_000_000),
+  discountPct: optionalInt(0, 90),
+  ligaPrice: brl("Preço da Liga inválido"),
+  ligaLanguage: z.union([z.enum(["en", "zh", "pt", "other"]), z.literal("")]).optional().transform((v) => v || null),
+  ligaCondition: z.union([condition, z.literal("")]).optional().transform((v) => v || null),
+  acceptsOffers: checkbox,
+  minOffer: brl("Oferta mínima inválida"),
   description: optionalText(1000),
   imagePath: optionalText(200),
+});
+
+export const offerSchema = z.object({
+  listingId: uuid,
+  amount: brl("Valor inválido").pipe(z.number({ error: "Diz quanto você oferece" }).int().min(1, "Diz quanto você oferece")),
+  message: optionalText(280),
+});
+
+export const offerResponseSchema = z.object({
+  offerId: uuid,
+  action: z.enum(["accept", "decline", "counter", "withdraw"]),
+  counter: brl("Valor inválido"),
 });
 
 export const collectionItemSchema = z.object({

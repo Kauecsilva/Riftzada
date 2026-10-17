@@ -42,6 +42,12 @@ As cartas vêm do [Riftcodex](https://riftcodex.com), uma API pública e gratuit
 - Anúncios e coleção apontam para `cards`. No anúncio, a carta fora do catálogo ainda pode ser digitada à mão.
 - Em `/colecao/importar` dá para subir a coleção por CSV: exportação da LigaRiftbound ou qualquer CSV com nome e quantidade. O casamento com o catálogo é por sigla da edição + número (regras em `src/lib/domain/collection-import.ts`).
 
+## Preço sugerido e ofertas
+
+- A migration `0008_prices_offers.sql` importa todo dia (pg_cron, 19:30 de Brasília) os preços do TCGplayer pelo [tcgcsv.com](https://tcgcsv.com) e a cotação do dólar ([open.er-api.com](https://open.er-api.com)). Para rodar na hora: `select public.sync_card_prices();`.
+- A LigaRiftbound bloqueia acesso automático (Cloudflare), então o vendedor copia o menor preço de lá no anúncio, com idioma e condição. O formulário sugere o menor entre Liga e TCGplayer e aplica o desconto escolhido.
+- Ofertas: o comprador oferece abaixo do preço; o vendedor aceita, recusa ou faz contraproposta. As regras ficam nas funções `make_listing_offer` e `respond_listing_offer`.
+
 ## Deploy (Vercel)
 
 Importe o repositório, configure as mesmas variáveis do `.env.example` (com `NEXT_PUBLIC_SITE_URL` = domínio de produção) e publique. Região sugerida: `gru1`.

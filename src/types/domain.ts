@@ -9,6 +9,9 @@ export type ListingStatus = "available" | "reserved" | "done";
 export type CardCondition = "nm" | "lp" | "mp" | "hp" | "damaged";
 export type DeckVisibility = "public" | "unlisted" | "private";
 export type DeckSection = "main" | "runes" | "battlefields" | "side";
+export type PriceBase = "liga" | "tcgplayer";
+export type LigaLanguage = "en" | "zh" | "pt" | "other";
+export type OfferStatus = "pending" | "countered" | "accepted" | "declined" | "withdrawn";
 
 export type MiniProfile = {
   id: string;
@@ -137,6 +140,14 @@ export type Listing = {
   quantity: number;
   priceCents: number | null;
   acceptsTrade: boolean;
+  /** De onde veio o preço: base (Liga ou TCGplayer, em centavos de real) e o desconto aplicado. */
+  priceBase: PriceBase | null;
+  priceBaseCents: number | null;
+  discountPct: number | null;
+  /** Menor preço da LigaRiftbound informado pelo vendedor (a Liga não deixa consultar automático). */
+  liga: { priceCents: number; language: LigaLanguage | null; condition: CardCondition | null } | null;
+  acceptsOffers: boolean;
+  minOfferCents: number | null;
   description: string | null;
   imageUrl: string | null;
   imagePath: string | null;
@@ -144,6 +155,29 @@ export type Listing = {
   isHidden: boolean;
   createdAt: string;
   seller: MiniProfile;
+};
+
+/** Preço do TCGplayer (em centavos de dólar) de um acabamento da carta. */
+export type CardPrice = {
+  finish: "normal" | "foil";
+  lowCents: number | null;
+  marketCents: number | null;
+  productUrl: string | null;
+  updatedAt: string;
+};
+
+/** Referências de preço de uma carta para o anúncio. */
+export type PriceReference = { tcgplayer: CardPrice[]; usdBrl: number | null; rateUpdatedAt: string | null };
+
+export type ListingOffer = {
+  id: string;
+  buyer: MiniProfile;
+  amountCents: number;
+  counterCents: number | null;
+  message: string | null;
+  status: OfferStatus;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type CollectionItem = {
