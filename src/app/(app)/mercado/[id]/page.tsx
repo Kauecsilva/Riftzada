@@ -9,6 +9,7 @@ import { Badge, KindTag } from "@/components/ui/Badge";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Photo } from "@/components/ui/Photo";
 import { FlashToast } from "@/components/ui/Toast";
+import { listingImageUrl } from "@/lib/cards";
 import { CONDITION, LISTING_STATUS } from "@/lib/domain/labels";
 import { formatPrice } from "@/lib/format";
 import { moderateListing } from "@/server/actions/admin";
@@ -29,6 +30,8 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
 
   const details = [
     ["Expansão", listing.setName],
+    ["Código", listing.card?.code ?? null],
+    ["Raridade", listing.card?.rarity ?? null],
     ["Variante", listing.variant],
     ["Condição", CONDITION[listing.condition].label],
     ["Quantidade", String(listing.quantity)],
@@ -39,7 +42,7 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
       {query.salvo && <FlashToast text="Anúncio salvo!" />}
       <PageHeader title={listing.cardName} back="/mercado" />
       <div className="grid gap-6 md:grid-cols-2">
-        <Photo src={listing.imageUrl} alt={listing.cardName} ratio="3/4" priority className="rounded-[28px] border border-line" sizes="(min-width: 768px) 440px, 100vw" />
+        <Photo src={listingImageUrl(listing)} alt={listing.cardName} ratio="3/4" priority className="rounded-[28px] border border-line" sizes="(min-width: 768px) 440px, 100vw" />
         <div className="space-y-5">
           <div className="flex flex-wrap items-center gap-2">
             <KindTag kind={listing.kind} />

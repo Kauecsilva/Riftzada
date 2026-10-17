@@ -102,9 +102,21 @@ export type DeckCardLine = { name: string; quantity: number; section: DeckSectio
 
 export type DeckDetail = DeckSummary & { description: string | null; cards: DeckCardLine[] };
 
+/** Carta do catálogo (importado do Riftcodex), resumida para busca, anúncio e coleção. */
+export type CardSummary = {
+  id: string;
+  name: string;
+  setName: string | null;
+  code: string | null;
+  rarity: string | null;
+  imageUrl: string | null;
+};
+
 export type Listing = {
   id: string;
   kind: ListingKind;
+  card: CardSummary | null;
+  collectionItemId: string | null;
   cardName: string;
   setName: string | null;
   variant: string | null;
@@ -119,6 +131,17 @@ export type Listing = {
   isHidden: boolean;
   createdAt: string;
   seller: MiniProfile;
+};
+
+export type CollectionItem = {
+  id: string;
+  card: CardSummary;
+  quantity: number;
+  condition: CardCondition;
+  variant: string | null;
+  notes: string | null;
+  /** Anúncio ainda aberto (não finalizado) feito a partir deste item. */
+  listing: { id: string; status: ListingStatus } | null;
 };
 
 export type Post = {

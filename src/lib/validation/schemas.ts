@@ -54,12 +54,16 @@ export const postSchema = z
   })
   .refine((v) => v.body || v.images.length, { message: "Escreve alguma coisa ou adiciona uma foto", path: ["body"] });
 
+const condition = z.enum(["nm", "lp", "mp", "hp", "damaged"]);
+
 export const listingSchema = z.object({
   kind: z.enum(["sell", "trade", "want"]),
+  cardId: optionalUuid,
+  collectionItemId: optionalUuid,
   cardName: requiredText(2, 120, "Carta"),
   setName: optionalText(60),
   variant: optionalText(40),
-  condition: z.enum(["nm", "lp", "mp", "hp", "damaged"]),
+  condition,
   quantity: z.coerce.number().int().min(1, "Quantidade mínima 1").max(99),
   price: z
     .string()
@@ -81,6 +85,16 @@ export const listingSchema = z.object({
   description: optionalText(1000),
   imagePath: optionalText(200),
 });
+
+export const collectionItemSchema = z.object({
+  cardId: z.uuid("Escolhe uma carta da lista"),
+  quantity: z.coerce.number().int().min(1, "Quantidade mínima 1").max(999, "Máximo de 999"),
+  condition,
+  variant: optionalText(40),
+  notes: optionalText(280),
+});
+
+export const collectionQuantitySchema = z.object({ id: uuid, quantity: z.coerce.number().int().min(0).max(999) });
 
 export const listingStatusSchema = z.object({ id: uuid, status: z.enum(["available", "reserved", "done"]) });
 

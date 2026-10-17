@@ -182,6 +182,19 @@ export const demoListings: DemoListing[] = [
   { id: l(5), sellerId: USERS.kaue, kind: "sell", cardName: "Brazen Buccaneer", setName: "Origins", variant: null, condition: "nm", quantity: 3, priceCents: 1000, acceptsTrade: true, description: null, imagePath: "demo/card-generic.svg", status: "done", createdAt: { days: -9, at: "15:00" } },
 ];
 
+export type DemoCollectionItem = {
+  id: string; userId: string; cardId: string; quantity: number; condition: CardCondition; variant: string | null; notes: string | null;
+};
+
+const ci = (n: number) => `00000000-0000-4000-8000-a000000000${String(n).padStart(2, "0")}`;
+
+/** Coleção só aparece no modo demonstração (não vai para o seed). */
+export const demoCollection: DemoCollectionItem[] = [
+  { id: ci(1), userId: USERS.kaue, cardId: LEGENDS.jinx, quantity: 2, condition: "nm", variant: null, notes: "Uma no deck, outra sobrando." },
+  { id: ci(2), userId: USERS.kaue, cardId: LEGENDS.annie, quantity: 1, condition: "nm", variant: "Foil", notes: null },
+  { id: ci(3), userId: USERS.kaue, cardId: LEGENDS.garen, quantity: 3, condition: "lp", variant: null, notes: null },
+];
+
 export type DemoPost = {
   id: string; authorId: string; kind: PostKind; body: string | null; eventId: string | null; deckId: string | null;
   isFeatured: boolean; createdAt: RelDate; images: string[];

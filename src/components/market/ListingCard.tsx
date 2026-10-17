@@ -3,6 +3,7 @@ import { Repeat } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge, KindTag } from "@/components/ui/Badge";
 import { Photo } from "@/components/ui/Photo";
+import { listingImageUrl } from "@/lib/cards";
 import { CONDITION, LISTING_STATUS } from "@/lib/domain/labels";
 import { formatPrice } from "@/lib/format";
 import type { Listing } from "@/types/domain";
@@ -12,7 +13,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
   return (
     <Link href={`/mercado/${listing.id}`} className="card group block overflow-hidden transition-transform hover:-translate-y-0.5">
       <div className="relative">
-        <Photo src={listing.imageUrl} alt={listing.cardName} ratio="1/1" sizes="(min-width: 1024px) 300px, 50vw" className={dimmed ? "opacity-60" : undefined} />
+        <Photo src={listingImageUrl(listing)} alt={listing.cardName} ratio="3/4" sizes="(min-width: 1024px) 300px, 50vw" className={dimmed ? "opacity-60" : undefined} />
         <div className="absolute top-2 left-2"><KindTag kind={listing.kind} /></div>
         {dimmed && <div className="absolute top-2 right-2"><Badge tone={listing.status === "reserved" ? "gold" : "neutral"}>{LISTING_STATUS[listing.status]}</Badge></div>}
       </div>

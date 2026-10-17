@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Plus, Search, Store } from "lucide-react";
+import { Library, Plus, Search, Store } from "lucide-react";
 import { ListingCard } from "@/components/market/ListingCard";
 import { buttonClass } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -43,7 +43,12 @@ export default async function MarketPage({ searchParams }: PageProps<"/mercado">
       <PageHeader
         title="Mercado"
         subtitle="Vende, troca e procura. O Riftzada só conecta, o resto é com vocês."
-        action={<Link href="/mercado/novo" className={buttonClass("primary", "md", "hidden md:inline-flex")}><Plus size={18} aria-hidden /> Anunciar</Link>}
+        action={
+          <div className="flex gap-2">
+            <Link href="/colecao" className={buttonClass("secondary", "md")} aria-label="Minha coleção"><Library size={18} aria-hidden /><span className="hidden md:inline">Minha coleção</span></Link>
+            <Link href="/mercado/novo" className={buttonClass("primary", "md", "hidden md:inline-flex")}><Plus size={18} aria-hidden /> Anunciar</Link>
+          </div>
+        }
       />
 
       <form role="search" action="/mercado" className="relative mb-4">

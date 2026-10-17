@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LogOut, Shield } from "lucide-react";
+import { Library, LogOut, Shield } from "lucide-react";
 import { DeckCard } from "@/components/decks/DeckCard";
 import { PostCard } from "@/components/feed/PostCard";
 import { ListingCard } from "@/components/market/ListingCard";
@@ -45,6 +45,15 @@ export default async function PlayerPage({ params, searchParams }: PageProps<"/j
       {query.salvo && <FlashToast text="Perfil atualizado!" />}
       <ProfileHeader profile={profile} mine={mine} champion={(stats?.titles ?? 0) > 0} />
       <StatsGrid stats={stats} />
+      {mine && (
+        <Link href="/colecao" className="card flex items-center gap-4 p-4 transition-colors hover:border-rift/50">
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-gold-soft text-gold"><Library size={22} aria-hidden /></span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-semibold">Minha coleção</span>
+            <span className="block text-sm text-muted">Registra tuas cartas e anuncia as repetidas em dois toques.</span>
+          </span>
+        </Link>
+      )}
 
       <section aria-labelledby="conquistas">
         <SectionHeader id="conquistas" title="Conquistas" />

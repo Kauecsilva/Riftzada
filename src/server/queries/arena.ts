@@ -149,6 +149,10 @@ export async function getLegends(): Promise<Legend[]> {
     .select("id, name")
     .eq("game", "riftbound")
     .eq("card_type", "legend")
+    // Uma linha por lenda: as variantes de impressão do catálogo ficam de fora
+    .eq("is_alternate_art", false)
+    .eq("is_overnumbered", false)
+    .eq("is_signature", false)
     .order("name");
   if (error) throw error;
   return data;
