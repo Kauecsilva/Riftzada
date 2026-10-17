@@ -78,3 +78,14 @@ export function ligaCardUrl(cardName: string): string {
 export function discountLabel(base: PriceBase, pct: number | null): string {
   return pct ? `${pct}% abaixo ${base === "liga" ? "da Liga" : "do TCGplayer"}` : `Preço ${base === "liga" ? "da Liga" : "do TCGplayer"}`;
 }
+
+export type PriceComparison = { cheaper: PriceBase; diffCents: number; diffPct: number } | { cheaper: null; diffCents: 0; diffPct: 0 };
+
+/** Quem está mais barato e por quanto (a % é sobre o preço mais caro). */
+export function comparePrices(ligaCents: number, tcgCents: number): PriceComparison {
+  if (ligaCents === tcgCents) return { cheaper: null, diffCents: 0, diffPct: 0 };
+  const cheaper: PriceBase = ligaCents < tcgCents ? "liga" : "tcgplayer";
+  const high = Math.max(ligaCents, tcgCents);
+  const diffCents = high - Math.min(ligaCents, tcgCents);
+  return { cheaper, diffCents, diffPct: Math.round((diffCents / high) * 100) };
+}

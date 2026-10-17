@@ -10,6 +10,7 @@ import {
   PRICE_BASE, tcgBrlCents,
 } from "@/lib/domain/pricing";
 import { formatPrice, shortDate } from "@/lib/format";
+import { PriceComparison } from "./PriceComparison";
 import type { CardCondition, LigaLanguage, Listing, PriceBase, PriceReference } from "@/types/domain";
 
 export type AppliedPrice = { base: PriceBase; baseCents: number; discountPct: number; cents: number };
@@ -134,6 +135,8 @@ export function PriceSuggestion({
           <p className="text-xs text-gold">Esse menor preço não é de carta NM. Vale conferir se tem NM mais cara.</p>
         )}
       </div>
+
+      {ligaCents != null && tcgCents != null && <PriceComparison ligaCents={ligaCents} tcgCents={tcgCents} />}
 
       {/* Base + desconto */}
       {cheapest ? (
