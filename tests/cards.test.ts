@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cardImageUrl, cardLine, listingImageUrl } from "@/lib/cards";
+import { cardImageUrl, cardLine, listingImageUrl, uniqueLegends } from "@/lib/cards";
 import { collectionItemSchema, listingSchema } from "@/lib/validation/schemas";
 
 const CARD_ID = "00000000-0000-4000-8000-200000000001";
@@ -54,5 +54,20 @@ describe("coleção", () => {
   it("limita a quantidade", () => {
     expect(collectionItemSchema.safeParse({ cardId: CARD_ID, quantity: "0", condition: "nm" }).success).toBe(false);
     expect(collectionItemSchema.safeParse({ cardId: CARD_ID, quantity: "1000", condition: "nm" }).success).toBe(false);
+  });
+});
+
+describe("lendas sem repetição", () => {
+  it("fica uma por nome, preferindo a impressão normal", () => {
+    const legends = uniqueLegends([
+      { id: "1", name: "Ahri - Nine-Tailed Fox", rarity: "Promo" },
+      { id: "2", name: "Ahri - Nine-Tailed Fox (Metal)", rarity: "Promo" },
+      { id: "3", name: "Ahri - Nine-Tailed Fox", rarity: "Rare" },
+      { id: "4", name: "Annie - Dark Child (Starter)", rarity: "Rare" },
+    ]);
+    expect(legends).toEqual([
+      { id: "3", name: "Ahri - Nine-Tailed Fox" },
+      { id: "4", name: "Annie - Dark Child" },
+    ]);
   });
 });

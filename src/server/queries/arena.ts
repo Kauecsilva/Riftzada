@@ -1,4 +1,5 @@
 import "server-only";
+import { uniqueLegends } from "@/lib/cards";
 import { isDemoMode } from "@/lib/env";
 import { mediaUrl } from "@/lib/images";
 import { createClient } from "@/lib/supabase/server";
@@ -146,14 +147,13 @@ export async function getLegends(): Promise<Legend[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("cards")
-    .select("id, name")
+    .select("id, name, rarity")
     .eq("game", "riftbound")
     .eq("card_type", "legend")
-    // Uma linha por lenda: as variantes de impressão do catálogo ficam de fora
     .eq("is_alternate_art", false)
     .eq("is_overnumbered", false)
     .eq("is_signature", false)
     .order("name");
   if (error) throw error;
-  return data;
+  return uniqueLegends(data);
 }
