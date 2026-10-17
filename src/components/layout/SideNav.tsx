@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Layers, LogOut, Shield } from "lucide-react";
+import { LogOut, Shield } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Avatar } from "@/components/ui/Avatar";
 import type { MiniProfile } from "@/types/domain";
@@ -13,7 +13,6 @@ import { PublishMenu } from "./PublishMenu";
 /** Navegação lateral do desktop (≥1024px). */
 export function SideNav({ me, isAdmin }: { me: MiniProfile; isAdmin: boolean }) {
   const path = usePathname();
-  const links = [...NAV_ITEMS.slice(0, 3), { href: "/decks", label: "Decks", icon: Layers }, NAV_ITEMS[3]];
 
   return (
     <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-line px-4 py-6 lg:flex">
@@ -22,7 +21,7 @@ export function SideNav({ me, isAdmin }: { me: MiniProfile; isAdmin: boolean }) 
       </Link>
       <nav aria-label="Principal">
         <ul className="space-y-1">
-          {links.map((it) => {
+          {NAV_ITEMS.map((it) => {
             const active = isActive(path, it.href, "exact" in it ? it.exact : false);
             return (
               <li key={it.href}>

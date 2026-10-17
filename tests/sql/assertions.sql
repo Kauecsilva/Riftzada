@@ -176,3 +176,46 @@ do $$ begin
 exception when insufficient_privilege then null;
 end $$;
 rollback;
+
+-- ---------- Lojas ----------
+begin;
+select pg_temp.login('00000000-0000-4000-8000-100000000002'); -- João (user) cadastra a loja dele
+insert into public.stores (id, community_id, owner_id, name, address)
+values ('00000000-0000-4000-8000-b00000000001', '00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-100000000002', 'Toca do Rift', 'Rua das Cartas, 123');
+do $$ begin
+  insert into public.stores (community_id, owner_id, name)
+  values ('00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-100000000003', 'Loja do Rafael');
+  raise exception 'FALHOU: cadastrou loja em nome de outro';
+exception when insufficient_privilege then null;
+end $$;
+-- Semanal: duas datas da mesma série; campos de resultado são ignorados
+insert into public.events (id, community_id, store_id, series_id, name, starts_at, location, created_by, player_count) values
+  ('00000000-0000-4000-8000-b10000000001', '00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-b00000000001', '00000000-0000-4000-8000-b90000000001', 'Semanal de Riftbound', now() + interval '3 days', 'Toca', '00000000-0000-4000-8000-100000000002', 99),
+  ('00000000-0000-4000-8000-b10000000002', '00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-b00000000001', '00000000-0000-4000-8000-b90000000001', 'Semanal de Riftbound', now() + interval '10 days', 'Toca', '00000000-0000-4000-8000-100000000002', null);
+select pg_temp.check((select player_count from events where id = '00000000-0000-4000-8000-b10000000001') is null, 'Loja não preenche resultado');
+update public.events set name = 'Semanal da Toca' where id = '00000000-0000-4000-8000-b10000000001';
+select pg_temp.check((select name from events where id = '00000000-0000-4000-8000-b10000000001') = 'Semanal da Toca', 'Dono edita evento da loja');
+do $$ begin
+  update public.events set store_id = null where id = '00000000-0000-4000-8000-b10000000001';
+  raise exception 'FALHOU: tirou o evento da loja';
+exception when insufficient_privilege then null;
+end $$;
+
+select pg_temp.login('00000000-0000-4000-8000-100000000003'); -- Rafael (não é dono)
+select pg_temp.check((select count(*) from stores) = 1, 'Membros veem as lojas');
+do $$ begin
+  insert into public.events (community_id, store_id, name, starts_at, location, created_by)
+  values ('00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-b00000000001', 'Evento pirata', now(), 'Casa', '00000000-0000-4000-8000-100000000003');
+  raise exception 'FALHOU: criou evento na loja de outro';
+exception when insufficient_privilege then null;
+end $$;
+update public.events set name = 'Hackeado' where store_id = '00000000-0000-4000-8000-b00000000001';
+delete from public.events where store_id = '00000000-0000-4000-8000-b00000000001';
+update public.stores set name = 'Hackeada' where id = '00000000-0000-4000-8000-b00000000001';
+
+select pg_temp.login('00000000-0000-4000-8000-100000000002'); -- João de novo
+select pg_temp.check((select count(*) from events where store_id = '00000000-0000-4000-8000-b00000000001' and name <> 'Hackeado') = 2, 'Outro membro não mexe nos eventos da loja');
+select pg_temp.check((select name from stores where id = '00000000-0000-4000-8000-b00000000001') = 'Toca do Rift', 'Outro membro não edita a loja');
+delete from public.events where series_id = '00000000-0000-4000-8000-b90000000001';
+select pg_temp.check((select count(*) from events where store_id is not null) = 0, 'Dono apaga o semanal');
+rollback;

@@ -14,6 +14,7 @@ import { FlashToast } from "@/components/ui/Toast";
 import { EVENT_STATUS } from "@/lib/domain/labels";
 import { countdown } from "@/lib/format";
 import { getEvent } from "@/server/queries/arena";
+import { canManageStore } from "@/server/queries/stores";
 import { requireSession } from "@/server/session";
 
 export async function generateMetadata({ params }: PageProps<"/arena/eventos/[id]">): Promise<Metadata> {
@@ -29,6 +30,9 @@ export default async function EventPage({ params, searchParams }: PageProps<"/ar
   const finished = event.status === "finished";
   const full = Boolean(event.maxPlayers && event.goingCount >= event.maxPlayers);
   const isAdmin = session.role === "admin";
+  const editHref = event.store && (await canManageStore(event.store.id))
+    ? `/loja/${event.store.id}/eventos/${event.id}`
+    : isAdmin ? `/admin/eventos/${event.id}` : null;
   const people = event.participants.filter((p) => (finished ? p.played : true));
 
   return (
@@ -37,8 +41,8 @@ export default async function EventPage({ params, searchParams }: PageProps<"/ar
       <PageHeader
         title={event.name}
         back={finished ? "/arena/resultados" : "/arena"}
-        action={isAdmin ? (
-          <Link href={`/admin/eventos/${event.id}`} className={buttonClass("secondary", "sm")}><Pencil size={15} aria-hidden /> Editar</Link>
+        action={editHref ? (
+          <Link href={editHref} className={buttonClass("secondary", "sm")}><Pencil size={15} aria-hidden /> Editar</Link>
         ) : undefined}
       />
 
@@ -71,15 +75,6 @@ export default async function EventPage({ params, searchParams }: PageProps<"/ar
           {event.results.length ? (
             <>
               <Podium results={event.results} />
-              {event.results.some((r) => r.deck) && (
-                <ul className="flex flex-wrap gap-2 pt-1">
-                  {event.results.filter((r) => r.deck).map((r) => (
-                    <li key={r.id}>
-                      <Link href={`/decks/${r.deck!.id}`} className={buttonClass("secondary", "sm")}>{r.placement}º · {r.deck!.name}</Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
               {event.resultsNotes && <p className="card p-4 text-muted">{event.resultsNotes}</p>}
             </>
           ) : (

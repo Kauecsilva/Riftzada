@@ -59,6 +59,19 @@ export type EventSummary = {
   goingCount: number;
   isGoing: boolean;
   playerCount: number | null;
+  /** Loja que organiza (null = evento da própria comunidade). */
+  store: StoreRef | null;
+  /** Datas do mesmo evento semanal compartilham o seriesId. */
+  seriesId: string | null;
+};
+
+export type StoreRef = { id: string; name: string };
+
+export type Store = StoreRef & {
+  address: string | null;
+  instagram: string | null;
+  description: string | null;
+  owner: MiniProfile;
 };
 
 export type ResultPlayer =
