@@ -4,8 +4,6 @@ import { isDemoMode, SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/env";
 
 // Abrem sem login: autenticação, instalação do PWA e arquivos públicos
 const PUBLIC_PATHS = ["/entrar", "/cadastro", "/esqueci-senha", "/auth", "/manifest.webmanifest", "/sw.js", "/offline"];
-// Só fazem sentido deslogado
-const GUEST_ONLY = ["/entrar", "/cadastro", "/esqueci-senha"];
 
 const matches = (path: string, list: string[]) => list.some((p) => path === p || path.startsWith(`${p}/`));
 
@@ -38,11 +36,7 @@ export async function updateSession(request: NextRequest) {
     url.search = path === "/" ? "" : `?next=${encodeURIComponent(path)}`;
     return NextResponse.redirect(url);
   }
-  if (loggedIn && matches(path, GUEST_ONLY)) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
-    url.search = "";
-    return NextResponse.redirect(url);
-  }
+  // Quem já está logado sai das telas de visitante na própria página (redirectIfSignedIn),
+  // com a sessão completa; aqui só o JWT faria loop se o perfil não carregasse.
   return response;
 }
