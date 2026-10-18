@@ -16,9 +16,11 @@ import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
 import { listingPhotos, offerVerb } from "@/lib/cards";
 import { CONDITION, LISTING_STATUS } from "@/lib/domain/labels";
+import { pickTcgPrice, tcgBrlCents } from "@/lib/domain/pricing";
 import { formatPrice } from "@/lib/format";
 import { moderateListing } from "@/server/actions/admin";
 import { getListing, getListingOffers, getOffersFor, getSharedWhatsapp } from "@/server/queries/market";
+import { getPriceReference } from "@/server/queries/prices";
 import { canModerate, requireSession } from "@/server/session";
 
 export async function generateMetadata({ params }: PageProps<"/mercado/[id]">): Promise<Metadata> {
@@ -31,11 +33,13 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
   const listing = await getListing(id);
   if (!listing) notFound();
   const mine = listing.seller.id === session.userId;
-  const [whatsapp, offers, holders] = await Promise.all([
+  const [whatsapp, offers, holders, priceRef] = await Promise.all([
     mine ? null : getSharedWhatsapp(listing.seller.id),
     listing.kind === "sell" ? getListingOffers(listing.id) : [],
     listing.kind === "want" && listing.status !== "done" ? getOffersFor(listing) : [],
+    listing.kind === "sell" && listing.card ? getPriceReference(listing.card.id) : null,
   ]);
+  const tcgCents = priceRef ? tcgBrlCents(pickTcgPrice(priceRef.tcgplayer, listing.variant), priceRef.usdBrl) : null;
   const photos = listingPhotos(listing);
 
   const details = [
@@ -83,7 +87,7 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
           <p className="font-display text-4xl font-extrabold">
             {listing.priceCents != null ? formatPrice(listing.priceCents) : listing.kind === "want" ? "A combinar" : "Só troca"}
           </p>
-          <PriceReferenceNote listing={listing} />
+          <PriceReferenceNote listing={listing} tcgCents={tcgCents} />
           {listing.kind === "want" && listing.status !== "done" && (holders.length > 0 || mine) && (
             <section aria-labelledby="ofertas" className="card p-4">
               <h2 id="ofertas" className="font-semibold">Quem tem essa carta</h2>

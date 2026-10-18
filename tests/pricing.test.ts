@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  applyDiscount, centsToInput, cheapestBase, discountLabel, ligaCardUrl, parseBrl, pickTcgPrice, tcgBrlCents, usdToBrlCents,
+  applyDiscount, centsToInput, cheapestBase, comparePrices, discountLabel, ligaCardUrl, parseBrl, pickTcgPrice, tcgBrlCents, usdToBrlCents,
 } from "@/lib/domain/pricing";
 import { listingSchema, offerSchema } from "@/lib/validation/schemas";
 import type { CardPrice } from "@/types/domain";
@@ -44,6 +44,12 @@ describe("preço sugerido", () => {
     expect(cheapestBase({ liga: 20000, tcgplayer: 24396 })).toBe("liga");
     expect(cheapestBase({ liga: null, tcgplayer: 24396 })).toBe("tcgplayer");
     expect(cheapestBase({})).toBeNull();
+  });
+
+  it("compara Liga e TCGplayer", () => {
+    expect(comparePrices(33666, 24396)).toEqual({ cheaper: "tcgplayer", diffCents: 9270, diffPct: 28 });
+    expect(comparePrices(20000, 25000)).toEqual({ cheaper: "liga", diffCents: 5000, diffPct: 20 });
+    expect(comparePrices(1000, 1000).cheaper).toBeNull();
   });
 
   it("monta o link e o texto da Liga", () => {
