@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { redirectIfSignedIn } from "@/server/session";
 import { SignInForm } from "@/components/auth/SignInForm";
 import { FormMessage } from "@/components/ui/FormMessage";
 
 export const metadata: Metadata = { title: "Entrar" };
 
 export default async function SignInPage({ searchParams }: PageProps<"/entrar">) {
+  await redirectIfSignedIn();
   const { next, erro, confirmado } = await searchParams;
   return (
     <div className="space-y-4">
