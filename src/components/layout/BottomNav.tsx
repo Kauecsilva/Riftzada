@@ -7,7 +7,7 @@ import { isActive, NAV_ITEMS } from "./nav-items";
 import { PublishMenu } from "./PublishMenu";
 
 /** Barra inferior do celular: Home, Arena, +, Mercado, Perfil. */
-export function BottomNav({ isAdmin }: { isAdmin: boolean }) {
+export function BottomNav({ isAdmin, isStore }: { isAdmin: boolean; isStore: boolean }) {
   const path = usePathname();
   const [home, arena, market, profile] = NAV_ITEMS;
 
@@ -33,7 +33,7 @@ export function BottomNav({ isAdmin }: { isAdmin: boolean }) {
         {item(home)}
         {item(arena)}
         <li className="flex flex-1 justify-center">
-          <PublishMenu isAdmin={isAdmin} variant="fab" />
+          <PublishMenu isAdmin={isAdmin} isStore={isStore} variant="fab" />
         </li>
         {item(market)}
         {item(profile)}

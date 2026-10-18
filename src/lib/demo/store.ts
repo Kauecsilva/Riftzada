@@ -71,6 +71,7 @@ export function demoProfile(username: string): Profile | null {
     city: user.city,
     state: user.state,
     createdAt: resolveRelDate(user.joined),
+    accountKind: "player",
   };
 }
 

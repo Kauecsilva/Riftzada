@@ -30,7 +30,11 @@ export type Profile = MiniProfile & {
   city: string | null;
   state: string | null;
   createdAt: string;
+  /** Escolhido no cadastro. Só conta de loja cadastra loja e cria eventos. */
+  accountKind: AccountKind;
 };
+
+export type AccountKind = "player" | "store";
 
 export type PlayerStats = MiniProfile & {
   eventsPlayed: number;

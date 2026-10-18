@@ -37,7 +37,7 @@ Navegador ──(upload)──▶ compressão no cliente ──▶ Supabase Stor
 
 ### Autenticação
 
-1. **Cadastro** (`/cadastro`): apelido (`@username`, também usado como nome de exibição), e-mail e senha. Com "Confirm email" desligado no Supabase, a pessoa já entra logada.
+1. **Cadastro** (`/cadastro`): tipo de conta (Jogador ou Loja), apelido (`@username`, também usado como nome de exibição), e-mail e senha. Conta de loja cai em `/loja` para pedir o cadastro da loja. Com "Confirm email" desligado no Supabase, a pessoa já entra logada.
 2. **Confirmação** (`/auth/confirm`): troca o token por sessão e leva para a Home.
 3. Um **trigger** em `auth.users` cria o `profile` e a associação (`community_members`, papel `user`) na comunidade padrão.
 4. **Login** (`/entrar`), **Logout** (`/auth/sair`, POST), **Esqueci a senha** (`/esqueci-senha`) → e-mail → `/redefinir-senha`.
@@ -139,7 +139,7 @@ Todas as tabelas têm `id uuid` (exceto junções), `created_at`, RLS ligado, e 
 | Tabela | Colunas principais | Observações |
 |---|---|---|
 | `communities` | id, slug, name, game, tagline, is_default | Começa com "Riftzada X1". |
-| `profiles` | id (= auth.users.id), username (único, minúsculo), display_name, avatar_path, bio, favorite_legend_id → cards, instagram, created_at | Nunca guarda e-mail. "Users" é o `auth.users` do Supabase. |
+| `profiles` | id (= auth.users.id), username (único, minúsculo), display_name, avatar_path, bio, favorite_legend_id → cards, instagram, account_kind (player/store), created_at | Nunca guarda e-mail. `account_kind` vem do cadastro e só o admin troca (migration 0012). "Users" é o `auth.users` do Supabase. |
 | `profile_contacts` | user_id, whatsapp, share_whatsapp | Separado para RLS própria: só o dono lê o número; outros membros só leem se `share_whatsapp = true`. |
 | `community_members` | community_id, user_id, role, joined_at, is_banned | Papel por comunidade (multi-loja futura sem refazer nada). |
 | `cards` | id, game, name, set_code, set_name, collector_no, rarity, card_type, domain, image_path, external_id, source (`manual`/`api`) | Catálogo modular. `external_id` + `source` deixam a API futura entrar sem mexer no resto. |
@@ -147,7 +147,7 @@ Todas as tabelas têm `id uuid` (exceto junções), `created_at`, RLS ligado, e 
 | `post_images` | id, post_id, path, position, width, height | Até 4 fotos por post. |
 | `post_likes` | post_id, user_id | Fase 2 (tabela já criada). |
 | `post_comments` | id, post_id, author_id, body, is_hidden | Fase 2. |
-| `stores` | id, community_id, owner_id → profiles, name (único por comunidade), address?, instagram?, description?, approved_at?, approved_by? | Qualquer membro pede o cadastro da própria loja (migration 0009); ela nasce pendente e só um admin aprova (0011). Só o dono de loja aprovada cria/edita/apaga os eventos da loja (semanais, campeonatos…); admin pode tudo. Loja pendente só aparece para o dono e o admin. |
+| `stores` | id, community_id, owner_id → profiles, name (único por comunidade), address?, instagram?, description?, approved_at?, approved_by? | Conta de loja (`profiles.account_kind = store`, 0012) pede o cadastro da própria loja; ela nasce pendente e só um admin aprova (0011). Só o dono de loja aprovada cria/edita/apaga os eventos da loja (semanais, campeonatos…); admin pode tudo. Loja pendente só aparece para o dono e o admin. |
 | `events` | id, community_id, store_id? → stores, series_id?, name, description, starts_at, location, max_players?, status, image_path?, signup_url?, format?, player_count?, results_image_path?, results_notes?, created_by | `player_count` é preenchido no resultado (pode haver quem jogou sem conta). |
 | `event_participants` | event_id, user_id, status, created_at | "Vou jogar" = `going`; ao registrar resultado o admin confirma quem `played`. |
 | `event_results` | id, event_id, placement (1..), user_id?, guest_name?, legend_id → cards?, deck_id?, record ("4-1"), notes | `user_id` **ou** `guest_name` (jogador sem conta). Único por (evento, jogador). |
@@ -267,7 +267,7 @@ Decks aparecem no MVP numa versão simples porque o "+" e o seed já pedem; curt
 | Rota | Tela | Conteúdo |
 |---|---|---|
 | `/entrar` | Entrar na Riftzada | Logo, frase "Onde a galera do Rift se encontra", e-mail, senha, links para cadastro e "esqueci a senha". |
-| `/cadastro` | Criar conta | Apelido, e-mail, senha. Entra direto (ou aviso de confirmação, se ela estiver ligada). |
+| `/cadastro` | Criar conta | Jogador ou Loja, apelido, e-mail, senha. Entra direto (ou aviso de confirmação, se ela estiver ligada). |
 | `/esqueci-senha`, `/redefinir-senha` | Recuperar acesso | Um campo por vez. |
 | `/` | Home / Mural | "Olá, Kauê." · Campeão da semana (foto grande, lenda, evento) · Próximo evento com "Vou jogar" · Feed "Na Riftzada" (posts, pulls, decks, anúncios, campeões) · Top 3 do ranking. No desktop, evento e ranking numa coluna lateral. |
 | `+` (sheet) | Publicar | Publicar no mural · Anunciar carta · Publicar deck · Registrar resultado (só admin). |
@@ -331,7 +331,7 @@ Toda tela tem `loading.tsx` com skeleton, estado vazio com texto leve e erros co
 
 **Lojas (out/2026)** Lojas cadastram eventos avulsos e semanais. A aba de decks saiu da navegação (`/decks` redireciona para a Home); tabelas e telas continuam no código para voltar quando fizer sentido.
 
-**Conta de loja (out/2026)** O cadastro da loja vira um pedido que o admin aprova em `/admin/lojas` (migration 0011). Só loja aprovada cria eventos; as lojas que já existiam foram aprovadas na migration.
+**Conta de loja (out/2026)** O cadastro da loja vira um pedido que o admin aprova em `/admin/lojas` (migration 0011). Só loja aprovada cria eventos; as lojas que já existiam foram aprovadas na migration. Na 0012 o cadastro ganhou o tipo de conta (Jogador ou Loja): só conta de loja pede loja e cria eventos (avulsos e semanais); jogador não vê "Cadastrar evento da loja".
 
 **Fase 2** Curtidas, comentários, conquistas automáticas, TV Mode, deck completo com catálogo, histórico avançado, mercado melhorado.
 

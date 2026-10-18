@@ -46,9 +46,16 @@ async function storeAccess(storeId: string | null | undefined): Promise<"admin" 
   const session = await getSession();
   if (!session) return null;
   if (session.role === "admin") return "admin";
+  if (session.profile.accountKind !== "store") return null;
   const store = await getStore(storeId);
   if (store?.owner.id !== session.userId) return null;
   return store.approved ? "owner" : "pending-owner";
+}
+
+/** Quem pede o cadastro de uma loja: conta de loja e admin. */
+export async function canCreateStore(): Promise<boolean> {
+  const session = await getSession();
+  return session?.role === "admin" || session?.profile.accountKind === "store";
 }
 
 /** Quem edita os dados da loja: o dono (mesmo antes da aprovação) e o admin. */
