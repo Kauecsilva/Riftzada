@@ -22,5 +22,5 @@
       }
     ]
   },
-  "enabledMcpjsonServers": ["firecrawl", "context7"]
+  "enabledMcpjsonServers": ["context7"]
 }
