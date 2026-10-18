@@ -58,8 +58,25 @@ Skill instalada não executa nada sozinha: nada de animação, cache, deploy ou 
 
 ## Git e colaboração
 
-- Sem bloqueio de push na `main`, sem exigência de branch/worktree e sem hooks de Git. Lint, tipos, testes e build são checks explícitos.
+- Sem bloqueio de push na `main`, sem exigência de worktree e sem hooks de Git. Lint, tipos, testes e build são checks explícitos.
 - PRs com merge automático depois do CI verde estão autorizados pelo Kaue.
+
+## Claude e Codex no mesmo repositório
+
+Os dois agentes seguem este arquivo. O que muda é só onde cada um acha as coisas:
+
+| | Claude Code | Codex |
+|---|---|---|
+| Instruções | `CLAUDE.md` → `AGENTS.md` | `AGENTS.md` |
+| Skills | `.claude/skills/` (fonte) | `.agents/skills/` (cópia) |
+| MCP | `.mcp.json` | `.codex/config.toml` |
+| Sessão começa com Superpowers | hook em `.claude/settings.json` | sem hook: leia a skill `using-superpowers` antes da primeira ação |
+
+- Skills: edite só em `.claude/skills/` e rode `npm run skills:sync`. O CI (`npm run skills:check`) falha se a cópia ficar diferente.
+- Cada tarefa é uma issue no GitHub com o rótulo `claude` ou `codex`, que diz quem é o dono. Sem rótulo, ninguém pegou.
+- Uma tarefa, uma branch, um PR. Branch com o prefixo do agente (`claude/…`, `codex/…`). Nunca faça push na branch do outro agente.
+- Antes de começar, atualize da `main` e veja os PRs abertos. Se a tarefa mexe em arquivo que outro PR aberto já altera (migrations, `package-lock.json`, `src/lib/validation`, `globals.css`), espere esse PR entrar ou combine na issue.
+- O handoff (objetivo, estado verificado, checks, pendências) vai no PR ou na issue, nunca só na conversa do agente: o outro não a vê.
 
 ## Mapa de documentos
 
@@ -70,7 +87,7 @@ Skill instalada não executa nada sozinha: nada de animação, cache, deploy ou 
 | Design system e interface | `docs/ARQUITETURA.md` §6 e tokens em `src/app/globals.css` |
 | Rodar local, Supabase, deploy | `README.md` |
 | Checks, lint, revisão e segurança | `docs/quality.md` |
-| Ferramentas de agente, decisões e pendências | `docs/setup.md` |
+| Ferramentas de agente (Claude e Codex), decisões e pendências | `docs/setup.md` |
 
 <!-- BEGIN:nextjs-agent-rules -->
 

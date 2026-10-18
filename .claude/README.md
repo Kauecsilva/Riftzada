@@ -28,3 +28,5 @@ Observações:
 - As skills do Firecrawl usam o conector Firecrawl do claude.ai (já conectado na conta do Kaue).
 
 Para atualizar, copie de novo a pasta da skill a partir do repositório de origem (ou use `npx skills add <repo>` e mova o resultado para cá).
+
+O Codex lê skills de `.agents/skills/`, que é uma cópia desta pasta. Depois de mudar qualquer skill aqui, rode `npm run skills:sync`; o CI falha se a cópia ficar diferente (`npm run skills:check`).

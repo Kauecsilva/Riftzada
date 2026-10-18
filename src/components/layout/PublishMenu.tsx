@@ -14,11 +14,13 @@ const OPTIONS = [
 ];
 
 /** O "+" da barra: abre as opções de publicação. "Registrar resultado" só aparece para admin. */
-export function PublishMenu({ isAdmin, variant }: { isAdmin: boolean; variant: "fab" | "sidebar" }) {
+export function PublishMenu({ isAdmin, isStore, variant }: { isAdmin: boolean; isStore: boolean; variant: "fab" | "sidebar" }) {
   const [open, setOpen] = useState(false);
+  // Evento de loja só para conta de loja (e admin)
+  const base = isAdmin || isStore ? OPTIONS : OPTIONS.filter((o) => o.href !== "/loja");
   const options = isAdmin
-    ? [...OPTIONS, { href: "/admin/eventos", label: "Registrar resultado", text: "Quem levou o último torneio?", icon: Trophy, tone: "bg-gold-soft text-gold" }]
-    : OPTIONS;
+    ? [...base, { href: "/admin/eventos", label: "Registrar resultado", text: "Quem levou o último torneio?", icon: Trophy, tone: "bg-gold-soft text-gold" }]
+    : base;
 
   return (
     <>

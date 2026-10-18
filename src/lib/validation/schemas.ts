@@ -17,10 +17,10 @@ export const username = z
 export const signInSchema = z.object({ email, password: z.string().min(1, "Digite a senha"), next: z.string().optional() });
 
 export const signUpSchema = z.object({
-  displayName: requiredText(1, 40, "Nome"),
   username,
   email,
   password,
+  accountKind: z.enum(["player", "store"]).default("player"),
 });
 
 export const resetRequestSchema = z.object({ email });

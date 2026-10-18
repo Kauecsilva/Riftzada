@@ -12,7 +12,7 @@ import { PublishMenu } from "./PublishMenu";
 import { RiftboundCredit } from "./RiftboundCredit";
 
 /** Navegação lateral do desktop (≥1024px). */
-export function SideNav({ me, isAdmin }: { me: MiniProfile; isAdmin: boolean }) {
+export function SideNav({ me, isAdmin, isStore }: { me: MiniProfile; isAdmin: boolean; isStore: boolean }) {
   const path = usePathname();
 
   return (
@@ -45,7 +45,7 @@ export function SideNav({ me, isAdmin }: { me: MiniProfile; isAdmin: boolean }) 
         </ul>
       </nav>
       <div className="mt-6">
-        <PublishMenu isAdmin={isAdmin} variant="sidebar" />
+        <PublishMenu isAdmin={isAdmin} isStore={isStore} variant="sidebar" />
       </div>
       <div className="mt-auto space-y-3">
         <RiftboundCredit className="px-3" />
