@@ -260,3 +260,20 @@ export type Session = {
   role: MemberRole;
   communityId: string;
 };
+
+export type NotificationKind =
+  | "offer_received" | "offer_countered" | "offer_accepted" | "offer_declined" | "offer_withdrawn"
+  | "trade_offer" | "message";
+
+/** Aviso para o usuário logado sobre algo que outro jogador fez (oferta, contraproposta, mensagem…). */
+export type AppNotification = {
+  id: string;
+  kind: NotificationKind;
+  actor: MiniProfile | null;
+  listingId: string | null;
+  cardName: string | null;
+  amountCents: number | null;
+  body: string | null;
+  readAt: string | null;
+  createdAt: string;
+};

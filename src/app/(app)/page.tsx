@@ -5,6 +5,7 @@ import { EventCard } from "@/components/arena/EventCard";
 import { RankingList } from "@/components/arena/RankingList";
 import { FeedList } from "@/components/feed/FeedList";
 import { Logo } from "@/components/layout/Logo";
+import { NotificationBell } from "@/components/layout/NotificationBell";
 import { RiftboundCredit } from "@/components/layout/RiftboundCredit";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -12,6 +13,7 @@ import { FlashToast } from "@/components/ui/Toast";
 import { ART } from "@/lib/art";
 import { getLatestChampion, getNextEvent, getRanking } from "@/server/queries/arena";
 import { getFeed } from "@/server/queries/feed";
+import { getUnreadCount } from "@/server/queries/notifications";
 import { requireSession } from "@/server/session";
 
 const PAGE = 15;
@@ -33,12 +35,13 @@ function greeting(): string {
 export default async function HomePage({ searchParams }: PageProps<"/">) {
   const params = await searchParams;
   const before = typeof params.antes === "string" ? params.antes : undefined;
-  const [session, champion, nextEvent, ranking, feed] = await Promise.all([
+  const [session, champion, nextEvent, ranking, feed, unread] = await Promise.all([
     requireSession(),
     before ? null : getLatestChampion(),
     getNextEvent(),
     getRanking(5),
     getFeed({ limit: PAGE, before }),
+    requireSession().then((s) => getUnreadCount(s.userId)),
   ]);
   const flash = Object.keys(FLASH).find((k) => params[k]);
 
@@ -66,6 +69,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       <div className="min-w-0 space-y-8">
         <header className="flex items-center justify-between lg:hidden">
           <Logo size={26} />
+          <NotificationBell unread={unread} className="-mr-2" />
         </header>
         <section aria-label="Boas-vindas" className="frame-hex relative overflow-hidden bg-surface">
           <Image src={ART.launch} alt="Ahri, Yasuo e Jinx na arte de lançamento de Riftbound" fill priority sizes="(min-width: 1024px) 760px, 100vw" className="object-cover object-[50%_15%]" />

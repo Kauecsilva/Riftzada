@@ -7,7 +7,7 @@ export const NAV_ITEMS = [
   { href: "/perfil", label: "Perfil", icon: User },
 ] as const;
 
-/** Bolinha com o número de mensagens não lidas, no item do Mercado (onde ficam as conversas). */
+/** Número do contador de não lidos ("9+" a partir de 10). */
 export function unreadLabel(unread: number): string | null {
   return unread > 0 ? (unread > 9 ? "9+" : String(unread)) : null;
 }

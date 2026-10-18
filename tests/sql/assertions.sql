@@ -329,6 +329,27 @@ select pg_temp.check(public.respond_listing_offer((select id from listing_offers
 select pg_temp.check((select amount_cents from listing_offers) = 8000, 'Oferta fecha no valor da contraproposta');
 select pg_temp.check((select status from market_listings where id = '00000000-0000-4000-8000-500000000001') = 'reserved', 'Anúncio de 1 unidade fica reservado');
 
+-- Notificações: cada passo da oferta avisa a outra parte; só o dono vê
+select pg_temp.check((select array_agg(kind) from notifications where offer_id = current_setting('test.offer')::uuid) = array['offer_countered'], 'Comprador recebe só a contraproposta');
+do $$ begin
+  insert into public.notifications (user_id, kind) values ('00000000-0000-4000-8000-100000000002', 'message');
+  raise exception 'FALHOU: inseriu notificação direto';
+exception when insufficient_privilege then null;
+end $$;
+do $$ begin
+  perform public.notify('00000000-0000-4000-8000-100000000003', '00000000-0000-4000-8000-100000000002', 'message');
+  raise exception 'FALHOU: usuário chamou notify';
+exception when insufficient_privilege then null;
+end $$;
+select pg_temp.login('00000000-0000-4000-8000-100000000003'); -- Rafael (vendedor)
+select pg_temp.check((select count(*) from notifications where offer_id = current_setting('test.offer')::uuid and kind = 'offer_received') = 3
+  and (select count(*) from notifications where offer_id = current_setting('test.offer')::uuid and kind = 'offer_accepted') = 1, 'Vendedor recebe a oferta, as duas mudanças de valor e o aceite');
+select pg_temp.check((select amount_cents from notifications where kind = 'offer_accepted') = 8000, 'Aviso de aceite traz o valor fechado');
+select public.mark_notifications_read();
+select pg_temp.check((select count(*) from notifications where read_at is null) = 0, 'Vendedor marca tudo como lido');
+select pg_temp.login('00000000-0000-4000-8000-100000000002'); -- João
+select pg_temp.check((select count(*) from notifications where offer_id = current_setting('test.offer')::uuid and read_at is null) = 1, 'Marcar como lido não mexe nos avisos dos outros');
+
 -- ---------- Lojas ----------
 begin;
 -- Cadastro com account_kind = store vira conta de loja; sem ele, jogador

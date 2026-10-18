@@ -1,6 +1,6 @@
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SideNav } from "@/components/layout/SideNav";
-import { getUnreadCount } from "@/server/queries/chat";
+import { getUnreadCount } from "@/server/queries/notifications";
 import { requireSession } from "@/server/session";
 import { ServiceWorker } from "@/components/layout/ServiceWorker";
 
