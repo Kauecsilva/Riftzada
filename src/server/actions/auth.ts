@@ -32,7 +32,7 @@ export async function signUp(_: ActionState, form: FormData): Promise<ActionStat
   if (blocked) return blocked;
   const parsed = signUpSchema.safeParse(formToObject(form));
   if (!parsed.success) return zodErrorState(parsed.error);
-  const { displayName, username, email, password } = parsed.data;
+  const { username, email, password } = parsed.data;
 
   const supabase = await createClient();
   const { data: available } = await supabase.rpc("username_available", { name: username });
@@ -41,7 +41,7 @@ export async function signUp(_: ActionState, form: FormData): Promise<ActionStat
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { username, display_name: displayName }, emailRedirectTo: `${SITE_URL}/auth/confirm` },
+    options: { data: { username, display_name: username }, emailRedirectTo: `${SITE_URL}/auth/confirm` },
   });
   if (error) {
     console.error("[auth] signUp", error.code, error.message);

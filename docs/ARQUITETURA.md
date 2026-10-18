@@ -37,7 +37,7 @@ Navegador ──(upload)──▶ compressão no cliente ──▶ Supabase Stor
 
 ### Autenticação
 
-1. **Cadastro** (`/cadastro`): nome, apelido (`@username`), e-mail, senha. O Supabase manda o e-mail de confirmação.
+1. **Cadastro** (`/cadastro`): apelido (`@username`, também usado como nome de exibição), e-mail e senha. Com "Confirm email" desligado no Supabase, a pessoa já entra logada.
 2. **Confirmação** (`/auth/confirm`): troca o token por sessão e leva para a Home.
 3. Um **trigger** em `auth.users` cria o `profile` e a associação (`community_members`, papel `user`) na comunidade padrão.
 4. **Login** (`/entrar`), **Logout** (`/auth/sair`, POST), **Esqueci a senha** (`/esqueci-senha`) → e-mail → `/redefinir-senha`.
@@ -267,7 +267,7 @@ Decks aparecem no MVP numa versão simples porque o "+" e o seed já pedem; curt
 | Rota | Tela | Conteúdo |
 |---|---|---|
 | `/entrar` | Entrar na Riftzada | Logo, frase "Onde a galera do Rift se encontra", e-mail, senha, links para cadastro e "esqueci a senha". |
-| `/cadastro` | Criar conta | Nome, apelido, e-mail, senha. Aviso de confirmação por e-mail. |
+| `/cadastro` | Criar conta | Apelido, e-mail, senha. Entra direto (ou aviso de confirmação, se ela estiver ligada). |
 | `/esqueci-senha`, `/redefinir-senha` | Recuperar acesso | Um campo por vez. |
 | `/` | Home / Mural | "Olá, Kauê." · Campeão da semana (foto grande, lenda, evento) · Próximo evento com "Vou jogar" · Feed "Na Riftzada" (posts, pulls, decks, anúncios, campeões) · Top 3 do ranking. No desktop, evento e ranking numa coluna lateral. |
 | `+` (sheet) | Publicar | Publicar no mural · Anunciar carta · Publicar deck · Registrar resultado (só admin). |
