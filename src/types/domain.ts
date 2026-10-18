@@ -177,8 +177,19 @@ export type CardPrice = {
   updatedAt: string;
 };
 
+/** Menor preço da LigaRiftbound, coletado automaticamente (idioma e condição da oferta mais barata). */
+export type LigaPrice = {
+  finish: "normal" | "foil";
+  lowCents: number;
+  avgCents: number | null;
+  language: LigaLanguage | null;
+  condition: CardCondition | null;
+  url: string;
+  updatedAt: string;
+};
+
 /** Referências de preço de uma carta para o anúncio. */
-export type PriceReference = { tcgplayer: CardPrice[]; usdBrl: number | null; rateUpdatedAt: string | null };
+export type PriceReference = { tcgplayer: CardPrice[]; liga: LigaPrice[]; usdBrl: number | null; rateUpdatedAt: string | null };
 
 export type ListingOffer = {
   id: string;

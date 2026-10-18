@@ -6,7 +6,7 @@ import { buttonClass } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { CONDITION } from "@/lib/domain/labels";
 import {
-  applyDiscount, centsToInput, cheapestBase, DISCOUNT_STEPS, discountLabel, LIGA_LANGUAGE, ligaCardUrl, parseBrl, pickTcgPrice,
+  applyDiscount, centsToInput, cheapestBase, DISCOUNT_STEPS, discountLabel, LIGA_LANGUAGE, ligaCardUrl, parseBrl, pickFinish,
   PRICE_BASE, tcgBrlCents,
 } from "@/lib/domain/pricing";
 import { formatPrice, shortDate } from "@/lib/format";
@@ -18,8 +18,8 @@ export type AppliedPrice = { base: PriceBase; baseCents: number; discountPct: nu
 const usd = (cents: number) => (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "USD" });
 
 /**
- * Preço sugerido no anúncio de venda: menor valor entre a LigaRiftbound (o vendedor informa, porque a Liga
- * não deixa consultar automático) e o TCGplayer (atualizado todo dia, convertido pelo dólar do dia),
+ * Preço sugerido no anúncio de venda: menor valor entre a LigaRiftbound (coletado automaticamente quando
+ * tem, e o vendedor pode corrigir) e o TCGplayer (atualizado todo dia, convertido pelo dólar do dia),
  * com desconto opcional. "Usar esse preço" preenche o campo de preço.
  */
 export function PriceSuggestion({
@@ -34,6 +34,8 @@ export function PriceSuggestion({
   const [ligaCondition, setLigaCondition] = useState<CardCondition | "">(listing?.liga?.condition ?? "nm");
   const [chosenBase, setChosenBase] = useState<PriceBase | null>(listing?.priceBase ?? null);
   const [pct, setPct] = useState(listing?.discountPct ?? 0);
+  // Enquanto o vendedor não mexe nos campos da Liga, eles mostram o preço coletado
+  const [ligaEdited, setLigaEdited] = useState(Boolean(listing?.liga));
 
   useEffect(() => {
     if (!cardId) return;
@@ -52,9 +54,19 @@ export function PriceSuggestion({
 
   const loading = Boolean(cardId) && loadedFor !== cardId;
   const ref = cardId && loadedFor === cardId ? reference : null;
-  const tcg = ref ? pickTcgPrice(ref.tcgplayer, variant) : null;
+  const tcg = ref ? pickFinish(ref.tcgplayer, variant) : null;
   const tcgCents = tcgBrlCents(tcg, ref?.usdBrl ?? null);
-  const ligaParsed = parseBrl(ligaText);
+  const autoLiga = ref && !ligaEdited ? pickFinish(ref.liga, variant) : null;
+  const ligaValue = autoLiga ? centsToInput(autoLiga.lowCents) : ligaText;
+  const languageValue = autoLiga ? (autoLiga.language ?? "") : ligaLanguage;
+  const conditionValue = autoLiga ? (autoLiga.condition ?? "") : ligaCondition;
+  const editLiga = (change: { text?: string; language?: LigaLanguage | ""; condition?: CardCondition | "" }) => {
+    setLigaText(change.text ?? ligaValue);
+    setLigaLanguage(change.language ?? languageValue);
+    setLigaCondition(change.condition ?? conditionValue);
+    setLigaEdited(true);
+  };
+  const ligaParsed = parseBrl(ligaValue);
   const ligaCents = ligaParsed != null && !Number.isNaN(ligaParsed) && ligaParsed > 0 ? ligaParsed : null;
   const bases: Record<PriceBase, number | null> = { liga: ligaCents, tcgplayer: tcgCents };
   const cheapest = cheapestBase(bases);
@@ -111,27 +123,37 @@ export function PriceSuggestion({
             </a>
           )}
         </div>
-        <p className="text-xs text-faint">A Liga não deixa consultar automático: abre a carta lá e copia o menor preço, dizendo se é americana ou chinesa e se está NM.</p>
+        {autoLiga ? (
+          <p className="text-xs text-faint">
+            Menor preço na Liga em {shortDate(autoLiga.updatedAt)}
+            {autoLiga.avgCents != null && <> (média {formatPrice(autoLiga.avgCents)})</>}.
+            {!autoLiga.language && " O idioma e a condição dessa oferta não vêm na consulta: confira na Liga."} Pode corrigir se mudou.
+          </p>
+        ) : (
+          <p className="text-xs text-faint">Sem preço coletado da Liga para essa carta: abre a carta lá e copia o menor preço, dizendo se é americana ou chinesa e se está NM.</p>
+        )}
         <div className="grid grid-cols-[1fr_1fr] gap-2 sm:grid-cols-[1fr_1.3fr_1fr]">
           <label className="col-span-2 space-y-1 sm:col-span-1">
             <span className="text-xs text-muted">Menor preço</span>
-            <input name="ligaPrice" inputMode="decimal" value={ligaText} onChange={(e) => setLigaText(e.target.value)} className="input" placeholder="336,66"
+            <input name="ligaPrice" inputMode="decimal" value={ligaValue} onChange={(e) => editLiga({ text: e.target.value })} className="input" placeholder="336,66"
               aria-invalid={Number.isNaN(ligaParsed) || undefined} />
           </label>
           <label className="space-y-1">
             <span className="text-xs text-muted">Idioma</span>
-            <select name="ligaLanguage" value={ligaLanguage} onChange={(e) => setLigaLanguage(e.target.value as LigaLanguage)} className="input">
+            <select name="ligaLanguage" value={languageValue} onChange={(e) => editLiga({ language: e.target.value as LigaLanguage | "" })} className="input">
+              <option value="">Não sei</option>
               {(Object.keys(LIGA_LANGUAGE) as LigaLanguage[]).map((l) => <option key={l} value={l}>{LIGA_LANGUAGE[l]}</option>)}
             </select>
           </label>
           <label className="space-y-1">
             <span className="text-xs text-muted">Condição</span>
-            <select name="ligaCondition" value={ligaCondition} onChange={(e) => setLigaCondition(e.target.value as CardCondition)} className="input">
+            <select name="ligaCondition" value={conditionValue} onChange={(e) => editLiga({ condition: e.target.value as CardCondition | "" })} className="input">
+              <option value="">Não sei</option>
               {(Object.keys(CONDITION) as CardCondition[]).map((c) => <option key={c} value={c}>{CONDITION[c].short}</option>)}
             </select>
           </label>
         </div>
-        {ligaCents != null && ligaCondition && ligaCondition !== "nm" && (
+        {ligaCents != null && conditionValue && conditionValue !== "nm" && (
           <p className="text-xs text-gold">Esse menor preço não é de carta NM. Vale conferir se tem NM mais cara.</p>
         )}
       </div>

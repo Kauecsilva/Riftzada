@@ -46,8 +46,19 @@ As cartas vêm do [Riftcodex](https://riftcodex.com), uma API pública e gratuit
 ## Preço sugerido e ofertas
 
 - A migration `0008_prices_offers.sql` importa todo dia (pg_cron, 19:30 de Brasília) os preços do TCGplayer pelo [tcgcsv.com](https://tcgcsv.com) e a cotação do dólar ([open.er-api.com](https://open.er-api.com)). Para rodar na hora: `select public.sync_card_prices();`.
-- A LigaRiftbound bloqueia acesso automático (Cloudflare), então o vendedor copia o menor preço de lá no anúncio, com idioma e condição. O formulário sugere o menor entre Liga e TCGplayer e aplica o desconto escolhido.
+- O menor preço da LigaRiftbound vem da coleta `npm run liga:sync` (migration `0013_liga_prices.sql`). A Liga bloqueia acesso vindo de servidor (Cloudflare), então o script roda num computador com internet de casa e grava pelo token `LIGA_SYNC_TOKEN` (veja abaixo). O formulário já abre com o preço coletado, que o vendedor pode corrigir, sugere o menor entre Liga e TCGplayer e aplica o desconto escolhido.
 - Ofertas: o comprador oferece abaixo do preço; o vendedor aceita, recusa ou faz contraproposta. As regras ficam nas funções `make_listing_offer` e `respond_listing_offer`.
+
+### Coleta da Liga no computador
+
+1. Ter o `.env.local` com `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` e `LIGA_SYNC_TOKEN` (o token é criado no banco, ver o topo de `0013_liga_prices.sql`).
+2. Testar: `npm run liga:sync -- --limit 5 --dry-run`. Gravar de verdade: `npm run liga:sync`.
+3. Cada rodada consulta até 300 cartas (anunciadas primeiro, depois as mais antigas), com 2 a 4 segundos entre páginas: uns 15 minutos. Todo dia, ela vai revezando o catálogo inteiro.
+4. Agendar no Windows (todo dia às 19h), num PowerShell na pasta do projeto:
+   ```powershell
+   $acao = New-ScheduledTaskAction -Execute "cmd.exe" -Argument "/c npm run liga:sync > liga-sync.log 2>&1" -WorkingDirectory (Get-Location)
+   Register-ScheduledTask -TaskName "Riftzada Liga" -Action $acao -Trigger (New-ScheduledTaskTrigger -Daily -At 19:00)
+   ```
 
 ## Deploy (Vercel)
 
@@ -65,6 +76,7 @@ Importe o repositório, configure as mesmas variáveis do `.env.example` (com `N
 | `npm test` | Testes de domínio (ranking, decklist, validações) |
 | `npm run test:sql` | Aplica migrations + seed num Postgres local e testa RLS e views |
 | `npm run seed:sql` | Regera `supabase/seed.sql` a partir de `src/lib/demo/fixtures.ts` |
+| `npm run liga:sync` | Coleta o menor preço das cartas na LigaRiftbound (roda no computador, não no servidor) |
 
 ## Organização
 

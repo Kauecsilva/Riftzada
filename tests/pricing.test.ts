@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  applyDiscount, centsToInput, cheapestBase, comparePrices, discountLabel, ligaCardUrl, parseBrl, pickTcgPrice, tcgBrlCents, usdToBrlCents,
+  applyDiscount, centsToInput, cheapestBase, comparePrices, discountLabel, ligaCardUrl, parseBrl, pickFinish, tcgBrlCents, usdToBrlCents,
 } from "@/lib/domain/pricing";
 import { listingSchema, offerSchema } from "@/lib/validation/schemas";
 import type { CardPrice } from "@/types/domain";
@@ -27,10 +27,10 @@ describe("preço sugerido", () => {
   });
 
   it("escolhe o acabamento pela variante", () => {
-    expect(pickTcgPrice([normal, foil], "Foil")).toBe(foil);
-    expect(pickTcgPrice([normal, foil], null)).toBe(normal);
-    expect(pickTcgPrice([foil], "")).toBe(foil);
-    expect(pickTcgPrice([], "Foil")).toBeNull();
+    expect(pickFinish([normal, foil], "Foil")).toBe(foil);
+    expect(pickFinish([normal, foil], null)).toBe(normal);
+    expect(pickFinish([foil], "")).toBe(foil);
+    expect(pickFinish([], "Foil")).toBeNull();
   });
 
   it("usa o menor anúncio do TCGplayer e cai para o preço de mercado", () => {
