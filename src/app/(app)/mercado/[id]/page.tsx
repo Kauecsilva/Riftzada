@@ -16,7 +16,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
 import { listingPhotos, offerVerb } from "@/lib/cards";
 import { CONDITION, LISTING_STATUS } from "@/lib/domain/labels";
-import { pickTcgPrice, tcgBrlCents } from "@/lib/domain/pricing";
+import { pickFinish, tcgBrlCents } from "@/lib/domain/pricing";
 import { formatPrice } from "@/lib/format";
 import { moderateListing } from "@/server/actions/admin";
 import { getListing, getListingOffers, getOffersFor, getSharedWhatsapp } from "@/server/queries/market";
@@ -39,7 +39,7 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
     listing.kind === "want" && listing.status !== "done" ? getOffersFor(listing) : [],
     listing.kind === "sell" && listing.card ? getPriceReference(listing.card.id) : null,
   ]);
-  const tcgCents = priceRef ? tcgBrlCents(pickTcgPrice(priceRef.tcgplayer, listing.variant), priceRef.usdBrl) : null;
+  const tcgCents = priceRef ? tcgBrlCents(pickFinish(priceRef.tcgplayer, listing.variant), priceRef.usdBrl) : null;
   const photos = listingPhotos(listing);
 
   const details = [

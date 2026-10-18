@@ -252,6 +252,31 @@ exception when insufficient_privilege then null;
 end $$;
 rollback;
 
+-- ---------- Preços da Liga (coleta pelo computador) ----------
+begin;
+update public.cards set collector_no = '247' where id = '00000000-0000-4000-8000-200000000002';
+update public.cards set collector_no = '202' where id = '00000000-0000-4000-8000-200000000001';
+update public.market_listings set card_id = '00000000-0000-4000-8000-200000000002' where id = '00000000-0000-4000-8000-500000000001';
+insert into public.price_sync_tokens (token_hash, label)
+values (encode(digest('token-de-teste-com-mais-de-32-caracteres', 'sha256'), 'hex'), 'teste');
+set local role anon;
+do $$ begin
+  perform public.liga_sync_targets('token-errado-mas-com-mais-de-32-caracteres');
+  raise exception 'FALHOU: token errado listou cartas';
+exception when insufficient_privilege then null;
+end $$;
+select pg_temp.check((select name from public.liga_sync_targets('token-de-teste-com-mais-de-32-caracteres', 1)) = 'Kai''Sa, Daughter of the Void', 'Carta anunciada vem primeiro na fila');
+select pg_temp.check(public.upsert_liga_prices('token-de-teste-com-mais-de-32-caracteres', array['Kai''Sa, Daughter of the Void'],
+  '[{"card_id": "00000000-0000-4000-8000-200000000002", "finish": "normal", "low_cents": 9500, "avg_cents": 11000, "high_cents": 14000, "language": "en", "condition": "nm"},
+    {"card_id": "00000000-0000-4000-8000-200000000001", "finish": "normal", "low_cents": 1, "language": "en"}]') = 1, 'Grava só cartas do nome consultado');
+select pg_temp.check((select name from public.liga_sync_targets('token-de-teste-com-mais-de-32-caracteres', 1)) <> 'Kai''Sa, Daughter of the Void', 'Carta consultada vai para o fim da fila');
+select pg_temp.login('00000000-0000-4000-8000-100000000002'); -- João
+select pg_temp.check((select low_cents || language || condition from liga_prices) = '9500ennm', 'Logado lê o preço da Liga');
+select pg_temp.check((select count(*) from price_sync_tokens) = 0, 'Ninguém lê os tokens');
+select pg_temp.check(public.upsert_liga_prices('token-de-teste-com-mais-de-32-caracteres', array['Kai''Sa, Daughter of the Void'], '[]') = 0, 'Lote sem oferta');
+select pg_temp.check((select count(*) from liga_prices) = 0, 'Preço que sumiu da Liga é apagado');
+rollback;
+
 -- ---------- Ofertas ----------
 begin;
 -- Rafael vende a Kai'Sa por R$ 90 e aceita ofertas a partir de R$ 50
