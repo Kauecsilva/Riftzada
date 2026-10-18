@@ -1,3 +1,4 @@
+import { ART } from "@/lib/art";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Tabs } from "@/components/ui/Tabs";
 
@@ -12,7 +13,7 @@ const TABS = [
 export default function ArenaLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title="Na Arena" subtitle="Torneios, resultados e quem manda na Riftzada." />
+      <PageHeader title="Na Arena" subtitle="Torneios, resultados e quem manda na Riftzada." art={ART.podium} />
       <Tabs items={TABS} label="Seções da Arena" />
       {children}
     </div>

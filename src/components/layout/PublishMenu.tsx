@@ -7,7 +7,7 @@ import { cn } from "@/lib/cn";
 import { Sheet } from "@/components/ui/Sheet";
 
 const OPTIONS = [
-  { href: "/publicar", label: "Publicar no mural", text: "Foto, resenha ou o pull da semana", icon: Camera, tone: "bg-rift-soft text-[#c9bfff]" },
+  { href: "/publicar", label: "Publicar no mural", text: "Foto, resenha ou o pull da semana", icon: Camera, tone: "bg-rift-soft text-rift-strong" },
   { href: "/mercado/novo", label: "Anunciar carta", text: "Vende, troca ou procura", icon: Tag, tone: "bg-sell/15 text-sell" },
   { href: "/colecao", label: "Registrar na coleção", text: "Guarda o que você tem e anuncia as repetidas", icon: Library, tone: "bg-gold-soft text-gold" },
   { href: "/loja", label: "Cadastrar evento da loja", text: "Semanal, skirmish, pré-release…", icon: CalendarPlus, tone: "bg-energy/15 text-energy" },
@@ -28,16 +28,16 @@ export function PublishMenu({ isAdmin, variant }: { isAdmin: boolean; variant: "
           onClick={() => setOpen(true)}
           aria-label="Publicar"
           aria-haspopup="dialog"
-          className="-mt-7 inline-flex size-16 items-center justify-center rounded-full bg-linear-to-br from-[#9a85ff] to-rift text-white shadow-glow ring-4 ring-bg transition-transform active:scale-95"
+          className="-mt-5 inline-flex size-12 items-center justify-center rotate-45 rounded-[14px] border border-gold-strong/60 bg-linear-to-br from-rift-strong to-rift text-on-rift shadow-glow ring-4 ring-bg transition-transform active:scale-95"
         >
-          <Plus size={30} strokeWidth={2.5} aria-hidden />
+          <Plus size={26} strokeWidth={2.5} className="-rotate-45" aria-hidden />
         </button>
       ) : (
         <button
           type="button"
           onClick={() => setOpen(true)}
           aria-haspopup="dialog"
-          className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-rift font-semibold text-white shadow-glow transition-colors hover:bg-rift-strong"
+          className="flex min-h-12 w-full items-center justify-center gap-2 rounded-md border border-gold-strong/40 bg-linear-to-b from-rift-strong to-rift font-display text-lg font-bold tracking-wide text-on-rift uppercase shadow-glow transition-[filter] hover:brightness-110"
         >
           <Plus size={20} aria-hidden /> Publicar
         </button>

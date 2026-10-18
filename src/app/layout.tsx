@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Inter } from "next/font/google";
+import { Barlow, Barlow_Condensed } from "next/font/google";
 import { ToastProvider } from "@/components/ui/Toast";
 import { DemoBanner } from "@/components/layout/DemoBanner";
 import { isDemoMode, SITE_URL } from "@/lib/env";
 import "./globals.css";
 
-const display = Bricolage_Grotesque({ subsets: ["latin"], weight: ["600", "700", "800"], variable: "--font-bricolage", display: "swap" });
-const sans = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+// Condensada e pesada como o logotipo de Riftbound; o texto corrido fica na Barlow normal
+const display = Barlow_Condensed({ subsets: ["latin"], weight: ["600", "700", "800"], variable: "--font-display-face", display: "swap" });
+const sans = Barlow({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-body-face", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0b14",
+  themeColor: "#050b14",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

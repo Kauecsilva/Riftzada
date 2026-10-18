@@ -37,7 +37,7 @@ export function OwnerActions({ id, status: initial }: { id: string; status: List
                   if (result.message) toast(result.message, result.ok ? "ok" : "error");
                 });
               }}
-              className={cn("min-h-10 rounded-full text-sm font-semibold transition-colors", status === s ? "bg-rift text-white" : "text-muted hover:text-ink")}
+              className={cn("min-h-10 rounded-full text-sm font-semibold transition-colors", status === s ? "bg-rift text-on-rift" : "text-muted hover:text-ink")}
             >
               {LISTING_STATUS[s]}
             </button>

@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 import { initials } from "@/lib/format";
 
 // Cor estável por nome, para as iniciais não ficarem todas iguais
-const TINTS = ["from-rift to-[#4b3bb8]", "from-energy to-[#1f8f86]", "from-gold to-[#c27a1c]", "from-sell to-[#b83a4c]", "from-[#5aa2ff] to-[#2d5fb8]"];
+const TINTS = ["from-rift to-[#a8520d]", "from-energy to-[#086f6a]", "from-gold to-[#8a6a2c]", "from-sell to-[#b83a4c]", "from-[#5aa2ff] to-[#2d5fb8]"];
 
 function tint(name: string): string {
   let hash = 0;

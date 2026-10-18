@@ -6,7 +6,7 @@ type Tone = "neutral" | "rift" | "energy" | "gold" | "sell" | "danger";
 
 const TONES: Record<Tone, string> = {
   neutral: "bg-surface-2 text-muted border-line",
-  rift: "bg-rift-soft text-[#c9bfff] border-rift/40",
+  rift: "bg-rift-soft text-rift-strong border-rift/40",
   energy: "bg-energy/10 text-energy border-energy/30",
   gold: "bg-gold-soft text-gold border-gold/30",
   sell: "bg-sell/10 text-sell border-sell/30",

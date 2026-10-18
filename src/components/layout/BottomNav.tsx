@@ -18,9 +18,9 @@ export function BottomNav({ isAdmin }: { isAdmin: boolean }) {
         <Link
           href={it.href}
           aria-current={active ? "page" : undefined}
-          className={cn("flex min-h-14 flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-colors", active ? "text-ink" : "text-faint hover:text-muted")}
+          className={cn("flex min-h-14 flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-colors", active ? "text-gold-strong" : "text-faint hover:text-muted")}
         >
-          <it.icon size={23} strokeWidth={active ? 2.4 : 2} className={active ? "text-rift-strong" : undefined} aria-hidden />
+          <it.icon size={23} strokeWidth={active ? 2.4 : 2} className={active ? "text-gold" : undefined} aria-hidden />
           {it.label}
         </Link>
       </li>
@@ -28,7 +28,7 @@ export function BottomNav({ isAdmin }: { isAdmin: boolean }) {
   };
 
   return (
-    <nav aria-label="Principal" className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-line bg-bg/90 backdrop-blur-xl lg:hidden">
+    <nav aria-label="Principal" className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-gold-line/50 bg-bg/90 backdrop-blur-xl lg:hidden">
       <ul className="mx-auto flex max-w-lg items-end px-2">
         {item(home)}
         {item(arena)}

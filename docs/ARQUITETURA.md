@@ -218,34 +218,34 @@ Decks aparecem no MVP numa versão simples porque o "+" e o seed já pedem; curt
 
 ## 6. Design system inicial
 
-**Conceito:** "noite de torneio". Fundo escuro azul-arroxeado (a fenda, o Rift), um acento energético ciano-violeta para ação, e dourado reservado a prestígio (campeões, Hall, 1º lugar). Identidade própria, sem nenhum elemento da loja.
+**Conceito:** "noite no Rift". Azul-noite de Runeterra no fundo, laranja do logo de Riftbound para ação, teal hextech para o que está vivo e ouro hextech reservado a prestígio (campeões, Hall, 1º lugar). Molduras com filete dourado e cantos chanfrados lembram o cliente do League of Legends. As seções principais (Home, Arena, Mercado, login) abrem com arte oficial de Riftbound, e o logo oficial aparece na barra lateral, no fim da Home (celular) e no login, sempre com o crédito à Riot: é um site de fãs, sem afiliação. URLs das artes e o texto do crédito ficam em `src/lib/art.ts`.
 
 ### Cores (tokens em `globals.css`)
 
 | Token | Valor | Uso |
 |---|---|---|
-| `--color-bg` | `#0A0B14` | Fundo do app |
-| `--color-surface` | `#131527` | Cartões |
-| `--color-surface-2` | `#1B1E36` | Cartão sobre cartão, inputs |
-| `--color-line` | `#2A2E4F` | Bordas e divisórias |
-| `--color-ink` | `#EEF0FF` | Texto principal |
-| `--color-muted` | `#9AA0C7` | Texto secundário (contraste ≥ 4.5:1 no fundo) |
-| `--color-rift` | `#7B61FF` | Ação principal, botão "+", links |
-| `--color-energy` | `#36E2D3` | Destaques vivos, "ao vivo", sucesso |
-| `--color-gold` | `#F5C14B` | Campeão, 1º lugar, Hall |
+| `--color-bg` | `#050B14` | Fundo do app |
+| `--color-surface` | `#0B1626` | Cartões |
+| `--color-surface-2` | `#112038` | Cartão sobre cartão, inputs |
+| `--color-line` | `#22344F` | Bordas e divisórias |
+| `--color-ink` | `#F0E6D2` | Texto principal (creme do LoL) |
+| `--color-muted` | `#A3ADBF` | Texto secundário (contraste ≥ 4.5:1 no fundo) |
+| `--color-rift` / `--color-on-rift` | `#F28A1F` / `#1F1000` | Ação principal, botão "+", links; texto sobre ela |
+| `--color-energy` | `#0AC8B9` | Destaques vivos, "ao vivo", sucesso |
+| `--color-gold` / `--color-gold-strong` / `--color-gold-line` | `#D9B76C` / `#F0D9A0` / `#785A28` | Campeão, 1º lugar, Hall, títulos de seção, molduras |
 | `--color-silver` / `--color-bronze` | `#C9CEE6` / `#D58A54` | 2º e 3º lugares |
-| `--color-sell` / `--color-trade` / `--color-want` | `#FF6B7F` / `#36E2D3` / `#F5C14B` | Etiquetas VENDE / TROCA / PROCURA |
+| `--color-sell` / `--color-trade` / `--color-want` | `#FF6B7F` / `#0AC8B9` / `#D9B76C` | Etiquetas VENDE / TROCA / PROCURA |
 | `--color-danger` | `#FF5470` | Erros e exclusões |
 
 ### Tipografia
 
-- **Display:** Bricolage Grotesque 700/800 (títulos, nomes de campeão, números do ranking). Forte e com personalidade.
-- **Texto:** Inter 400/500/600.
-- Escala: 12 · 14 · 16 (base) · 18 · 22 · 28 · 36 (hero).
+- **Display:** Barlow Condensed 600/700/800, em caixa alta nos títulos (condensada como o logotipo de Riftbound).
+- **Texto:** Barlow 400/500/600/700.
+- Escala: 12 · 14 · 16 (base) · 18 · 22 · 34 · 40–60 (hero).
 
 ### Forma e movimento
 
-- Cantos: 12 (inputs), 20 (cartões), 28 (cartões hero e bottom sheet), pílula (botões e chips).
+- Cantos: 8 (inputs e botões), 10 (cartões), 28 (bottom sheet), chanfrados com moldura dourada (`.frame-hex`) nos destaques, pílula nos chips.
 - Áreas clicáveis ≥ 44 px. Foco visível com anel `--color-rift`.
 - Microinterações: botão afunda em 0.97 ao tocar; cartões sobem 2 px no hover (desktop); sheets entram de baixo em 200 ms. Tudo desligado com `prefers-reduced-motion`.
 - Skeletons com brilho suave em todo `loading.tsx`.
@@ -256,7 +256,7 @@ Decks aparecem no MVP numa versão simples porque o "+" e o seed já pedem; curt
 
 ### Layout
 
-- **Celular (360–430 px):** coluna única, barra inferior fixa com 5 itens; o "+" central é um círculo elevado em `--color-rift`.
+- **Celular (360–430 px):** coluna única, barra inferior fixa com 5 itens; o "+" central é um losango elevado em `--color-rift`.
 - **Tablet (768 px):** mesma barra, conteúdo em até 640 px, grades de 2 colunas no mercado.
 - **Desktop (≥1024 px):** barra lateral à esquerda com logo e navegação, conteúdo central, e na Home uma coluna lateral fixa com próximo evento e ranking. Mercado em 3 colunas.
 

@@ -5,7 +5,8 @@ import { ChevronRight } from "lucide-react";
 export function SectionHeader({ title, href, linkLabel = "Ver tudo", id }: { title: string; href?: string; linkLabel?: string; id?: string }) {
   return (
     <div className="mb-3 flex items-end justify-between gap-3">
-      <h2 id={id} className="font-display text-[13px] font-bold tracking-[0.14em] text-muted uppercase">
+      <h2 id={id} className="flex items-center gap-2.5 font-display text-lg font-bold tracking-[0.08em] text-gold-strong uppercase">
+        <span className="diamond" aria-hidden />
         {title}
       </h2>
       {href && (

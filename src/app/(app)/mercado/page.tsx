@@ -6,6 +6,7 @@ import { buttonClass } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { FlashToast } from "@/components/ui/Toast";
+import { ART } from "@/lib/art";
 import { cn } from "@/lib/cn";
 import { LISTING_KIND } from "@/lib/domain/labels";
 import { getListings } from "@/server/queries/market";
@@ -29,8 +30,8 @@ export default async function MarketPage({ searchParams }: PageProps<"/mercado">
         key={label}
         href={`/mercado${query.size ? `?${query}` : ""}`}
         aria-current={active ? "page" : undefined}
-        className={cn("inline-flex min-h-10 items-center rounded-full border px-4 text-sm font-semibold transition-colors",
-          active ? "border-rift bg-rift text-white" : "border-line bg-surface text-muted hover:text-ink")}
+        className={cn("inline-flex min-h-10 items-center rounded-md border px-4 text-sm font-semibold transition-colors",
+          active ? "border-rift bg-rift text-on-rift" : "border-line bg-surface text-muted hover:text-ink")}
       >
         {label}
       </Link>
@@ -43,6 +44,7 @@ export default async function MarketPage({ searchParams }: PageProps<"/mercado">
       <PageHeader
         title="Mercado"
         subtitle="Vende, troca e procura. O Riftzada só conecta, o resto é com vocês."
+        art={ART.bazaar}
         action={
           <div className="flex gap-2">
             <Link href="/colecao" className={buttonClass("secondary", "md")} aria-label="Minha coleção"><Library size={18} aria-hidden /><span className="hidden md:inline">Minha coleção</span></Link>
