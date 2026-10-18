@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HandCoins, Repeat } from "lucide-react";
+import { HandCoins, MapPin, Repeat } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge, KindTag } from "@/components/ui/Badge";
 import { Photo } from "@/components/ui/Photo";
@@ -11,7 +11,7 @@ import type { Listing } from "@/types/domain";
 export function ListingCard({ listing }: { listing: Listing }) {
   const dimmed = listing.status !== "available";
   return (
-    <Link href={`/mercado/${listing.id}`} className="card group block overflow-hidden transition-transform hover:-translate-y-0.5">
+    <Link href={`/mercado/${listing.id}`} className="card group block h-full overflow-hidden transition-transform hover:-translate-y-0.5">
       <div className="relative">
         <Photo src={listingImageUrl(listing)} alt={listing.cardName} ratio="3/4" sizes="(min-width: 1024px) 300px, 50vw" className={dimmed ? "opacity-60" : undefined} />
         <div className="absolute top-2 left-2"><KindTag kind={listing.kind} /></div>
@@ -36,6 +36,11 @@ export function ListingCard({ listing }: { listing: Listing }) {
           <Avatar name={listing.seller.displayName} src={listing.seller.avatarUrl} size={18} />
           <span className="truncate">{listing.seller.displayName}</span>
         </div>
+        {listing.sellerRegion && (
+          <p className="flex items-center gap-1 text-xs text-faint">
+            <MapPin size={12} className="shrink-0" aria-hidden /><span className="truncate">{listing.sellerRegion}</span>
+          </p>
+        )}
       </div>
     </Link>
   );

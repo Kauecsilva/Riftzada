@@ -1,12 +1,14 @@
 import Link from "next/link";
-import { AtSign, CalendarDays, Pencil } from "lucide-react";
+import { AtSign, CalendarDays, MapPin, Pencil } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { buttonClass } from "@/components/ui/button";
+import { formatRegion } from "@/lib/domain/region";
 import { longDate } from "@/lib/format";
 import type { Profile } from "@/types/domain";
 
 export function ProfileHeader({ profile, mine, champion }: { profile: Profile; mine: boolean; champion: boolean }) {
+  const region = formatRegion(profile.city, profile.state);
   return (
     <header className="relative overflow-hidden rounded-[28px] border border-line bg-linear-to-br from-rift-soft via-surface to-surface p-5 md:p-7">
       <div className="pointer-events-none absolute -top-20 -right-16 size-64 rounded-full bg-rift/25 blur-3xl" aria-hidden />
@@ -18,6 +20,7 @@ export function ProfileHeader({ profile, mine, champion }: { profile: Profile; m
           {profile.bio && <p className="mt-3 max-w-prose">{profile.bio}</p>}
           <div className="mt-3 flex flex-wrap gap-2">
             {profile.favoriteLegend && <Badge tone="rift">Main {profile.favoriteLegend.name.split(",")[0]}</Badge>}
+            {region && <Badge><MapPin size={12} aria-hidden /> {region}</Badge>}
             <Badge><CalendarDays size={12} aria-hidden /> Desde {longDate(profile.createdAt).replace(/^\d+ de /, "")}</Badge>
             {profile.instagram && (
               <a href={`https://instagram.com/${profile.instagram}`} target="_blank" rel="noopener noreferrer">

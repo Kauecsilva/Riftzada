@@ -26,6 +26,9 @@ export type Profile = MiniProfile & {
   bio: string | null;
   favoriteLegend: Legend | null;
   instagram: string | null;
+  /** Cidade e UF informadas no perfil (opcionais; cidade só vem junto com a UF). */
+  city: string | null;
+  state: string | null;
   createdAt: string;
 };
 
@@ -155,6 +158,8 @@ export type Listing = {
   isHidden: boolean;
   createdAt: string;
   seller: MiniProfile;
+  /** "Campinas/SP" do perfil de quem anunciou, ou null. */
+  sellerRegion: string | null;
 };
 
 /** Preço do TCGplayer (em centavos de dólar) de um acabamento da carta. */
