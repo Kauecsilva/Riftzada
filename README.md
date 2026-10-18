@@ -4,7 +4,7 @@
 
 App web mobile-first (PWA) para a galera que joga Riftbound junto: mural, torneios, resultados, ranking, Hall da Fama, mercado de cartas e decks. Projeto da comunidade, **não é um app oficial de nenhuma loja**.
 
-O planejamento completo (arquitetura, banco, telas, backlog e riscos) está em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md).
+O planejamento completo (arquitetura, banco, telas, backlog e riscos) está em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md). Instruções para agentes de IA em [`AGENTS.md`](AGENTS.md); checks em [`docs/quality.md`](docs/quality.md).
 
 ## Stack
 
@@ -60,6 +60,8 @@ Importe o repositório, configure as mesmas variáveis do `.env.example` (com `N
 | `npm run dev` | Servidor de desenvolvimento |
 | `npm run build` | Build de produção (precisa passar antes de qualquer PR) |
 | `npm run lint` / `npm run typecheck` | ESLint e TypeScript |
+| `npm run lint:rules` / `npm run lint:typed` | Autoteste das regras locais de lint e gate de async com tipos |
+| `npm run check` | Lint, regras, tipos, testes e build de uma vez |
 | `npm test` | Testes de domínio (ranking, decklist, validações) |
 | `npm run test:sql` | Aplica migrations + seed num Postgres local e testa RLS e views |
 | `npm run seed:sql` | Regera `supabase/seed.sql` a partir de `src/lib/demo/fixtures.ts` |
