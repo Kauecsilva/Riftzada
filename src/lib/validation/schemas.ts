@@ -244,3 +244,9 @@ export const rankingEntrySchema = z.object({
 });
 
 export const legendSchema = z.object({ name: requiredText(2, 120, "Nome"), setName: optionalText(60) });
+
+export const suggestionSchema = z.object({
+  kind: z.enum(["improvement", "idea"]),
+  title: requiredText(5, 100, "Título"),
+  details: optionalText(3000),
+});

@@ -59,6 +59,11 @@ As cartas vêm do [Riftcodex](https://riftcodex.com), uma API pública e gratuit
 - Variáveis na Vercel: `FIRECRAWL_API_KEY` (painel do Firecrawl), `LIGA_SYNC_TOKEN` (criado no banco, ver o topo de `0013_liga_prices.sql`) e `CRON_SECRET` (qualquer texto longo aleatório; a Vercel manda no cabeçalho do cron).
 - Rodar na hora: `curl -H "Authorization: Bearer $CRON_SECRET" https://<domínio>/api/cron/liga`. A resposta lista cada coleção com quantas cartas gravou ou o erro.
 
+## Sugestões
+
+- No "+" da barra, "Sugerir melhoria" abre `/sugestao`. Membro logado manda título, tipo (melhoria ou ideia) e detalhes, e o servidor cria uma issue em `GITHUB_REPO` (padrão `Kauecsilva/Riftzada`) com o título `[Melhoria] …` ou `[Ideia] …` e o nome de quem enviou. Menções com `@` são quebradas para não marcar ninguém.
+- Variável na Vercel: `GITHUB_TOKEN`, um token *fine-grained* do GitHub só com acesso ao repositório e permissão **Issues: Read and write**. Sem ela o formulário avisa que as sugestões não estão ligadas.
+
 ## Deploy (Vercel)
 
 Importe o repositório, configure as mesmas variáveis do `.env.example` (com `NEXT_PUBLIC_SITE_URL` = domínio de produção) e publique. Região sugerida: `gru1`.

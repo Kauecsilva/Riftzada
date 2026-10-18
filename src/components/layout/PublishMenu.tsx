@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Camera, CalendarPlus, Library, Plus, Tag, Trophy } from "lucide-react";
+import { Camera, CalendarPlus, Library, Lightbulb, Plus, Tag, Trophy } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Sheet } from "@/components/ui/Sheet";
 
@@ -11,6 +11,7 @@ const OPTIONS = [
   { href: "/mercado/novo", label: "Anunciar carta", text: "Vende, troca ou procura", icon: Tag, tone: "bg-sell/15 text-sell" },
   { href: "/colecao", label: "Registrar na coleção", text: "Guarda o que você tem e anuncia as repetidas", icon: Library, tone: "bg-gold-soft text-gold" },
   { href: "/loja", label: "Cadastrar evento da loja", text: "Semanal, skirmish, pré-release…", icon: CalendarPlus, tone: "bg-energy/15 text-energy" },
+  { href: "/sugestao", label: "Sugerir melhoria", text: "Ideia ou ajuste para o app", icon: Lightbulb, tone: "bg-surface-3 text-ink" },
 ];
 
 /** O "+" da barra: abre as opções de publicação. "Registrar resultado" só aparece para admin. */
