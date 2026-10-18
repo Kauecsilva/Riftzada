@@ -13,7 +13,6 @@
     "test": "vitest run",
     "test:sql": "tests/sql/run.sh",
     "seed:sql": "node scripts/generate-seed.mts",
-    "liga:sync": "node scripts/liga-sync.mts",
     "skills:sync": "node scripts/sync-agent-skills.mjs",
     "skills:check": "node scripts/sync-agent-skills.mjs --check",
     "check": "npm run skills:check && npm run lint && npm run lint:rules && npm run lint:typed && npm run typecheck && npm test && npm run build"
