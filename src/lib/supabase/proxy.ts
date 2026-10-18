@@ -2,8 +2,8 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isDemoMode, SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/env";
 
-// Abrem sem login: autenticação, instalação do PWA e arquivos públicos
-const PUBLIC_PATHS = ["/entrar", "/cadastro", "/esqueci-senha", "/auth", "/manifest.webmanifest", "/sw.js", "/offline"];
+// Abrem sem login: autenticação, instalação do PWA, arquivos públicos e o cron (que confere o CRON_SECRET)
+const PUBLIC_PATHS = ["/entrar", "/cadastro", "/esqueci-senha", "/auth", "/manifest.webmanifest", "/sw.js", "/offline", "/api/cron"];
 
 const matches = (path: string, list: string[]) => list.some((p) => path === p || path.startsWith(`${p}/`));
 

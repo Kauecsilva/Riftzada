@@ -1,22 +1,17 @@
-// Leitura da página de uma carta na LigaRiftbound (usada pelo script scripts/liga-sync.mts, que roda
-// no computador de alguém, porque a Liga bloqueia acesso vindo de servidor).
+// Leitura da página de uma coleção na LigaRiftbound (?view=cards/search&card=ed=OGN), usada pela
+// coleta diária em src/server/liga-sync.ts.
 //
-// A página traz JSON embutido em variáveis JS:
-//   cards_editions: uma entrada por impressão (code = set, num = número) com price por versão:
-//                   "0" normal, "2" foil, "3" arte alternativa; p = menor, m = médio, g = maior.
-//   cards_stock:    as ofertas das lojas, já em ordem de preço (p = posição), com idioma e qualid.
-//                   O preço de cada oferta vem ofuscado (sprite CSS), por isso usamos o resumo acima.
-// Sem import de runtime de "@/": o script roda direto no Node.
+// A página traz a variável JS `cardsjson`: uma entrada por impressão da coleção, com
+//   sSigla (coleção), sN (número: "39", "39A" arte alternativa, "299S"/"189*" assinada, "SP1", "R01"),
+//   nEN ("Kai'Sa - Survivor (Alternate Art) (39A)") e p1a/p1b/p1c = menor, médio e maior preço,
+//   já juntando todas as versões (normal e foil) da impressão.
 
 import type { CardCondition, LigaLanguage } from "@/types/domain";
 
-type PriceBlock = { p?: string; m?: string; g?: string };
-export type LigaEdition = { id: number | string; code: string; num: string; price?: Record<string, PriceBlock | unknown[]> };
-export type LigaStock = { p: number; idEdicao: string | number; num: string; qualid: string | number; idioma: string | number };
-export type LigaPage = { editions: LigaEdition[]; stock: LigaStock[] };
+export type LigaSetEntry = { sSigla: string; sN: string; nEN: string; p1a?: string; p1b?: string; p1c?: string };
 
-/** Carta do nosso catálogo a procurar na página (o nome base é o da página). */
-export type LigaTarget = { id: string; setCode: string | null; collectorNo: string | null; alternateArt: boolean };
+/** Carta do nosso catálogo a procurar na coleção. */
+export type LigaTarget = { id: string; name: string; setCode: string | null; collectorNo: string | null };
 
 export type LigaPriceItem = {
   card_id: string;
@@ -28,68 +23,47 @@ export type LigaPriceItem = {
   condition: CardCondition | null;
 };
 
-const LANGUAGE: Record<string, LigaLanguage> = { "2": "en", "10": "zh", "8": "pt", "11": "pt" };
-const CONDITION: Record<string, CardCondition> = { "1": "nm", "2": "nm", "3": "lp", "4": "mp", "5": "hp", "6": "damaged" };
+/** Página de desafio da Cloudflare em vez da coleção. */
+export function isChallenge(html: string): boolean {
+  return /Just a moment|cf-chl|challenge-form/i.test(html) && !html.includes("cardsjson");
+}
 
-function jsonVar<T>(html: string, name: string): T | null {
-  const match = html.match(new RegExp(`var ${name}\\s*=\\s*(\\[.*?\\]);`, "s"));
+/** null quando a página não é de coleção (sigla desconhecida ou layout mudou). */
+export function parseLigaSet(html: string): LigaSetEntry[] | null {
+  const match = html.match(/var cardsjson\s*=\s*(\[.*?\]);/s);
   if (!match) return null;
   try {
-    return JSON.parse(match[1]) as T;
+    return JSON.parse(match[1]) as LigaSetEntry[];
   } catch {
     return null;
   }
-}
-
-/** Página de desafio da Cloudflare em vez da carta. */
-export function isChallenge(html: string): boolean {
-  return /Just a moment|cf-chl|challenge-form/i.test(html) && !html.includes("cards_editions");
-}
-
-/** null quando a página não é de carta (nome não achado ou layout mudou). */
-export function parseLigaPage(html: string): LigaPage | null {
-  const editions = jsonVar<LigaEdition[]>(html, "cards_editions");
-  if (!editions) return null;
-  return { editions, stock: jsonVar<LigaStock[]>(html, "cards_stock") ?? [] };
 }
 
 const cents = (text: string | undefined) => {
   const value = Math.round(Number(text) * 100);
   return Number.isFinite(value) && value > 0 ? value : null;
 };
-/** "039", "39" e "SP1" comparados sem zeros à esquerda e sem caixa. */
-const sameNum = (a: string | null, b: string) => (a ?? "").replace(/^0+/, "").toLowerCase() === b.replace(/^0+/, "").toLowerCase();
+const digits = (text: string | null) => (text ?? "").replace(/\D/g, "").replace(/^0+/, "");
+const baseName = (name: string) => name.replace(/(\s*\([^)]*\))+$/, "").toLowerCase();
+const kind = (name: string) => (/\(Alternate Art\)/i.test(name) ? "aa" : /\(Signature\)/i.test(name) ? "sig" : "");
+/** Nomes iguais ou um terminando no outro ("Zed - Master of Shadows" e "Master of Shadows"). */
+const sameName = (a: string, b: string) => a === b || a.endsWith(b) || b.endsWith(a);
 
 /**
- * Menor preço de cada carta pedida que existe na página. Idioma e condição são os da oferta mais barata
- * da impressão, então só vão para a versão (normal/foil/arte) que tem esse menor preço.
+ * Menor preço de cada carta na coleção. Casa por coleção + número + tipo (comum, arte alternativa ou
+ * assinada); se ainda sobrar mais de uma (SP1, R01 e a carta 1 têm o mesmo número no nosso catálogo),
+ * desempata pelo nome. Overnumbered entra como comum: a Liga às vezes marca, às vezes não.
+ * Como a Liga junta normal e foil nesse resumo, tudo vai como "normal" e sem idioma/condição.
  */
-export function ligaPrices(page: LigaPage, targets: LigaTarget[]): LigaPriceItem[] {
-  const items: LigaPriceItem[] = [];
-  for (const target of targets) {
-    const edition = page.editions.find((e) => e.code?.toUpperCase() === target.setCode?.toUpperCase() && sameNum(target.collectorNo, e.num));
-    if (!edition?.price) continue;
-    const keys: [string, LigaPriceItem["finish"]][] = target.alternateArt ? [["3", "normal"]] : [["0", "normal"], ["2", "foil"]];
-    const found = keys.flatMap(([key, finish]) => {
-      const block = edition.price![key];
-      const low = block && !Array.isArray(block) ? cents((block as PriceBlock).p) : null;
-      if (!low) return [];
-      const b = block as PriceBlock;
-      return [{ card_id: target.id, finish, low_cents: low, avg_cents: cents(b.m), high_cents: cents(b.g), language: null, condition: null } as LigaPriceItem];
-    });
-    // A oferta mais barata da impressão é a do menor preço entre todas as versões dela
-    const allLows = Object.values(edition.price).flatMap((b) => (b && !Array.isArray(b) ? [cents((b as PriceBlock).p)] : [])).filter((v): v is number => v != null);
-    const cheapestOverall = Math.min(...allLows);
-    const cheapestOffer = page.stock
-      .filter((s) => String(s.idEdicao) === String(edition.id) && s.num === edition.num)
-      .sort((a, b) => a.p - b.p)[0];
-    for (const item of found) {
-      if (cheapestOffer && item.low_cents === cheapestOverall) {
-        item.language = LANGUAGE[String(cheapestOffer.idioma)] ?? "other";
-        item.condition = CONDITION[String(cheapestOffer.qualid)] ?? null;
-      }
-      items.push(item);
-    }
-  }
-  return items;
+export function ligaSetPrices(entries: LigaSetEntry[], targets: LigaTarget[]): LigaPriceItem[] {
+  return targets.flatMap((target) => {
+    const candidates = entries.filter(
+      (e) => e.sSigla.toUpperCase() === target.setCode?.toUpperCase() && digits(e.sN) === digits(target.collectorNo) && kind(e.nEN) === kind(target.name),
+    );
+    const named = candidates.filter((e) => sameName(baseName(e.nEN), baseName(target.name)));
+    const entry = candidates.length === 1 ? candidates[0] : named.length === 1 ? named[0] : undefined;
+    const low = cents(entry?.p1a);
+    if (!entry || !low) return [];
+    return [{ card_id: target.id, finish: "normal", low_cents: low, avg_cents: cents(entry.p1b), high_cents: cents(entry.p1c), language: null, condition: null }];
+  });
 }
