@@ -6,7 +6,7 @@ import { StoreSchedule } from "@/components/stores/StoreSchedule";
 import { buttonClass } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { FlashToast } from "@/components/ui/Toast";
-import { getMyStores, getStoreEvents } from "@/server/queries/stores";
+import { canCreateStore, getMyStores, getStoreEvents } from "@/server/queries/stores";
 
 export const metadata: Metadata = { title: "Minha loja" };
 
@@ -18,10 +18,21 @@ const FLASH: Record<string, string> = {
 };
 
 export default async function MyStorePage({ searchParams }: PageProps<"/loja">) {
-  const [stores, params] = await Promise.all([getMyStores(), searchParams]);
+  const [stores, params, allowed] = await Promise.all([getMyStores(), searchParams, canCreateStore()]);
   const created = Number(params["evento-criado"]);
   const flashKey = Object.keys(FLASH).find((k) => params[k]);
   const flash = created ? (created > 1 ? `${created} datas na agenda!` : "Evento criado!") : flashKey && FLASH[flashKey];
+
+  if (!stores.length && !allowed) {
+    return (
+      <div className="mx-auto max-w-2xl">
+        <PageHeader title="Eventos de loja" back="/arena/lojas" />
+        <p className="card p-5 text-sm text-muted">
+          Só contas de loja cadastram eventos na Riftzada. Se você tem uma loja, crie uma conta escolhendo <strong className="text-ink">Loja</strong> no cadastro.
+        </p>
+      </div>
+    );
+  }
 
   if (!stores.length) {
     return (

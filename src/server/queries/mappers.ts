@@ -7,7 +7,7 @@ import { mediaUrl } from "@/lib/images";
 import type {
   CardCondition, DeckDetail, DeckSection, DeckSummary, DeckVisibility, EventResult, EventStatus, EventSummary,
   CardSummary, Legend, LigaLanguage, Listing, ListingKind, ListingOffer, ListingStatus, MiniProfile, OfferStatus, PlayerStats, PostKind,
-  PriceBase, Profile, RankingRow, Store,
+  AccountKind, PriceBase, Profile, RankingRow, Store,
 } from "@/types/domain";
 
 export const MINI = "id, username, display_name, avatar_path";
@@ -22,15 +22,15 @@ export function mapMini(row: MiniRow): MiniProfile {
 const mapLegend = (row: LegendRow): Legend | null => (row ? { id: row.id, name: row.name } : null);
 
 // ---------- Perfil ----------
-export const PROFILE_FIELDS = `${MINI}, bio, instagram, city, state, created_at, legend:cards!profiles_favorite_legend_id_fkey(id, name)`;
+export const PROFILE_FIELDS = `${MINI}, bio, instagram, city, state, account_kind, created_at, legend:cards!profiles_favorite_legend_id_fkey(id, name)`;
 export type ProfileRow = MiniRow & {
-  bio: string | null; instagram: string | null; city: string | null; state: string | null; created_at: string; legend: LegendRow;
+  bio: string | null; instagram: string | null; city: string | null; state: string | null; account_kind: AccountKind; created_at: string; legend: LegendRow;
 };
 
 export function mapProfile(row: ProfileRow): Profile {
   return {
     ...mapMini(row), bio: row.bio, instagram: row.instagram, city: row.city, state: row.state,
-    createdAt: row.created_at, favoriteLegend: mapLegend(row.legend),
+    createdAt: row.created_at, favoriteLegend: mapLegend(row.legend), accountKind: row.account_kind,
   };
 }
 

@@ -10,13 +10,14 @@ export const dynamic = "force-dynamic";
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await requireSession();
   const isAdmin = session.role === "admin";
+  const isStore = session.profile.accountKind === "store";
   return (
     <div className="mx-auto flex max-w-[1320px]">
-      <SideNav me={session.profile} isAdmin={isAdmin} />
+      <SideNav me={session.profile} isAdmin={isAdmin} isStore={isStore} />
       <main id="conteudo" className="pb-nav min-w-0 flex-1 px-4 pt-5 md:px-8 lg:pt-8 lg:pb-12">
         {children}
       </main>
-      <BottomNav isAdmin={isAdmin} />
+      <BottomNav isAdmin={isAdmin} isStore={isStore} />
       <ServiceWorker />
     </div>
   );

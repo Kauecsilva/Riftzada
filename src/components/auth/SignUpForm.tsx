@@ -1,15 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import { Store, Swords } from "lucide-react";
+import { cn } from "@/lib/cn";
 import { Field, fieldProps } from "@/components/ui/Field";
 import { FormMessage } from "@/components/ui/FormMessage";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { signUp } from "@/server/actions/auth";
 import { initialActionState } from "@/lib/validation/common";
 
+const KINDS = [
+  { value: "player", label: "Jogador", text: "Joga, posta e anuncia cartas", icon: Swords },
+  { value: "store", label: "Loja", text: "Divulga eventos e semanais", icon: Store },
+] as const;
+
 export function SignUpForm() {
   const [state, action] = useActionState(signUp, initialActionState);
+  const [kind, setKind] = useState<"player" | "store">("player");
   const err = state.fieldErrors ?? {};
   if (state.ok) {
     return (
@@ -21,7 +29,22 @@ export function SignUpForm() {
   }
   return (
     <form action={action} className="space-y-4" noValidate>
-      <Field label="Apelido" name="username" error={err.username} hint="É como a galera te vê na Riftzada. Letras, números e _.">
+      <fieldset className="grid grid-cols-2 gap-2">
+        <legend className="mb-2 text-sm font-semibold">Tipo de conta</legend>
+        {KINDS.map((k) => (
+          <label key={k.value} className={cn("flex cursor-pointer items-center gap-3 rounded-2xl border p-3 transition-colors has-focus-visible:outline-3 has-focus-visible:outline-rift-strong",
+            kind === k.value ? "border-rift bg-rift-soft" : "border-line bg-surface-2 hover:bg-surface-3")}>
+            <input type="radio" name="accountKind" value={k.value} checked={kind === k.value} onChange={() => setKind(k.value)} className="sr-only" />
+            <k.icon size={22} className="shrink-0 text-rift-strong" aria-hidden />
+            <span>
+              <span className="block text-sm font-semibold">{k.label}</span>
+              <span className="block text-xs text-muted">{k.text}</span>
+            </span>
+          </label>
+        ))}
+      </fieldset>
+      {kind === "store" && <p className="text-sm text-muted">Depois do cadastro, você preenche os dados da loja e a organização aprova antes dos eventos irem ao ar.</p>}
+      <Field label={kind === "store" ? "Apelido da loja" : "Apelido"} name="username" error={err.username} hint="É como a galera te vê na Riftzada. Letras, números e _.">
         <input {...fieldProps("username", err.username, "hint")} autoComplete="username" maxLength={20} required pattern="[a-zA-Z0-9_]{3,20}" className="input lowercase" placeholder="kaue" />
       </Field>
       <Field label="E-mail" name="email" error={err.email} hint="Ninguém da comunidade vê teu e-mail.">

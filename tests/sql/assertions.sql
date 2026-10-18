@@ -307,7 +307,27 @@ select pg_temp.check((select status from market_listings where id = '00000000-00
 
 -- ---------- Lojas ----------
 begin;
-select pg_temp.login('00000000-0000-4000-8000-100000000002'); -- João (user) cadastra a loja dele
+-- Cadastro com account_kind = store vira conta de loja; sem ele, jogador
+select set_config('request.jwt.claim.sub', '', true);
+reset role;
+insert into auth.users (id, email, raw_user_meta_data) values
+  ('00000000-0000-4000-8000-1000000000a1', 'loja@teste.dev', '{"username": "lojanova", "account_kind": "store"}'),
+  ('00000000-0000-4000-8000-1000000000a2', 'jogador@teste.dev', '{"username": "jogadornovo"}');
+select pg_temp.check((select account_kind from profiles where id = '00000000-0000-4000-8000-1000000000a1') = 'store', 'Cadastro como loja');
+select pg_temp.check((select account_kind from profiles where id = '00000000-0000-4000-8000-1000000000a2') = 'player', 'Cadastro padrão é jogador');
+update public.profiles set account_kind = 'store' where id = '00000000-0000-4000-8000-100000000002'; -- João vira conta de loja
+
+select pg_temp.login('00000000-0000-4000-8000-100000000003'); -- Rafael (jogador) não cadastra loja
+do $$ begin
+  insert into public.stores (community_id, owner_id, name)
+  values ('00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-100000000003', 'Loja do Rafael');
+  raise exception 'FALHOU: jogador cadastrou loja';
+exception when insufficient_privilege then null;
+end $$;
+update public.profiles set account_kind = 'store' where id = '00000000-0000-4000-8000-100000000003';
+select pg_temp.check((select account_kind from profiles where id = '00000000-0000-4000-8000-100000000003') = 'player', 'Jogador não vira loja sozinho');
+
+select pg_temp.login('00000000-0000-4000-8000-100000000002'); -- João (conta de loja) cadastra a loja dele
 insert into public.stores (id, community_id, owner_id, name, address, approved_at)
 values ('00000000-0000-4000-8000-b00000000001', '00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-100000000002', 'Toca do Rift', 'Rua das Cartas, 123', now());
 select pg_temp.check((select approved_at from stores where id = '00000000-0000-4000-8000-b00000000001') is null, 'Loja nasce pendente, mesmo mandando approved_at');

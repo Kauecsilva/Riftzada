@@ -32,7 +32,7 @@ export async function signUp(_: ActionState, form: FormData): Promise<ActionStat
   if (blocked) return blocked;
   const parsed = signUpSchema.safeParse(formToObject(form));
   if (!parsed.success) return zodErrorState(parsed.error);
-  const { username, email, password } = parsed.data;
+  const { username, email, password, accountKind } = parsed.data;
 
   const supabase = await createClient();
   const { data: available } = await supabase.rpc("username_available", { name: username });
@@ -41,7 +41,7 @@ export async function signUp(_: ActionState, form: FormData): Promise<ActionStat
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { username, display_name: username }, emailRedirectTo: `${SITE_URL}/auth/confirm` },
+    options: { data: { username, display_name: username, account_kind: accountKind }, emailRedirectTo: `${SITE_URL}/auth/confirm` },
   });
   if (error) {
     console.error("[auth] signUp", error.code, error.message);
@@ -52,7 +52,7 @@ export async function signUp(_: ActionState, form: FormData): Promise<ActionStat
     return { ok: false, message: "Não deu para criar a conta agora. Tenta de novo em instantes." };
   }
   // Sem confirmação de e-mail ligada no Supabase, o cadastro já volta com sessão: entra direto
-  if (data.session) redirect("/?bemvindo=1");
+  if (data.session) redirect(accountKind === "store" ? "/loja" : "/?bemvindo=1");
   // Mesma resposta se o e-mail já existir: não revela quem tem conta
   return { ok: true, message: "Conta criada! Enviamos um link de confirmação para o teu e-mail." };
 }

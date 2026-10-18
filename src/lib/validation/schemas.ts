@@ -20,6 +20,7 @@ export const signUpSchema = z.object({
   username,
   email,
   password,
+  accountKind: z.enum(["player", "store"]).default("player"),
 });
 
 export const resetRequestSchema = z.object({ email });
