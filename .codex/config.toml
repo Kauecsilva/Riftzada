@@ -1,0 +1,6 @@
+# Config de projeto do Codex. Espelha o .mcp.json do Claude Code.
+# O Codex só carrega este arquivo se o projeto estiver como confiável
+# no ~/.codex/config.toml de quem usa (veja docs/setup.md).
+
+[mcp_servers.context7]
+url = "https://mcp.context7.com/mcp"

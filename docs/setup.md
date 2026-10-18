@@ -3,7 +3,7 @@
 Registro da adoção do [Vibe Coding Toolkit](https://github.com/soumatheusgomes/vibe-coding-toolkit) (prompt 12, projeto existente) neste repositório.
 
 - **Revisão do toolkit:** `de66fe3` (main, 18/10/2026).
-- **Cliente:** Claude Code (local e nuvem). Codex não é usado, então não há `.codex/`.
+- **Clientes:** Claude Code (local e nuvem) e Codex (desde 18/10/2026). Divisão de trabalho em `AGENTS.md` (Claude e Codex no mesmo repositório).
 - **Escopo:** tudo no projeto (versionado). Sessões na nuvem são efêmeras, então nada depende de instalação global feita à mão.
 - **Stack preservada:** Next.js 16.4.2 + Turbopack, Supabase sem ORM, npm. Os defaults do toolkit (Drizzle, Pino) não se aplicam: o projeto já decidiu por Supabase direto e não tem logger de servidor.
 
@@ -38,7 +38,7 @@ Status: **validado** (rodou aqui), **configurado** (arquivo no lugar, sem execu�
 | `next-dev-loop` | skill + `agent-browser` instalado pelo hook de nuvem | validado | Next 16.4.2 com Turbopack atende o mínimo 16.3; com `next dev`, `/_next/mcp` listou as ferramentas e `agent-browser 0.39.1` leu a Home (modo demonstração) usando o Chromium do Playwright |
 | `next-bundle-optimizer` | skill | configurado | Usar quando houver rota pesada; não rodou auditoria |
 | `supabase-postgres-best-practices` / `supabase` | skills | validado | Descobertas na sessão |
-| `gh-fix-ci` | não instalado | não se aplica | É fluxo do Codex; no Claude Code o conserto de CI já é feito pelos PRs |
+| `gh-fix-ci` | não instalado | não se aplica | É fluxo do Codex; no Claude Code o conserto de CI já é feito pelos PRs. Rever se o Codex passar a cuidar de CI |
 | `differential-review` | skill + agente `adversarial-modeler` em `.claude/agents` | configurado | Nome do agente ajustado para o formato sem namespace |
 | Prompt de segurança | `docs/prompts/security-review.md` | configurado | Bloco copiado sem alterações da revisão `de66fe3` |
 | `shadcn` | skill | não se aplica (por ora) | O projeto tem design system próprio em `src/components/ui`; não adotar shadcn só por causa da skill |
@@ -52,6 +52,28 @@ Status: **validado** (rodou aqui), **configurado** (arquivo no lugar, sem execu�
 | ESLint quality gates | perfil Next leve + autoteste + perfil tipado | validado | Ver [`docs/quality.md`](quality.md#adoção-medida-em-18102026) |
 | Hooks do cliente | `superpowers-session-start.sh`, `cloud-setup.sh` | validado | Sem hooks de Git, conforme o toolkit |
 | Avaliação do harness (prompt 14) | não rodada | pendente | Precisa de sessões novas e descartáveis; rodar quando quiser medir o comportamento |
+
+## Codex
+
+O Codex lê `AGENTS.md` direto, então regras, comandos e acordos já valem. O resto:
+
+| Peça | Como chega ao Codex | Status |
+|---|---|---|
+| Skills | `.agents/skills/`, cópia de `.claude/skills/` gerada por `npm run skills:sync`; `npm run skills:check` no CI barra divergência | configurado |
+| Context7 | `.codex/config.toml` | configurado; só carrega com o projeto marcado como confiável (abaixo) |
+| Superpowers no início | sem hook; `AGENTS.md` manda ler `using-superpowers` (a skill tem `references/codex-tools.md`) | configurado |
+| Firecrawl | o conector é do claude.ai e não existe no Codex | não se aplica; para pesquisa na web no Codex, cadastre o MCP do Firecrawl com chave própria em `~/.codex/config.toml` |
+| Agente `adversarial-modeler` | é formato do Claude Code; no Codex a `differential-review` roda sem ele | não se aplica |
+| Hooks `cloud-setup.sh` | no Codex na nuvem, ponha `npm ci` no setup do ambiente | pendente (feito no painel do Codex) |
+
+Na máquina do Kaue, para o Codex carregar `.codex/config.toml`, marque o projeto como confiável em `~/.codex/config.toml`:
+
+```toml
+[projects.'C:\Users\kauec\OneDrive\Área de Trabalho\Programação\Riftzada']
+trust_level = "trusted"
+```
+
+(O Codex costuma perguntar isso na primeira vez que abre a pasta.)
 
 ## Delegação
 
