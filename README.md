@@ -48,6 +48,8 @@ As cartas vêm do [Riftcodex](https://riftcodex.com), uma API pública e gratuit
 - A migration `0008_prices_offers.sql` importa todo dia (pg_cron, 19:30 de Brasília) os preços do TCGplayer pelo [tcgcsv.com](https://tcgcsv.com) e a cotação do dólar ([open.er-api.com](https://open.er-api.com)). Para rodar na hora: `select public.sync_card_prices();`.
 - O menor preço da LigaRiftbound vem da coleta `npm run liga:sync` (migration `0013_liga_prices.sql`). A Liga bloqueia acesso vindo de servidor (Cloudflare), então o script roda num computador com internet de casa e grava pelo token `LIGA_SYNC_TOKEN` (veja abaixo). O formulário já abre com o preço coletado, que o vendedor pode corrigir, sugere o menor entre Liga e TCGplayer e aplica o desconto escolhido.
 - Ofertas: o comprador oferece abaixo do preço; o vendedor aceita, recusa ou faz contraproposta. As regras ficam nas funções `make_listing_offer` e `respond_listing_offer`.
+- Troca: em anúncio de troca, ou venda que aceita troca, a oferta leva cartas e, se quiser, dinheiro junto (`0014_trade_offers_chat.sql`).
+- Conversa: cada anúncio tem uma conversa por interessado (`listing_messages`), em `/mensagens`. A migration 0014 adiciona a tabela à publicação `supabase_realtime` para as mensagens chegarem na hora.
 
 ### Coleta da Liga no computador
 

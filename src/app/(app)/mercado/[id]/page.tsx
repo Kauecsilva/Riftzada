@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { EyeOff, HandCoins, Repeat } from "lucide-react";
+import { EyeOff, HandCoins, MessagesSquare, Repeat } from "lucide-react";
 import { AuthorLine } from "@/components/feed/AuthorLine";
 import { InterestButton } from "@/components/market/InterestButton";
 import { OfferBox } from "@/components/market/OfferBox";
@@ -19,7 +19,10 @@ import { CONDITION, LISTING_STATUS } from "@/lib/domain/labels";
 import { pickFinish, tcgBrlCents } from "@/lib/domain/pricing";
 import { formatPrice } from "@/lib/format";
 import { moderateListing } from "@/server/actions/admin";
-import { getListing, getListingOffers, getOffersFor, getSharedWhatsapp } from "@/server/queries/market";
+import { getListing, getListingOffers, getOffersFor, getSharedWhatsapp, getSharedWhatsapps } from "@/server/queries/market";
+import { getConversations } from "@/server/queries/chat";
+import { chatHref } from "@/lib/domain/chat";
+import { dealSummary, offerModes } from "@/lib/domain/offers";
 import { getPriceReference } from "@/server/queries/prices";
 import { canModerate, requireSession } from "@/server/session";
 
@@ -33,12 +36,17 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
   const listing = await getListing(id);
   if (!listing) notFound();
   const mine = listing.seller.id === session.userId;
-  const [whatsapp, offers, holders, priceRef] = await Promise.all([
+  const modes = offerModes(listing);
+  const [whatsapp, offers, holders, priceRef, conversations] = await Promise.all([
     mine ? null : getSharedWhatsapp(listing.seller.id),
-    listing.kind === "sell" ? getListingOffers(listing.id) : [],
+    listing.kind !== "want" ? getListingOffers(listing.id) : [],
     listing.kind === "want" && listing.status !== "done" ? getOffersFor(listing) : [],
     listing.kind === "sell" && listing.card ? getPriceReference(listing.card.id) : null,
+    mine ? getConversations(session.userId) : [],
   ]);
+  const buyerWhatsapps = mine ? await getSharedWhatsapps(offers.map((o) => o.buyer.id)) : {};
+  // Conversas deste anúncio sem oferta (as com oferta já têm o botão no painel)
+  const chats = conversations.filter((c) => c.listing.id === listing.id && !offers.some((o) => o.buyer.id === c.buyer.id));
   const tcgCents = priceRef ? tcgBrlCents(pickFinish(priceRef.tcgplayer, listing.variant), priceRef.usdBrl) : null;
   const photos = listingPhotos(listing);
 
@@ -88,6 +96,7 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
             {listing.priceCents != null ? formatPrice(listing.priceCents) : listing.kind === "want" ? "A combinar" : "Só troca"}
           </p>
           <PriceReferenceNote listing={listing} tcgCents={tcgCents} />
+          <p className="text-sm text-muted">{dealSummary(listing)}</p>
           {listing.kind === "want" && listing.status !== "done" && (holders.length > 0 || mine) && (
             <section aria-labelledby="ofertas" className="card p-4">
               <h2 id="ofertas" className="font-semibold">Quem tem essa carta</h2>
@@ -124,16 +133,36 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
           {mine ? (
             <>
               <OwnerActions id={listing.id} status={listing.status} />
-              {listing.kind === "sell" && (listing.acceptsOffers || offers.length > 0) && (
-                <OffersPanel listingId={listing.id} offers={offers} priceCents={listing.priceCents} />
+              {(modes.money || modes.trade || offers.length > 0) && (
+                <OffersPanel listingId={listing.id} cardName={listing.cardName} offers={offers} priceCents={listing.priceCents} whatsapps={buyerWhatsapps} />
+              )}
+              {chats.length > 0 && (
+                <section aria-labelledby="chats-title" className="card p-4">
+                  <h2 id="chats-title" className="font-semibold">Conversas</h2>
+                  <ul className="mt-2 space-y-1">
+                    {chats.map((c) => (
+                      <li key={c.buyer.id}>
+                        <Link href={chatHref(listing.id, c.buyer.id)} className="-mx-2 flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-surface-2">
+                          <Avatar name={c.buyer.displayName} src={c.buyer.avatarUrl} size={28} />
+                          <span className="min-w-0 flex-1 text-sm">
+                            <strong>{c.buyer.displayName}</strong>
+                            <span className="block truncate text-xs text-muted">{c.last.body}</span>
+                          </span>
+                          {c.unread > 0 && <Badge tone="gold">{c.unread} nova{c.unread > 1 ? "s" : ""}</Badge>}
+                          <MessagesSquare size={16} className="text-faint" aria-hidden />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
               )}
             </>
           ) : (
             <>
-              {listing.kind === "sell" && ((listing.acceptsOffers && listing.status === "available") || offers.length > 0) && (
-                <OfferBox listing={listing} offers={offers} />
+              {((listing.status === "available" && (modes.money || modes.trade)) || offers.length > 0) && (
+                <OfferBox listing={listing} offers={offers} whatsapp={whatsapp} />
               )}
-              {listing.status !== "done" && <InterestButton listing={listing} whatsapp={whatsapp} />}
+              {listing.status !== "done" && <InterestButton listing={listing} me={session.userId} whatsapp={whatsapp} />}
             </>
           )}
           {!mine && canModerate(session) && (

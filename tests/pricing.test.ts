@@ -79,7 +79,7 @@ describe("validação do anúncio e da oferta", () => {
 
   it("oferta precisa de valor", () => {
     const listingId = "00000000-0000-4000-8000-500000000001";
-    expect(offerSchema.parse({ listingId, amount: "75,00", message: "" })).toEqual({ listingId, amount: 7500, message: null });
+    expect(offerSchema.parse({ listingId, amount: "75,00", message: "" })).toEqual({ listingId, amount: 7500, cards: [], message: null });
     expect(offerSchema.safeParse({ listingId, amount: "" }).success).toBe(false);
     expect(offerSchema.safeParse({ listingId, amount: "0" }).success).toBe(false);
   });

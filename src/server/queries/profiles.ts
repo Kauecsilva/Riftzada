@@ -15,6 +15,13 @@ export async function getProfileByUsername(username: string): Promise<Profile | 
   return data ? mapProfile(data) : null;
 }
 
+export async function getProfileById(id: string): Promise<Profile | null> {
+  if (isDemoMode) return demo.demoProfileById(id);
+  const supabase = await createClient();
+  const { data } = await supabase.from("profiles").select(PROFILE_FIELDS).eq("id", id).maybeSingle<ProfileRow>();
+  return data ? mapProfile(data) : null;
+}
+
 export async function getPlayerStats(userId: string): Promise<PlayerStats | null> {
   if (isDemoMode) return demo.demoPlayerStats(userId);
   const [supabase, communityId] = await Promise.all([createClient(), getCommunityId()]);

@@ -424,3 +424,64 @@ end $$;
 update public.profiles set city = 'Hackeada', state = 'AC' where id = '00000000-0000-4000-8000-100000000002';
 select pg_temp.check((select coalesce(city, '') from profiles where id = '00000000-0000-4000-8000-100000000002') <> 'Hackeada', 'Não edita a região de outro');
 rollback;
+
+-- ---------- Oferta com cartas ----------
+begin;
+select pg_temp.login('00000000-0000-4000-8000-100000000002'); -- João
+-- Troca do Viktor (Bia): oferece cartas + valor
+select set_config('test.trade', public.make_listing_offer('00000000-0000-4000-8000-500000000003', 1500, 'Topa?',
+  '[{"name": " Ahri, Alluring ", "qty": 2}]')::text, true);
+select pg_temp.check((select cards -> 0 ->> 'name' from listing_offers where id = current_setting('test.trade')::uuid) = 'Ahri, Alluring', 'Oferta guarda as cartas, sem espaços sobrando');
+select pg_temp.check((select (cards -> 0 ->> 'qty')::int from listing_offers where id = current_setting('test.trade')::uuid) = 2, 'Oferta guarda a quantidade da carta');
+do $$ begin
+  perform public.make_listing_offer('00000000-0000-4000-8000-500000000003', 1500);
+  raise exception 'FALHOU: oferta só em dinheiro num anúncio de troca';
+exception when invalid_parameter_value then null;
+end $$;
+-- Fury Rune do Pedro: venda que aceita troca, mas não aceita oferta em dinheiro
+select public.make_listing_offer('00000000-0000-4000-8000-500000000006', 0, null, '[{"name": "Calm Rune"}]');
+do $$ begin
+  perform public.make_listing_offer('00000000-0000-4000-8000-500000000006', 300, null, '[{"name": "Calm Rune"}]');
+  raise exception 'FALHOU: dinheiro da troca igual ao preço';
+exception when invalid_parameter_value then null;
+end $$;
+do $$ begin
+  perform public.make_listing_offer('00000000-0000-4000-8000-500000000006', 100, null, '[{"name": ""}]');
+  raise exception 'FALHOU: carta sem nome';
+exception when invalid_parameter_value then null;
+end $$;
+rollback;
+
+-- ---------- Conversa ----------
+begin;
+select pg_temp.login('00000000-0000-4000-8000-100000000002'); -- João puxa conversa com a Bia
+select public.send_listing_message('00000000-0000-4000-8000-500000000003', '00000000-0000-4000-8000-100000000002', 'Ainda tem o Viktor?');
+do $$ begin
+  perform public.send_listing_message('00000000-0000-4000-8000-500000000003', '00000000-0000-4000-8000-100000000004', 'Me passando pelo Pedro');
+  raise exception 'FALHOU: escreveu na conversa de outra pessoa';
+exception when insufficient_privilege then null;
+end $$;
+do $$ begin
+  insert into public.listing_messages (listing_id, buyer_id, sender_id, body)
+  values ('00000000-0000-4000-8000-500000000003', '00000000-0000-4000-8000-100000000002', '00000000-0000-4000-8000-100000000002', 'direto');
+  raise exception 'FALHOU: inseriu mensagem sem passar pela função';
+exception when insufficient_privilege then null;
+end $$;
+
+select pg_temp.login('00000000-0000-4000-8000-100000000005'); -- Bia (anunciante) responde
+select pg_temp.check((select count(*) from listing_messages where read_at is null and buyer_id = '00000000-0000-4000-8000-100000000002') = 1, 'Anunciante vê a mensagem não lida');
+select public.mark_listing_chat_read('00000000-0000-4000-8000-500000000003', '00000000-0000-4000-8000-100000000002');
+select pg_temp.check((select count(*) from listing_messages where read_at is null and buyer_id = '00000000-0000-4000-8000-100000000002') = 0, 'Abrir a conversa marca como lida');
+select public.send_listing_message('00000000-0000-4000-8000-500000000003', '00000000-0000-4000-8000-100000000002', 'Tenho sim!');
+do $$ begin
+  perform public.send_listing_message('00000000-0000-4000-8000-500000000003', '00000000-0000-4000-8000-100000000004', 'Oi Pedro');
+  raise exception 'FALHOU: anunciante puxou conversa com quem não chamou';
+exception when insufficient_privilege then null;
+end $$;
+
+select pg_temp.login('00000000-0000-4000-8000-100000000004'); -- Pedro não vê a conversa
+select pg_temp.check((select count(*) from listing_messages) = 0, 'Terceiro não vê a conversa');
+
+select pg_temp.login('00000000-0000-4000-8000-100000000002');
+select pg_temp.check((select count(*) from listing_messages) = 2, 'Quem chamou vê as duas mensagens');
+rollback;

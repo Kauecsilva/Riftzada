@@ -75,19 +75,27 @@ export async function getListing(id: string): Promise<Listing | null> {
   return data ? mapListing(data) : null;
 }
 
-/** WhatsApp do vendedor, só se ele escolheu compartilhar (a RLS também garante). */
-export async function getSharedWhatsapp(userId: string): Promise<string | null> {
+/** WhatsApp de cada pessoa, só de quem escolheu compartilhar (a RLS também garante). */
+export async function getSharedWhatsapps(userIds: string[]): Promise<Record<string, string | null>> {
+  const ids = [...new Set(userIds)];
+  if (!ids.length) return {};
   if (isDemoMode) {
-    const contact = demo.demoContact(userId);
-    return contact.shareWhatsapp ? contact.whatsapp : null;
+    return Object.fromEntries(ids.map((id) => {
+      const contact = demo.demoContact(id);
+      return [id, contact.shareWhatsapp ? contact.whatsapp : null];
+    }));
   }
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("profile_contacts")
-    .select("whatsapp, share_whatsapp")
-    .eq("user_id", userId)
-    .maybeSingle();
-  return data?.share_whatsapp ? data.whatsapp : null;
+  const { data } = await supabase.from("profile_contacts").select("user_id, whatsapp, share_whatsapp").in("user_id", ids);
+  return Object.fromEntries(ids.map((id) => {
+    const row = data?.find((c) => c.user_id === id);
+    return [id, row?.share_whatsapp ? (row.whatsapp as string | null) : null];
+  }));
+}
+
+/** WhatsApp do vendedor, só se ele escolheu compartilhar. */
+export async function getSharedWhatsapp(userId: string): Promise<string | null> {
+  return (await getSharedWhatsapps([userId]))[userId] ?? null;
 }
 
 /** Ofertas do anúncio: o vendedor vê todas, o comprador só as dele (a RLS decide). Em aberto primeiro. */

@@ -7,12 +7,12 @@ import { cn } from "@/lib/cn";
 import { Avatar } from "@/components/ui/Avatar";
 import type { MiniProfile } from "@/types/domain";
 import { Logo } from "./Logo";
-import { isActive, NAV_ITEMS } from "./nav-items";
+import { isActive, NAV_ITEMS, unreadLabel } from "./nav-items";
 import { PublishMenu } from "./PublishMenu";
 import { RiftboundCredit } from "./RiftboundCredit";
 
 /** Navegação lateral do desktop (≥1024px). */
-export function SideNav({ me, isAdmin, isStore }: { me: MiniProfile; isAdmin: boolean; isStore: boolean }) {
+export function SideNav({ me, isAdmin, isStore, unread }: { me: MiniProfile; isAdmin: boolean; isStore: boolean; unread: number }) {
   const path = usePathname();
 
   return (
@@ -24,6 +24,7 @@ export function SideNav({ me, isAdmin, isStore }: { me: MiniProfile; isAdmin: bo
         <ul className="space-y-1">
           {NAV_ITEMS.map((it) => {
             const active = isActive(path, it.href, "exact" in it ? it.exact : false);
+            const badge = it.href === "/mercado" ? unreadLabel(unread) : null;
             return (
               <li key={it.href}>
                 <Link
@@ -38,6 +39,11 @@ export function SideNav({ me, isAdmin, isStore }: { me: MiniProfile; isAdmin: bo
                 >
                   <it.icon size={21} className={active ? "text-gold" : undefined} aria-hidden />
                   {it.label}
+                  {badge && (
+                    <span className="ml-auto min-w-6 rounded-full bg-gold px-1.5 text-center font-sans text-xs leading-6 font-bold text-bg normal-case">
+                      {badge}<span className="sr-only"> mensagens não lidas</span>
+                    </span>
+                  )}
                 </Link>
               </li>
             );

@@ -187,6 +187,11 @@ export async function saveListing(listingId: string | null, _: ActionState, form
     if (error) return dbError(error);
     id = data.id;
   }
+  // WhatsApp informado no anúncio vai para o perfil, já compartilhado (o formulário só mostra o campo para quem não compartilha)
+  if (parsed.data.whatsapp) {
+    const { error } = await supabase.from("profile_contacts").upsert({ user_id: session.userId, whatsapp: parsed.data.whatsapp, share_whatsapp: true });
+    if (error) return dbError(error);
+  }
   revalidatePath("/mercado");
   revalidatePath("/");
   if (parsed.data.collectionItemId) revalidatePath("/colecao");
@@ -217,6 +222,8 @@ function offerError(error: { message: string; code?: string }): ActionState {
   if (error.message.includes("below the price")) return { ok: false, message: "A oferta tem que ficar abaixo do preço pedido." };
   if (error.message.includes("below the minimum")) return { ok: false, message: "Essa oferta está abaixo do mínimo que o vendedor aceita." };
   if (error.message.includes("does not accept offers")) return { ok: false, message: "Esse anúncio não está aceitando ofertas agora." };
+  if (error.message.includes("does not accept trades")) return { ok: false, message: "Esse anúncio não aceita troca. Oferece só dinheiro." };
+  if (error.message.includes("invalid cards")) return { ok: false, message: "Confere as cartas da oferta." };
   if (error.message.includes("counter must be")) return { ok: false, message: "A contraproposta tem que ficar entre a oferta e o preço pedido." };
   if (error.message.includes("is not pending") || error.message.includes("invalid action")) return { ok: false, message: "Essa oferta já foi respondida." };
   return dbError(error);
@@ -228,9 +235,12 @@ export async function makeOffer(_: ActionState, form: FormData): Promise<ActionS
   await requireSession();
   const parsed = offerSchema.safeParse(formToObject(form));
   if (!parsed.success) return zodErrorState(parsed.error);
-  const { listingId, amount, message } = parsed.data;
+  const { listingId, amount, cards, message } = parsed.data;
   const supabase = await createClient();
-  const { error } = await supabase.rpc("make_listing_offer", { target_listing: listingId, amount, note: message });
+  const { error } = await supabase.rpc("make_listing_offer", {
+    target_listing: listingId, amount, note: message,
+    offered_cards: cards.map((c) => ({ name: c.name, qty: c.qty, card_id: c.cardId })),
+  });
   if (error) return offerError(error);
   revalidatePath(`/mercado/${listingId}`);
   return { ok: true, message: "Oferta enviada! Agora é com o vendedor." };

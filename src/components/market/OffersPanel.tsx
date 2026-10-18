@@ -1,29 +1,37 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Check, Loader2, Undo2, X } from "lucide-react";
+import Link from "next/link";
+import { Check, Loader2, MessageCircle, MessagesSquare, Undo2, X } from "lucide-react";
 import { AuthorLine } from "@/components/feed/AuthorLine";
 import { buttonClass } from "@/components/ui/button";
 import { useToast } from "@/components/ui/Toast";
+import { chatHref } from "@/lib/domain/chat";
+import { offerSummary, whatsappLink } from "@/lib/domain/offers";
 import { formatPrice } from "@/lib/format";
 import { respondOffer } from "@/server/actions/content";
 import type { ListingOffer } from "@/types/domain";
 import { OfferStatusBadge } from "./OfferStatusBadge";
 
-/** Ofertas recebidas pelo vendedor: aceitar, recusar ou mandar contraproposta. */
-export function OffersPanel({ listingId, offers, priceCents }: { listingId: string; offers: ListingOffer[]; priceCents: number | null }) {
+type PanelProps = { listingId: string; cardName: string; priceCents: number | null };
+
+/**
+ * Ofertas recebidas pelo vendedor: aceitar, recusar ou mandar contraproposta, e chamar o comprador
+ * na conversa do app ou no WhatsApp (se ele compartilha; `whatsapps` vem por id do comprador).
+ */
+export function OffersPanel({ offers, whatsapps, ...props }: PanelProps & { offers: ListingOffer[]; whatsapps: Record<string, string | null> }) {
   if (!offers.length) {
     return <p className="card p-4 text-sm text-muted">Nenhuma oferta ainda. Quando alguém oferecer, aparece aqui.</p>;
   }
   return (
     <section className="space-y-3" aria-labelledby="offers-title">
       <h2 id="offers-title" className="text-sm font-semibold">Ofertas recebidas</h2>
-      {offers.map((offer) => <ReceivedOffer key={offer.id} listingId={listingId} offer={offer} priceCents={priceCents} />)}
+      {offers.map((offer) => <ReceivedOffer key={offer.id} {...props} offer={offer} whatsapp={whatsapps[offer.buyer.id] ?? null} />)}
     </section>
   );
 }
 
-function ReceivedOffer({ listingId, offer, priceCents }: { listingId: string; offer: ListingOffer; priceCents: number | null }) {
+function ReceivedOffer({ listingId, cardName, priceCents, offer, whatsapp }: PanelProps & { offer: ListingOffer; whatsapp: string | null }) {
   const [pending, start] = useTransition();
   const [countering, setCountering] = useState(false);
   const [counter, setCounter] = useState("");
@@ -42,11 +50,18 @@ function ReceivedOffer({ listingId, offer, priceCents }: { listingId: string; of
         <OfferStatusBadge status={offer.status} />
       </div>
       <p className="font-display text-2xl font-bold">
-        {formatPrice(offer.amountCents)}
+        {offer.amountCents > 0 || !offer.cards.length ? formatPrice(offer.amountCents) : "Troca"}
         {offer.status === "countered" && offer.counterCents != null && (
-          <span className="ml-2 text-sm font-semibold text-gold">você pediu {formatPrice(offer.counterCents)}</span>
+          <span className="ml-2 text-sm font-semibold text-gold">você pediu {formatPrice(offer.counterCents)}{offer.cards.length > 0 && " + cartas"}</span>
         )}
       </p>
+      {offer.cards.length > 0 && (
+        <ul className="flex flex-wrap gap-1.5" aria-label="Cartas oferecidas">
+          {offer.cards.map((c, i) => (
+            <li key={`${c.name}-${i}`} className="rounded-full border border-line bg-surface-2 px-3 py-1 text-sm">{c.qty > 1 && <strong>{c.qty}x </strong>}{c.name}</li>
+          ))}
+        </ul>
+      )}
       {offer.message && <p className="text-sm leading-relaxed whitespace-pre-line text-muted">{offer.message}</p>}
 
       {offer.status === "pending" && (
@@ -54,7 +69,7 @@ function ReceivedOffer({ listingId, offer, priceCents }: { listingId: string; of
           <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); run("counter", counter); }}>
             <label className="sr-only" htmlFor={`counter-${offer.id}`}>Valor da contraproposta</label>
             <input id={`counter-${offer.id}`} inputMode="decimal" value={counter} onChange={(e) => setCounter(e.target.value)} className="input flex-1" autoFocus
-              placeholder={priceCents != null ? `Entre ${formatPrice(offer.amountCents)} e ${formatPrice(priceCents)}` : "Valor"} />
+              placeholder={priceCents != null ? `Entre ${formatPrice(offer.amountCents)} e ${formatPrice(priceCents)}` : `Mais de ${formatPrice(offer.amountCents)}`} />
             <button type="submit" disabled={pending || !counter.trim()} className={buttonClass("gold", "md")}>
               {pending && <Loader2 size={16} className="animate-spin" aria-hidden />} Enviar
             </button>
@@ -68,6 +83,15 @@ function ReceivedOffer({ listingId, offer, priceCents }: { listingId: string; of
           </div>
         )
       )}
+      <div className="flex flex-wrap gap-2">
+        <Link href={chatHref(listingId, offer.buyer.id)} className={buttonClass("secondary", "sm")}><MessagesSquare size={15} aria-hidden /> Conversar</Link>
+        {whatsapp && (
+          <a href={whatsappLink(whatsapp, `Oi ${offer.buyer.displayName}! Vi tua oferta no Riftzada pelo ${cardName}: ${offerSummary(offer)}.`)}
+            target="_blank" rel="noopener noreferrer" className={buttonClass("secondary", "sm")}>
+            <MessageCircle size={15} aria-hidden /> WhatsApp
+          </a>
+        )}
+      </div>
     </article>
   );
 }

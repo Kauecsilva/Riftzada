@@ -37,6 +37,13 @@ const instagram = z
   .pipe(z.union([z.literal(""), z.string().regex(/^[A-Za-z0-9_.]{1,30}$/, "Instagram inválido")]))
   .transform((v) => v || null);
 
+/** "(11) 98765-4321" vira "11987654321"; vazio vira null. */
+const whatsapp = z
+  .string()
+  .transform((v) => v.replace(/\D/g, ""))
+  .pipe(z.union([z.literal(""), z.string().regex(/^\d{10,13}$/, "WhatsApp: DDD + número")]))
+  .transform((v) => v || null);
+
 export const profileSchema = z
   .object({
     displayName: requiredText(1, 40, "Nome"),
@@ -53,11 +60,7 @@ export const profileSchema = z
       .union([z.literal(""), z.enum(UFS, "Estado inválido")])
       .optional()
       .transform((v) => v || null),
-    whatsapp: z
-      .string()
-      .transform((v) => v.replace(/\D/g, ""))
-      .pipe(z.union([z.literal(""), z.string().regex(/^\d{10,13}$/, "WhatsApp: DDD + número")]))
-      .transform((v) => v || null),
+    whatsapp,
     shareWhatsapp: checkbox,
     avatarPath: optionalText(200),
   })
@@ -108,12 +111,43 @@ export const listingSchema = z.object({
   minOffer: brl("Oferta mínima inválida"),
   description: optionalText(1000),
   imagePath: optionalText(200),
+  /** Só vem quando o vendedor ainda não compartilha WhatsApp: preenchido, passa a compartilhar. */
+  whatsapp: whatsapp.optional().transform((v) => v ?? null),
 });
 
-export const offerSchema = z.object({
+const offerCard = z.object({
+  name: requiredText(1, 120, "Carta"),
+  qty: z.coerce.number().int().min(1).max(99).default(1),
+  cardId: z.uuid().nullable().optional().transform((v) => v ?? null),
+});
+
+/** Cartas da troca chegam como JSON num campo escondido do formulário. */
+const offerCards = z
+  .string()
+  .optional()
+  .transform((v, ctx) => {
+    try {
+      return JSON.parse(v || "[]") as unknown;
+    } catch {
+      ctx.addIssue({ code: "custom", message: "Lista de cartas inválida" });
+      return z.NEVER;
+    }
+  })
+  .pipe(z.array(offerCard).max(10, "No máximo 10 cartas"));
+
+export const offerSchema = z
+  .object({
+    listingId: uuid,
+    amount: brl("Valor inválido").transform((v) => v ?? 0),
+    cards: offerCards,
+    message: optionalText(280),
+  })
+  .refine((v) => v.amount > 0 || v.cards.length > 0, { message: "Diz quanto você oferece ou quais cartas", path: ["amount"] });
+
+export const messageSchema = z.object({
   listingId: uuid,
-  amount: brl("Valor inválido").pipe(z.number({ error: "Diz quanto você oferece" }).int().min(1, "Diz quanto você oferece")),
-  message: optionalText(280),
+  buyerId: uuid,
+  body: requiredText(1, 1000, "Mensagem"),
 });
 
 export const offerResponseSchema = z.object({

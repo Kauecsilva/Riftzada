@@ -3,16 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
-import { isActive, NAV_ITEMS } from "./nav-items";
+import { isActive, NAV_ITEMS, unreadLabel } from "./nav-items";
 import { PublishMenu } from "./PublishMenu";
 
 /** Barra inferior do celular: Home, Arena, +, Mercado, Perfil. */
-export function BottomNav({ isAdmin, isStore }: { isAdmin: boolean; isStore: boolean }) {
+export function BottomNav({ isAdmin, isStore, unread }: { isAdmin: boolean; isStore: boolean; unread: number }) {
   const path = usePathname();
   const [home, arena, market, profile] = NAV_ITEMS;
 
   const item = (it: (typeof NAV_ITEMS)[number]) => {
     const active = isActive(path, it.href, "exact" in it ? it.exact : false);
+    const badge = it.href === "/mercado" ? unreadLabel(unread) : null;
     return (
       <li className="flex-1">
         <Link
@@ -20,8 +21,12 @@ export function BottomNav({ isAdmin, isStore }: { isAdmin: boolean; isStore: boo
           aria-current={active ? "page" : undefined}
           className={cn("flex min-h-14 flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-colors", active ? "text-gold-strong" : "text-faint hover:text-muted")}
         >
-          <it.icon size={23} strokeWidth={active ? 2.4 : 2} className={active ? "text-gold" : undefined} aria-hidden />
+          <span className="relative">
+            <it.icon size={23} strokeWidth={active ? 2.4 : 2} className={active ? "text-gold" : undefined} aria-hidden />
+            {badge && <span className="absolute -top-1.5 -right-2.5 min-w-4 rounded-full bg-gold px-1 text-center text-[10px] leading-4 font-bold text-bg">{badge}</span>}
+          </span>
           {it.label}
+          {badge && <span className="sr-only">, {badge} mensagens não lidas</span>}
         </Link>
       </li>
     );
