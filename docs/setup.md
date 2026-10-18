@@ -48,7 +48,7 @@ Status: **validado** (rodou aqui), **configurado** (arquivo no lugar, sem execu�
 | Memória | instruções versionadas (`AGENTS.md`, docs) | configurado | A memória do Claude no projeto está desligada nas configurações do dono; o que precisa durar fica nos docs |
 | Obsidian | não | não se aplica | Sem necessidade concreta |
 | Skills de artefatos da Anthropic | `webapp-testing`, `mcp-builder` | validado | Descobertas na sessão |
-| Firecrawl (pedido à parte) | MCP + 3 skills | bloqueado | Rede nega `mcp.firecrawl.dev`; depois de liberar, conectar uma conta Firecrawl em `/mcp` |
+| Firecrawl (pedido à parte) | conector Firecrawl do claude.ai + 3 skills | validado | Conectado em 18/10/2026; uma busca real respondeu. Saiu do `.mcp.json`, cujo servidor direto era bloqueado pela rede da nuvem |
 | ESLint quality gates | perfil Next leve + autoteste + perfil tipado | validado | Ver [`docs/quality.md`](quality.md#adoção-medida-em-18102026) |
 | Hooks do cliente | `superpowers-session-start.sh`, `cloud-setup.sh` | validado | Sem hooks de Git, conforme o toolkit |
 | Avaliação do harness (prompt 14) | não rodada | pendente | Precisa de sessões novas e descartáveis; rodar quando quiser medir o comportamento |
@@ -65,4 +65,4 @@ Subagentes usam o modelo da sessão. Delegar só com tarefa independente, arquiv
 4. Regras de lint: copie `eslint-rules/` e `scripts/verify-quality-rules.mjs` da mesma revisão e rode `npm run lint:rules`.
 5. Atualize este arquivo com a data, a revisão e o que mudou.
 
-Gatilhos para rever: Next.js mudar de major, adoção de shadcn/ui ou Sentry, código passar de ~30 mil linhas (Graphify), liberação de rede para Context7/Firecrawl.
+Gatilhos para rever: Next.js mudar de major, adoção de shadcn/ui ou Sentry, código passar de ~30 mil linhas (Graphify) e liberação de rede para o Context7.

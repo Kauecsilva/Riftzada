@@ -50,7 +50,7 @@ Confira se a skill ou o servidor está disponível antes de depender dele. Detal
 - Bundle pesado ou rota lenta: `next-bundle-optimizer`, com evidência do analyzer.
 - Banco, migrations, RLS, SQL: `supabase` e `supabase-postgres-best-practices` antes de escrever; `npm run test:sql` depois.
 - Revisão: `requesting-code-review` / `ponytail-review` para qualidade; `differential-review` e [`docs/prompts/security-review.md`](docs/prompts/security-review.md) para mudanças sensíveis (auth, RLS, storage, dados pessoais).
-- Docs e textos: `writing-guidelines`. Pesquisa na web: `firecrawl` (precisa de conta conectada).
+- Docs e textos: `writing-guidelines`. Pesquisa na web: `firecrawl` (conector do claude.ai).
 - Vercel: `deploy-to-vercel` e `vercel-cli-with-tokens` só quando pedirem publicação; `vercel-optimize` com métricas reais.
 - Faltou uma capacidade: `find-skills`. Criar skill nova: `writing-skills`.
 
