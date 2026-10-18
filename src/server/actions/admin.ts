@@ -200,6 +200,44 @@ export async function updateMember(userId: string, change: { role?: MemberRole; 
   return { ok: true, message: "Acesso atualizado." };
 }
 
+// ---------- Lojas ----------
+
+/** Aprova o pedido: a partir daqui o dono cria os eventos da loja. */
+export async function approveStore(id: string): Promise<ActionState> {
+  const blocked = demoBlocked();
+  if (blocked) return blocked;
+  const session = await requireAdmin();
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("stores")
+    .update({ approved_at: new Date().toISOString(), approved_by: session.userId })
+    .eq("id", id)
+    .eq("community_id", session.communityId);
+  if (error) return dbError(error);
+  revalidatePath("/admin", "layout");
+  revalidatePath("/arena", "layout");
+  revalidatePath("/loja", "layout");
+  return { ok: true, message: "Loja aprovada." };
+}
+
+/** Recusa o pedido apagando a loja pendente (loja já aprovada não passa por aqui). */
+export async function rejectStore(id: string): Promise<ActionState> {
+  const blocked = demoBlocked();
+  if (blocked) return blocked;
+  const session = await requireAdmin();
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("stores")
+    .delete()
+    .eq("id", id)
+    .eq("community_id", session.communityId)
+    .is("approved_at", null);
+  if (error) return dbError(error);
+  revalidatePath("/admin", "layout");
+  revalidatePath("/loja", "layout");
+  return { ok: true, message: "Pedido recusado." };
+}
+
 // ---------- Ranking ----------
 
 export async function saveRankingRules(_: ActionState, form: FormData): Promise<ActionState> {

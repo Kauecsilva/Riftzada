@@ -1,6 +1,6 @@
 "use server";
 
-// Lojas: qualquer membro cadastra a sua e cuida dos eventos dela.
+// Lojas: qualquer membro pede o cadastro da sua; depois que um admin aprova, o dono cuida dos eventos dela.
 // A checagem aqui é para dar uma mensagem clara; quem barra de verdade é a RLS (is_store_owner).
 
 import { randomUUID } from "node:crypto";
@@ -12,7 +12,7 @@ import { isOwnMediaPath } from "@/lib/images";
 import { createClient } from "@/lib/supabase/server";
 import { formToObject, zodErrorState, type ActionState } from "@/lib/validation/common";
 import { storeEventSchema, storeSchema } from "@/lib/validation/schemas";
-import { canManageStore } from "../queries/stores";
+import { canEditStore, canManageStore } from "../queries/stores";
 import { requireSession } from "../session";
 import { dbError, demoBlocked } from "./helpers";
 
@@ -33,7 +33,7 @@ export async function saveStore(_: ActionState, form: FormData): Promise<ActionS
   const parsed = storeSchema.safeParse(formToObject(form));
   if (!parsed.success) return zodErrorState(parsed.error);
   const { id, ...v } = parsed.data;
-  if (id && !(await canManageStore(id))) return { ok: false, message: "Você não cuida dessa loja." };
+  if (id && !(await canEditStore(id))) return { ok: false, message: "Você não cuida dessa loja." };
 
   const supabase = await createClient();
   const { error } = id

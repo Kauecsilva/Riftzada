@@ -173,7 +173,7 @@ export function demoEvent(id: string): EventDetail | null {
 // ---------- Lojas ----------
 
 export function demoStoreList(): Store[] {
-  return demoStores.map((st) => ({ id: st.id, name: st.name, address: st.address, instagram: st.instagram, description: st.description, owner: mini(st.ownerId) }));
+  return demoStores.map((st) => ({ id: st.id, name: st.name, address: st.address, instagram: st.instagram, description: st.description, owner: mini(st.ownerId), approved: true }));
 }
 
 export function demoStoreEventList(storeId: string): EventSummary[] {

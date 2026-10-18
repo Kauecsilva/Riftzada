@@ -1,16 +1,18 @@
 import Link from "next/link";
-import { CalendarPlus, ShieldCheck, Trophy, Users, BarChart3 } from "lucide-react";
+import { CalendarPlus, ShieldCheck, Store, Trophy, Users, BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { eventWhen } from "@/lib/format";
 import { getAllEvents, getMembers } from "@/server/queries/admin";
+import { getPendingStores } from "@/server/queries/stores";
 
 export default async function AdminHome() {
-  const [events, members] = await Promise.all([getAllEvents(), getMembers()]);
+  const [events, members, storeRequests] = await Promise.all([getAllEvents(), getMembers(), getPendingStores()]);
   const pending = events.filter((e) => e.status !== "finished" && e.status !== "cancelled" && new Date(e.startsAt) < new Date());
   const shortcuts = [
     { href: "/admin/eventos/novo", label: "Criar evento", icon: CalendarPlus, tone: "text-energy" },
     { href: "/admin/eventos", label: "Registrar resultado", icon: Trophy, tone: "text-gold" },
+    { href: "/admin/lojas", label: storeRequests.length ? `Pedidos de loja (${storeRequests.length})` : "Pedidos de loja", icon: Store, tone: "text-energy" },
     { href: "/admin/moderacao", label: "Moderar conteúdo", icon: ShieldCheck, tone: "text-rift-strong" },
     { href: "/admin/usuarios", label: `Usuários (${members.length})`, icon: Users, tone: "text-silver" },
     { href: "/admin/ranking", label: "Configurar ranking", icon: BarChart3, tone: "text-sell" },

@@ -6,8 +6,8 @@ import type { EventSummary, Store } from "@/types/domain";
 import { getCommunityId, getSession } from "../session";
 import { EVENT_FIELDS, mapEvent, mapStore, STORE_FIELDS, type EventRow, type StoreRow } from "./mappers";
 
-/** Lojas da comunidade, em ordem alfabética. */
-export async function getStores(): Promise<Store[]> {
+/** Lojas que o usuário enxerga (a RLS mostra pendente só ao dono e ao admin), em ordem alfabética. */
+async function listStores(): Promise<Store[]> {
   if (isDemoMode) return demo.demoStoreList();
   const [supabase, communityId] = await Promise.all([createClient(), getCommunityId()]);
   const { data, error } = await supabase
@@ -20,25 +20,46 @@ export async function getStores(): Promise<Store[]> {
   return data.map(mapStore);
 }
 
-export async function getStore(id: string): Promise<Store | null> {
-  return (await getStores()).find((s) => s.id === id) ?? null;
+/** Lojas aprovadas: as que aparecem na Arena. */
+export async function getStores(): Promise<Store[]> {
+  return (await listStores()).filter((s) => s.approved);
 }
 
-/** Lojas que o usuário logado cuida. */
+/** Pedidos de loja esperando o admin. */
+export async function getPendingStores(): Promise<Store[]> {
+  return (await listStores()).filter((s) => !s.approved);
+}
+
+export async function getStore(id: string): Promise<Store | null> {
+  return (await listStores()).find((s) => s.id === id) ?? null;
+}
+
+/** Lojas que o usuário logado cuida, aprovadas ou não. */
 export async function getMyStores(): Promise<Store[]> {
   const session = await getSession();
   if (!session) return [];
-  return (await getStores()).filter((s) => s.owner.id === session.userId);
+  return (await listStores()).filter((s) => s.owner.id === session.userId);
 }
 
-/** Quem pode cadastrar e editar eventos da loja: o dono e o admin. */
-export async function canManageStore(storeId: string | null | undefined): Promise<boolean> {
-  if (!storeId) return false;
+async function storeAccess(storeId: string | null | undefined): Promise<"admin" | "owner" | "pending-owner" | null> {
+  if (!storeId) return null;
   const session = await getSession();
-  if (!session) return false;
-  if (session.role === "admin") return true;
+  if (!session) return null;
+  if (session.role === "admin") return "admin";
   const store = await getStore(storeId);
-  return store?.owner.id === session.userId;
+  if (store?.owner.id !== session.userId) return null;
+  return store.approved ? "owner" : "pending-owner";
+}
+
+/** Quem edita os dados da loja: o dono (mesmo antes da aprovação) e o admin. */
+export async function canEditStore(storeId: string | null | undefined): Promise<boolean> {
+  return (await storeAccess(storeId)) !== null;
+}
+
+/** Quem cadastra e edita eventos da loja: o dono de loja aprovada e o admin. */
+export async function canManageStore(storeId: string | null | undefined): Promise<boolean> {
+  const access = await storeAccess(storeId);
+  return access === "admin" || access === "owner";
 }
 
 /** Eventos da loja que ainda vão acontecer (ou estão rolando), do mais próximo ao mais distante. */

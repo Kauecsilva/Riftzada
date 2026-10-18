@@ -27,7 +27,7 @@ export function StoreForm({ store }: { store?: Store }) {
         <textarea {...fieldProps("description", err.description)} defaultValue={store?.description ?? ""} maxLength={500} className="input" placeholder="Horários, mesas livres, o que tem para vender…" />
       </Field>
       <FormMessage state={state} />
-      <SubmitButton>{store ? "Salvar loja" : "Cadastrar loja"}</SubmitButton>
+      <SubmitButton>{store ? "Salvar loja" : "Enviar para aprovação"}</SubmitButton>
     </form>
   );
 }

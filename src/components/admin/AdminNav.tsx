@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, CalendarDays, LayoutDashboard, ShieldCheck, Users } from "lucide-react";
+import { BarChart3, CalendarDays, LayoutDashboard, ShieldCheck, Store, Users } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 const LINKS = [
   { href: "/admin", label: "Painel", icon: LayoutDashboard, exact: true },
   { href: "/admin/eventos", label: "Eventos", icon: CalendarDays },
+  { href: "/admin/lojas", label: "Lojas", icon: Store },
   { href: "/admin/moderacao", label: "Moderação", icon: ShieldCheck },
   { href: "/admin/usuarios", label: "Usuários", icon: Users },
   { href: "/admin/ranking", label: "Ranking", icon: BarChart3 },

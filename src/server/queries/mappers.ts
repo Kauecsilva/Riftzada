@@ -92,11 +92,11 @@ export function mapEvent(row: EventRow, viewerId: string | null): EventSummary {
 }
 
 // ---------- Lojas ----------
-export const STORE_FIELDS = `id, name, address, instagram, description, owner:profiles!stores_owner_id_fkey(${MINI})`;
-export type StoreRow = { id: string; name: string; address: string | null; instagram: string | null; description: string | null; owner: MiniRow };
+export const STORE_FIELDS = `id, name, address, instagram, description, approved_at, owner:profiles!stores_owner_id_fkey(${MINI})`;
+export type StoreRow = { id: string; name: string; address: string | null; instagram: string | null; description: string | null; approved_at: string | null; owner: MiniRow };
 
 export function mapStore(row: StoreRow): Store {
-  return { id: row.id, name: row.name, address: row.address, instagram: row.instagram, description: row.description, owner: mapMini(row.owner) };
+  return { id: row.id, name: row.name, address: row.address, instagram: row.instagram, description: row.description, owner: mapMini(row.owner), approved: row.approved_at !== null };
 }
 
 export const RESULT_FIELDS = `id, event_id, placement, guest_name, record, notes,
