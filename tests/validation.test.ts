@@ -56,8 +56,8 @@ describe("formatRegion", () => {
 
 describe("cadastro", () => {
   it("apelido sem espaço nem acento", () => {
-    expect(signUpSchema.safeParse({ displayName: "K", username: "kauê silva", email: "a@b.com", password: "12345678" }).success).toBe(false);
-    expect(signUpSchema.parse({ displayName: "K", username: "Kaue_01", email: "A@B.com", password: "12345678" }).username).toBe("kaue_01");
+    expect(signUpSchema.safeParse({ username: "kauê silva", email: "a@b.com", password: "12345678" }).success).toBe(false);
+    expect(signUpSchema.parse({ username: "Kaue_01", email: "A@B.com", password: "12345678" }).username).toBe("kaue_01");
   });
 });
 

@@ -21,10 +21,7 @@ export function SignUpForm() {
   }
   return (
     <form action={action} className="space-y-4" noValidate>
-      <Field label="Como a galera te chama?" name="displayName" error={err.displayName}>
-        <input {...fieldProps("displayName", err.displayName)} autoComplete="name" maxLength={40} required className="input" placeholder="Kauê" />
-      </Field>
-      <Field label="Apelido" name="username" error={err.username} hint="Vai no teu link: riftzada.app/jogador/apelido">
+      <Field label="Apelido" name="username" error={err.username} hint="É como a galera te vê na Riftzada. Letras, números e _.">
         <input {...fieldProps("username", err.username, "hint")} autoComplete="username" maxLength={20} required pattern="[a-zA-Z0-9_]{3,20}" className="input lowercase" placeholder="kaue" />
       </Field>
       <Field label="E-mail" name="email" error={err.email} hint="Ninguém da comunidade vê teu e-mail.">
