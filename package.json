@@ -7,10 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "lint:rules": "node scripts/verify-quality-rules.mjs",
+    "lint:typed": "eslint -c eslint.typed.config.mjs",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:sql": "tests/sql/run.sh",
-    "seed:sql": "node scripts/generate-seed.mts"
+    "seed:sql": "node scripts/generate-seed.mts",
+    "check": "npm run lint && npm run lint:rules && npm run lint:typed && npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
