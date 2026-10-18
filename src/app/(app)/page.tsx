@@ -41,7 +41,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
     getNextEvent(),
     getRanking(5),
     getFeed({ limit: PAGE, before }),
-    getUnreadCount(),
+    requireSession().then((s) => getUnreadCount(s.userId)),
   ]);
   const flash = Object.keys(FLASH).find((k) => params[k]);
 

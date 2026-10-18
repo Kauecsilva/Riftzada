@@ -15,5 +15,6 @@ describe("texto das notificações", () => {
 
   it("funciona sem valor e sem nome da carta (anúncio oculto)", () => {
     expect(notificationText({ kind: "offer_received", cardName: null, amountCents: null })).toBe("fez uma oferta por um anúncio seu");
+    expect(notificationText({ kind: "offer_received", cardName: "Ahri", amountCents: 0 })).toBe("fez uma oferta por Ahri");
   });
 });

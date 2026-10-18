@@ -20,8 +20,13 @@ const KIND_HINT: Record<ListingKind, string> = {
   want: "Tá procurando alguma carta.",
 };
 
-/** Novo anúncio, edição, ou anúncio a partir de um item da coleção (`fromCollection` já preenche tudo). */
-export function ListingForm({ userId, listing, fromCollection }: { userId: string; listing?: Listing; fromCollection?: CollectionItem }) {
+/**
+ * Novo anúncio, edição, ou anúncio a partir de um item da coleção (`fromCollection` já preenche tudo).
+ * Quem ainda não compartilha WhatsApp pode deixar o número aqui mesmo (vai para o perfil).
+ */
+export function ListingForm({ userId, listing, fromCollection, sharesWhatsapp }: {
+  userId: string; listing?: Listing; fromCollection?: CollectionItem; sharesWhatsapp: boolean;
+}) {
   const [state, action] = useActionState(saveListing.bind(null, listing?.id ?? null), initialActionState);
   const [kind, setKind] = useState<ListingKind>(listing?.kind ?? "sell");
   const [setName, setSetName] = useState(listing?.setName ?? fromCollection?.card.setName ?? "");
@@ -136,7 +141,7 @@ export function ListingForm({ userId, listing, fromCollection }: { userId: strin
       {kind !== "trade" && (
         <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl border border-line bg-surface-2 px-4">
           <input type="checkbox" name="acceptsTrade" defaultChecked={listing?.acceptsTrade} className="size-5 accent-rift" />
-          <span className="text-sm font-medium">Aceito troca também</span>
+          <span className="text-sm font-medium">Aceito troca também <span className="font-normal text-faint">(cartas, com ou sem dinheiro)</span></span>
         </label>
       )}
 
@@ -147,6 +152,13 @@ export function ListingForm({ userId, listing, fromCollection }: { userId: strin
       <Field label="Detalhes" name="description" error={err.description} optional>
         <textarea {...fieldProps("description", err.description)} defaultValue={listing?.description ?? ""} maxLength={1000} className="input" placeholder="Estado, o que aceita em troca, onde entrega…" />
       </Field>
+
+      {!sharesWhatsapp && (
+        <Field label="Teu WhatsApp" name="whatsapp" error={err.whatsapp} optional
+          hint="Quem se interessar te chama direto, já com a carta e a oferta na mensagem. Fica no teu perfil e dá para tirar quando quiser.">
+          <input {...fieldProps("whatsapp", err.whatsapp, "hint")} type="tel" inputMode="tel" autoComplete="tel" className="input" placeholder="(11) 98765-4321" />
+        </Field>
+      )}
 
       <FormMessage state={state} />
       <SubmitButton>{listing ? "Salvar anúncio" : "Anunciar"}</SubmitButton>

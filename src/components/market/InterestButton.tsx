@@ -1,28 +1,31 @@
 import Link from "next/link";
-import { MessageCircle, UserRound } from "lucide-react";
+import { MessageCircle, MessagesSquare } from "lucide-react";
 import { buttonClass } from "@/components/ui/button";
+import { chatHref } from "@/lib/domain/chat";
+import { whatsappLink } from "@/lib/domain/offers";
 import type { Listing } from "@/types/domain";
 
 /**
- * "Tenho interesse": abre o WhatsApp só se o vendedor escolheu compartilhar o número.
- * Sem número, leva ao perfil (o contato acontece na loja ou pelo Instagram, se houver).
+ * Falar com quem anunciou: a conversa do app sempre; o WhatsApp só se a pessoa escolheu compartilhar,
+ * já com a carta na mensagem.
  */
-export function InterestButton({ listing, whatsapp }: { listing: Listing; whatsapp: string | null }) {
-  if (whatsapp) {
-    const text = encodeURIComponent(`Oi ${listing.seller.displayName}! Vi teu anúncio de ${listing.cardName} na Riftzada. Ainda tá disponível?`);
-    const number = whatsapp.length <= 11 ? `55${whatsapp}` : whatsapp;
-    return (
-      <a href={`https://wa.me/${number}?text=${text}`} target="_blank" rel="noopener noreferrer" className={buttonClass("primary", "lg", "w-full")}>
-        <MessageCircle size={20} aria-hidden /> Tenho interesse
-      </a>
-    );
-  }
+export function InterestButton({ listing, me, whatsapp }: { listing: Listing; me: string; whatsapp: string | null }) {
+  const name = listing.seller.displayName;
+  const text = listing.kind === "want"
+    ? `Oi ${name}! Vi no Riftzada que você procura ${listing.cardName}. Eu tenho, bora negociar?`
+    : `Oi ${name}! Vi teu anúncio de ${listing.cardName} no Riftzada. Ainda tá disponível?`;
   return (
-    <div className="space-y-2">
-      <Link href={`/jogador/${listing.seller.username}`} className={buttonClass("primary", "lg", "w-full")}>
-        <UserRound size={20} aria-hidden /> Tenho interesse
+    <section className="space-y-2" aria-label={`Falar com ${name}`}>
+      <Link href={chatHref(listing.id, me)} className={buttonClass("primary", "lg", "w-full")}>
+        <MessagesSquare size={20} aria-hidden /> {listing.kind === "want" ? "Tenho essa carta" : `Conversar com ${name}`}
       </Link>
-      <p className="text-center text-xs text-muted">{listing.seller.displayName} não deixou WhatsApp. Chama no perfil ou na próxima ida à loja.</p>
-    </div>
+      {whatsapp ? (
+        <a href={whatsappLink(whatsapp, text)} target="_blank" rel="noopener noreferrer" className={buttonClass("secondary", "lg", "w-full")}>
+          <MessageCircle size={20} aria-hidden /> Chamar no WhatsApp
+        </a>
+      ) : (
+        <p className="text-center text-xs text-muted">{name} não deixou WhatsApp. A conversa fica aqui no app.</p>
+      )}
+    </section>
   );
 }

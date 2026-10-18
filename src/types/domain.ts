@@ -177,18 +177,51 @@ export type CardPrice = {
   updatedAt: string;
 };
 
+/** Menor preço da LigaRiftbound, coletado automaticamente (idioma e condição da oferta mais barata). */
+export type LigaPrice = {
+  finish: "normal" | "foil";
+  lowCents: number;
+  avgCents: number | null;
+  language: LigaLanguage | null;
+  condition: CardCondition | null;
+  url: string;
+  updatedAt: string;
+};
+
 /** Referências de preço de uma carta para o anúncio. */
-export type PriceReference = { tcgplayer: CardPrice[]; usdBrl: number | null; rateUpdatedAt: string | null };
+export type PriceReference = { tcgplayer: CardPrice[]; liga: LigaPrice[]; usdBrl: number | null; rateUpdatedAt: string | null };
+
+/** Carta oferecida numa troca (`cardId` quando veio do catálogo). */
+export type OfferCard = { name: string; qty: number; cardId: string | null };
 
 export type ListingOffer = {
   id: string;
   buyer: MiniProfile;
+  /** Valor em dinheiro; pode ser zero quando a oferta é só em cartas. */
   amountCents: number;
+  cards: OfferCard[];
   counterCents: number | null;
   message: string | null;
   status: OfferStatus;
   createdAt: string;
   updatedAt: string;
+};
+
+export type ListingMessage = {
+  id: string;
+  senderId: string;
+  body: string;
+  createdAt: string;
+};
+
+/** Conversa de um anúncio entre quem anunciou e uma pessoa interessada (`buyer`). */
+export type Conversation = {
+  listing: { id: string; cardName: string; kind: ListingKind; imageUrl: string | null; seller: MiniProfile };
+  buyer: MiniProfile;
+  /** A outra ponta, do ponto de vista de quem está vendo. */
+  other: MiniProfile;
+  last: ListingMessage;
+  unread: number;
 };
 
 export type CollectionItem = {

@@ -7,7 +7,7 @@ import { cn } from "@/lib/cn";
 import { Avatar } from "@/components/ui/Avatar";
 import type { MiniProfile } from "@/types/domain";
 import { Logo } from "./Logo";
-import { isActive, NAV_ITEMS } from "./nav-items";
+import { isActive, NAV_ITEMS, unreadLabel } from "./nav-items";
 import { PublishMenu } from "./PublishMenu";
 import { RiftboundCredit } from "./RiftboundCredit";
 
@@ -57,7 +57,7 @@ export function SideNav({ me, isAdmin, isStore, unread }: { me: MiniProfile; isA
               Avisos
               {unread > 0 && (
                 <span className="ml-auto rounded-full bg-rift px-2 font-sans text-xs leading-5 font-bold text-on-rift">
-                  {unread > 9 ? "9+" : unread}<span className="sr-only"> não {unread === 1 ? "lida" : "lidas"}</span>
+                  {unreadLabel(unread)}<span className="sr-only"> não {unread === 1 ? "lida" : "lidas"}</span>
                 </span>
               )}
             </Link>

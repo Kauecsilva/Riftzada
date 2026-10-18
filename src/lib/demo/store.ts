@@ -303,20 +303,20 @@ export function demoOffers(listingId: string): ListingOffer[] {
   const seller = demoListings.find((l) => l.id === listingId)?.sellerId;
   return demoOfferRows
     .filter((o) => o.listingId === listingId && (seller === DEMO_USER_ID || o.buyerId === DEMO_USER_ID))
-    .map((o) => {
-      const at = resolveRelDate(o.createdAt);
-      return { id: o.id, buyer: mini(o.buyerId), amountCents: o.amountCents, counterCents: o.counterCents, message: o.message, status: o.status, createdAt: at, updatedAt: at };
+    .map(({ id, buyerId, amountCents, cards, counterCents, message, status, createdAt }) => {
+      const at = resolveRelDate(createdAt);
+      return { id, buyer: mini(buyerId), amountCents, cards: cards.map((c) => ({ ...c, cardId: null })), counterCents, message, status, createdAt: at, updatedAt: at };
     });
 }
 
-/** Preço fictício do TCGplayer (US$ 18 o menor anúncio) para o formulário funcionar no demo. */
+/** Preços fictícios (TCGplayer US$ 18, Liga R$ 119,90) para o formulário funcionar no demo. */
 export function demoPriceReference(cardId: string): PriceReference {
-  if (!demoCards.some((c) => c.id === cardId)) return { tcgplayer: [], usdBrl: null, rateUpdatedAt: null };
+  if (!demoCards.some((c) => c.id === cardId)) return { tcgplayer: [], liga: [], usdBrl: null, rateUpdatedAt: null };
   const now = new Date().toISOString();
   return {
     tcgplayer: [{ finish: "normal", lowCents: 1800, marketCents: 2150, productUrl: "https://www.tcgplayer.com/search/riftbound-league-of-legends-trading-card-game/product", updatedAt: now }],
-    usdBrl: 5.08,
-    rateUpdatedAt: now,
+    liga: [{ finish: "normal", lowCents: 11990, avgCents: 13500, language: "en", condition: "nm", url: "https://www.ligariftbound.com.br/", updatedAt: now }],
+    usdBrl: 5.08, rateUpdatedAt: now,
   };
 }
 

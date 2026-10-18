@@ -9,9 +9,10 @@ export const dynamic = "force-dynamic";
 
 /** Casca do app logado: barra lateral no desktop, barra inferior no celular. */
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const [session, unread] = await Promise.all([requireSession(), getUnreadCount()]);
+  const session = await requireSession();
   const isAdmin = session.role === "admin";
   const isStore = session.profile.accountKind === "store";
+  const unread = await getUnreadCount(session.userId);
   return (
     <div className="mx-auto flex max-w-[1320px]">
       <SideNav me={session.profile} isAdmin={isAdmin} isStore={isStore} unread={unread} />

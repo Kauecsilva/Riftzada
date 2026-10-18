@@ -4,7 +4,8 @@ import type { AppNotification } from "@/types/domain";
 /** O que o outro jogador fez, sem o nome dele: "ofereceu R$ 75 por Kai'Sa". */
 export function notificationText(n: Pick<AppNotification, "kind" | "cardName" | "amountCents">): string {
   const card = n.cardName ?? "um anúncio seu";
-  const value = formatPrice(n.amountCents);
+  // Oferta só em cartas vem com valor 0: sem "R$ 0" no texto
+  const value = n.amountCents ? formatPrice(n.amountCents) : null;
   switch (n.kind) {
     case "offer_received":
       return value ? `ofereceu ${value} por ${card}` : `fez uma oferta por ${card}`;

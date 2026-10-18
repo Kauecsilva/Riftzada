@@ -3,6 +3,7 @@ import { cache } from "react";
 import { isDemoMode } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import { demoNotifications } from "@/lib/demo/notifications";
+import { getUnreadCount as getUnreadMessages } from "./chat";
 import type { AppNotification, NotificationKind } from "@/types/domain";
 import { mapMini, MINI, type MiniRow } from "./mappers";
 
@@ -37,11 +38,15 @@ export async function getNotifications(limit = 50): Promise<AppNotification[]> {
   }));
 }
 
-/** Quantos avisos não lidos (para o sininho). Falha vira 0: o contador nunca derruba a página. */
-export const getUnreadCount = cache(async (): Promise<number> => {
-  if (isDemoMode) return demoNotifications().filter((n) => !n.readAt).length;
+/**
+ * O número do sininho: avisos não lidos + mensagens de chat não lidas (um contador só no app).
+ * Falha vira 0: o contador nunca derruba a página.
+ */
+export const getUnreadCount = cache(async (userId: string): Promise<number> => {
+  const messages = getUnreadMessages(userId);
+  if (isDemoMode) return demoNotifications().filter((n) => !n.readAt).length + (await messages);
   const supabase = await createClient();
   const { count, error } = await supabase.from("notifications").select("id", { count: "exact", head: true }).is("read_at", null);
   if (error) console.error("[db]", error.code, error.message);
-  return count ?? 0;
+  return (count ?? 0) + (await messages);
 });

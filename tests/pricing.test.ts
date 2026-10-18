@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  applyDiscount, centsToInput, cheapestBase, comparePrices, discountLabel, ligaCardUrl, parseBrl, pickTcgPrice, tcgBrlCents, usdToBrlCents,
+  applyDiscount, centsToInput, cheapestBase, comparePrices, discountLabel, ligaCardUrl, parseBrl, pickFinish, tcgBrlCents, usdToBrlCents,
 } from "@/lib/domain/pricing";
 import { listingSchema, offerSchema } from "@/lib/validation/schemas";
 import type { CardPrice } from "@/types/domain";
@@ -27,10 +27,10 @@ describe("preço sugerido", () => {
   });
 
   it("escolhe o acabamento pela variante", () => {
-    expect(pickTcgPrice([normal, foil], "Foil")).toBe(foil);
-    expect(pickTcgPrice([normal, foil], null)).toBe(normal);
-    expect(pickTcgPrice([foil], "")).toBe(foil);
-    expect(pickTcgPrice([], "Foil")).toBeNull();
+    expect(pickFinish([normal, foil], "Foil")).toBe(foil);
+    expect(pickFinish([normal, foil], null)).toBe(normal);
+    expect(pickFinish([foil], "")).toBe(foil);
+    expect(pickFinish([], "Foil")).toBeNull();
   });
 
   it("usa o menor anúncio do TCGplayer e cai para o preço de mercado", () => {
@@ -79,7 +79,7 @@ describe("validação do anúncio e da oferta", () => {
 
   it("oferta precisa de valor", () => {
     const listingId = "00000000-0000-4000-8000-500000000001";
-    expect(offerSchema.parse({ listingId, amount: "75,00", message: "" })).toEqual({ listingId, amount: 7500, message: null });
+    expect(offerSchema.parse({ listingId, amount: "75,00", message: "" })).toEqual({ listingId, amount: 7500, cards: [], message: null });
     expect(offerSchema.safeParse({ listingId, amount: "" }).success).toBe(false);
     expect(offerSchema.safeParse({ listingId, amount: "0" }).success).toBe(false);
   });
