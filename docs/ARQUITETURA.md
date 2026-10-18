@@ -154,6 +154,7 @@ Todas as tabelas têm `id uuid` (exceto junções), `created_at`, RLS ligado, e 
 | `decks` | id, community_id, author_id, name, legend_id → cards, description, visibility, event_id?, record?, placement?, created_at | Fase 2 na UI completa; MVP já mostra e cria. |
 | `deck_cards` | deck_id, card_id?, card_name, quantity, section (`main`, `runes`, `battlefields`, `side`) | `card_name` garante a lista mesmo sem a carta no catálogo; `card_id` liga quando existir. |
 | `market_listings` | id, community_id, seller_id, kind, card_id?, card_name, set_name?, variant?, condition, quantity, price_cents?, accepts_trade, description?, image_path?, status, is_hidden, created_at | Sem pagamento. `card_id` opcional, `card_name` obrigatório. |
+| `notifications` | id, user_id → profiles, actor_id? → profiles, kind, listing_id?, offer_id?, amount_cents?, body?, read_at?, created_at | Avisos do que outro jogador fez com você (oferta recebida, contraproposta, aceite, recusa, retirada; `trade_offer` e `message` reservados para troca e chat). Nascem só por trigger via `notify()` (0015); o dono lê e marca como lido por `mark_notifications_read()`. |
 | `achievements` | id, code (único), name, description, icon, tier | Catálogo de badges. |
 | `user_achievements` | user_id, achievement_id, community_id, awarded_at, event_id? | Fase 2 concede automaticamente. |
 | `ranking_rules` | community_id (PK), points_by_placement int[], participation_points, updated_at | Pontuação configurável: ex. `{100,70,50,50}` + 10 por presença. |
@@ -280,6 +281,7 @@ Decks aparecem no MVP numa versão simples porque o "+" e o seed já pedem; curt
 | `/mercado` | Mercado | Filtros VENDE / TROCA / PROCURA, busca por nome, cards com foto, preço e status. |
 | `/mercado/[id]` | Anúncio | Foto, carta, set, variante, condição, quantidade, preço, aceita troca, vendedor, "Tenho interesse" (WhatsApp se o vendedor liberou, senão perfil). Dono: editar, mudar status, apagar. |
 | `/mercado/novo`, `/mercado/[id]/editar` | Anunciar carta | Tipo, carta, set, condição, quantidade, preço, troca, foto, descrição. |
+| `/notificacoes` | Notificações | Propostas recebidas e respostas às suas, mais novas primeiro; não lidas destacadas. Tocar marca como lida e abre o anúncio. Sininho com contador no topo da Home (celular) e "Avisos" na barra lateral (desktop); ponto na Home da barra inferior quando há novidade. |
 | `/decks/[id]`, `/decks/novo` | Deck | Lenda, autor, resultado, lista por seção, copiar lista, compartilhar. Novo deck por lista colada. |
 | `/jogador/[username]` | Perfil | Foto, nome, @, bio, deck favorito, Instagram · torneios, títulos, 2º, top 4 · histórico de resultados · decks · anúncios ativos · posts recentes. |
 | `/perfil/editar` | Editar perfil | Foto, nome, bio, lenda favorita, Instagram, WhatsApp e se quer mostrá-lo. |

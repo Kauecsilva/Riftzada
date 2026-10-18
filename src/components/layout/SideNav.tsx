@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut, Shield } from "lucide-react";
+import { Bell, LogOut, Shield } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Avatar } from "@/components/ui/Avatar";
 import type { MiniProfile } from "@/types/domain";
@@ -12,7 +12,7 @@ import { PublishMenu } from "./PublishMenu";
 import { RiftboundCredit } from "./RiftboundCredit";
 
 /** Navegação lateral do desktop (≥1024px). */
-export function SideNav({ me, isAdmin, isStore }: { me: MiniProfile; isAdmin: boolean; isStore: boolean }) {
+export function SideNav({ me, isAdmin, isStore, unread }: { me: MiniProfile; isAdmin: boolean; isStore: boolean; unread: number }) {
   const path = usePathname();
 
   return (
@@ -42,6 +42,26 @@ export function SideNav({ me, isAdmin, isStore }: { me: MiniProfile; isAdmin: bo
               </li>
             );
           })}
+          <li>
+            <Link
+              href="/notificacoes"
+              aria-current={path === "/notificacoes" ? "page" : undefined}
+              className={cn(
+                "relative flex min-h-12 items-center gap-3 rounded-md px-3 font-display text-lg font-semibold tracking-wide uppercase transition-colors",
+                path === "/notificacoes"
+                  ? "bg-linear-to-r from-gold-soft to-transparent text-gold-strong before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:bg-gold"
+                  : "text-muted hover:bg-surface hover:text-ink",
+              )}
+            >
+              <Bell size={21} className={path === "/notificacoes" ? "text-gold" : undefined} aria-hidden />
+              Avisos
+              {unread > 0 && (
+                <span className="ml-auto rounded-full bg-rift px-2 font-sans text-xs leading-5 font-bold text-on-rift">
+                  {unread > 9 ? "9+" : unread}<span className="sr-only"> não {unread === 1 ? "lida" : "lidas"}</span>
+                </span>
+              )}
+            </Link>
+          </li>
         </ul>
       </nav>
       <div className="mt-6">

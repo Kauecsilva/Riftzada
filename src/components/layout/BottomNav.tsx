@@ -7,11 +7,12 @@ import { isActive, NAV_ITEMS } from "./nav-items";
 import { PublishMenu } from "./PublishMenu";
 
 /** Barra inferior do celular: Home, Arena, +, Mercado, Perfil. */
-export function BottomNav({ isAdmin, isStore }: { isAdmin: boolean; isStore: boolean }) {
+export function BottomNav({ isAdmin, isStore, unread }: { isAdmin: boolean; isStore: boolean; unread: number }) {
   const path = usePathname();
   const [home, arena, market, profile] = NAV_ITEMS;
 
-  const item = (it: (typeof NAV_ITEMS)[number]) => {
+  // O sininho fica no topo da Home; aqui só um ponto avisando que tem novidade
+  const item = (it: (typeof NAV_ITEMS)[number], dot = false) => {
     const active = isActive(path, it.href, "exact" in it ? it.exact : false);
     return (
       <li className="flex-1">
@@ -20,8 +21,12 @@ export function BottomNav({ isAdmin, isStore }: { isAdmin: boolean; isStore: boo
           aria-current={active ? "page" : undefined}
           className={cn("flex min-h-14 flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-colors", active ? "text-gold-strong" : "text-faint hover:text-muted")}
         >
-          <it.icon size={23} strokeWidth={active ? 2.4 : 2} className={active ? "text-gold" : undefined} aria-hidden />
+          <span className="relative">
+            <it.icon size={23} strokeWidth={active ? 2.4 : 2} className={active ? "text-gold" : undefined} aria-hidden />
+            {dot && <span className="absolute -top-0.5 -right-1 size-2.5 rounded-full bg-rift ring-2 ring-bg" aria-hidden />}
+          </span>
           {it.label}
+          {dot && <span className="sr-only">(notificações novas)</span>}
         </Link>
       </li>
     );
@@ -30,7 +35,7 @@ export function BottomNav({ isAdmin, isStore }: { isAdmin: boolean; isStore: boo
   return (
     <nav aria-label="Principal" className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-gold-line/50 bg-bg/90 backdrop-blur-xl lg:hidden">
       <ul className="mx-auto flex max-w-lg items-end px-2">
-        {item(home)}
+        {item(home, unread > 0)}
         {item(arena)}
         <li className="flex flex-1 justify-center">
           <PublishMenu isAdmin={isAdmin} isStore={isStore} variant="fab" />
