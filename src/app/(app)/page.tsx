@@ -1,12 +1,15 @@
+import Image from "next/image";
 import { CalendarX2 } from "lucide-react";
 import { ChampionHero } from "@/components/arena/ChampionHero";
 import { EventCard } from "@/components/arena/EventCard";
 import { RankingList } from "@/components/arena/RankingList";
 import { FeedList } from "@/components/feed/FeedList";
 import { Logo } from "@/components/layout/Logo";
+import { RiftboundCredit } from "@/components/layout/RiftboundCredit";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { FlashToast } from "@/components/ui/Toast";
+import { ART } from "@/lib/art";
 import { getLatestChampion, getNextEvent, getRanking } from "@/server/queries/arena";
 import { getFeed } from "@/server/queries/feed";
 import { requireSession } from "@/server/session";
@@ -64,12 +67,17 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
         <header className="flex items-center justify-between lg:hidden">
           <Logo size={26} />
         </header>
-        <div>
-          <p className="font-display text-3xl font-extrabold tracking-tight md:text-4xl">
-            {greeting()}, <span className="text-brand">{session.profile.displayName}</span>.
-          </p>
-          <p className="mt-1 text-muted">Olha o que rolou na Riftzada.</p>
-        </div>
+        <section aria-label="Boas-vindas" className="frame-hex relative overflow-hidden bg-surface">
+          <Image src={ART.launch} alt="Ahri, Yasuo e Jinx na arte de lançamento de Riftbound" fill priority sizes="(min-width: 1024px) 760px, 100vw" className="object-cover object-[50%_15%]" />
+          <div className="absolute inset-0 bg-linear-to-t from-bg from-10% via-bg/75 to-bg/0" aria-hidden />
+          <div className="absolute inset-0 bg-linear-to-r from-bg/70 to-transparent" aria-hidden />
+          <div className="relative px-5 pt-32 pb-5 md:px-8 md:pt-48 md:pb-7">
+            <h1 className="font-display text-[40px] leading-[0.95] font-extrabold tracking-tight uppercase drop-shadow-[0_2px_12px_rgb(0_0_0/0.8)] md:text-6xl">
+              {greeting()}, {session.profile.displayName}.
+            </h1>
+            <p className="mt-2 text-ink/85">Olha o que rolou na Riftzada.</p>
+          </div>
+        </section>
 
         {champion && (
           <section aria-label="Campeão da semana">
@@ -86,6 +94,8 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
           <SectionHeader id="mural" title="Na Riftzada" />
           <FeedList items={feed} session={session} pageSize={PAGE} />
         </section>
+
+        <RiftboundCredit className="lg:hidden" />
       </div>
 
       <aside className="hidden space-y-8 lg:block">

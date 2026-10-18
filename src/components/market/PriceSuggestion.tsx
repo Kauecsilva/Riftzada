@@ -146,7 +146,7 @@ export function PriceSuggestion({
             <div className="grid grid-cols-2 gap-1.5 rounded-full border border-line bg-surface-2 p-1">
               {(Object.keys(PRICE_BASE) as PriceBase[]).map((b) => (
                 <button key={b} type="button" disabled={bases[b] == null} aria-pressed={base === b} onClick={() => setChosenBase(b)}
-                  className={cn("min-h-10 rounded-full text-sm font-semibold transition-colors disabled:opacity-40", base === b ? "bg-rift text-white" : "text-muted hover:text-ink")}>
+                  className={cn("min-h-10 rounded-full text-sm font-semibold transition-colors disabled:opacity-40", base === b ? "bg-rift text-on-rift" : "text-muted hover:text-ink")}>
                   {PRICE_BASE[b]}{cheapest === b && bases.liga != null && bases.tcgplayer != null ? " · menor" : ""}
                 </button>
               ))}

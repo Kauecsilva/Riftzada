@@ -1,40 +1,45 @@
 @import "tailwindcss";
 
 /* ---------- Design system da Riftzada ----------
-   "Noite de torneio": fundo escuro azul-arroxeado, acento rift (violeta) para ação,
-   energy (ciano) para o que está vivo, gold só para prestígio (campeão, 1º lugar, Hall).
+   "Noite no Rift": azul-noite de Runeterra, laranja Riftbound para ação (o mesmo do logo do jogo),
+   teal hextech para o que está vivo, ouro hextech só para prestígio (campeão, 1º lugar, Hall).
+   Molduras com filete dourado e cantos chanfrados lembram o cliente do League of Legends.
    Use sempre os tokens (bg-surface, text-muted, text-gold…), nunca cores soltas. */
 @theme {
-  --color-bg: #0a0b14;
-  --color-surface: #131527;
-  --color-surface-2: #1b1e36;
-  --color-surface-3: #252945;
-  --color-line: #2a2e4f;
-  --color-ink: #eef0ff;
-  --color-muted: #9aa0c7;
-  --color-faint: #6b7199;
+  --color-bg: #050b14;
+  --color-surface: #0b1626;
+  --color-surface-2: #112038;
+  --color-surface-3: #1a2d4a;
+  --color-line: #22344f;
+  --color-ink: #f0e6d2;
+  --color-muted: #a3adbf;
+  --color-faint: #6f7c93;
 
-  --color-rift: #7b61ff;
-  --color-rift-strong: #8f79ff;
-  --color-rift-soft: #2a2358;
-  --color-energy: #36e2d3;
-  --color-gold: #f5c14b;
-  --color-gold-soft: #3a2f14;
+  /* "rift" continua sendo o token de ação: agora é o laranja do logo de Riftbound */
+  --color-rift: #f28a1f;
+  --color-rift-strong: #ffa947;
+  --color-rift-soft: #3a240e;
+  --color-on-rift: #1f1000;
+  --color-energy: #0ac8b9;
+  --color-gold: #d9b76c;
+  --color-gold-strong: #f0d9a0;
+  --color-gold-soft: #2c2412;
+  --color-gold-line: #785a28;
   --color-silver: #c9cee6;
   --color-bronze: #d58a54;
   --color-sell: #ff6b7f;
-  --color-trade: #36e2d3;
-  --color-want: #f5c14b;
+  --color-trade: #0ac8b9;
+  --color-want: #d9b76c;
   --color-danger: #ff5470;
 
-  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-display-face), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-body-face), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  --radius-card: 20px;
-  --radius-hero: 28px;
+  --radius-card: 10px;
+  --radius-hero: 14px;
 
-  --shadow-float: 0 10px 30px -10px rgb(0 0 0 / 0.6);
-  --shadow-glow: 0 8px 28px -6px rgb(123 97 255 / 0.55);
+  --shadow-float: 0 14px 40px -12px rgb(0 0 0 / 0.75);
+  --shadow-glow: 0 8px 26px -8px rgb(242 138 31 / 0.6);
 
   --animate-sheet-in: sheet-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
   --animate-fade-in: fade-in 0.18s ease-out;
@@ -62,8 +67,8 @@
   }
   body {
     background:
-      radial-gradient(1200px 600px at 10% -10%, rgb(123 97 255 / 0.14), transparent 60%),
-      radial-gradient(900px 500px at 110% 10%, rgb(54 226 211 / 0.07), transparent 60%),
+      radial-gradient(1100px 560px at 15% -12%, rgb(10 200 185 / 0.09), transparent 60%),
+      radial-gradient(900px 520px at 105% 0%, rgb(242 138 31 / 0.08), transparent 60%),
       var(--color-bg);
     background-attachment: fixed;
     color: var(--color-ink);
@@ -78,7 +83,7 @@
   }
   ::selection {
     background: var(--color-rift);
-    color: white;
+    color: var(--color-on-rift);
   }
   input, select, textarea, button {
     font: inherit;
@@ -86,11 +91,29 @@
 }
 
 @layer components {
-  /* Cartão padrão */
+  /* Cartão padrão: painel azul-noite com um filete dourado no topo, como os painéis do cliente do LoL */
   .card {
-    background: var(--color-surface);
+    background:
+      linear-gradient(90deg, transparent, rgb(217 183 108 / 0.45), transparent) top / 100% 1px no-repeat,
+      linear-gradient(180deg, var(--color-surface) 0%, rgb(11 22 38 / 0.92) 100%);
     border: 1px solid var(--color-line);
     border-radius: var(--radius-card);
+  }
+  /* Moldura hextech: filete em degradê dourado e cantos chanfrados. Para o que é destaque (hero, campeão). */
+  .frame-hex {
+    --chamfer: 12px;
+    position: relative;
+    border: 1.5px solid var(--color-gold-line);
+    border-image: linear-gradient(160deg, var(--color-gold-strong), var(--color-gold) 30%, var(--color-gold-line) 65%, var(--color-gold) 100%) 1;
+    clip-path: polygon(var(--chamfer) 0, calc(100% - var(--chamfer)) 0, 100% var(--chamfer), 100% calc(100% - var(--chamfer)), calc(100% - var(--chamfer)) 100%, var(--chamfer) 100%, 0 calc(100% - var(--chamfer)), 0 var(--chamfer));
+  }
+  /* Losango de ornamento (títulos de seção) */
+  .diamond {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    transform: rotate(45deg);
+    border: 1.5px solid var(--color-gold);
   }
   /* Brilho do skeleton */
   .skeleton {
@@ -101,13 +124,13 @@
   }
   /* Texto com o degradê da marca */
   .text-brand {
-    background: linear-gradient(100deg, #b4a6ff 0%, var(--color-rift) 45%, var(--color-energy) 100%);
+    background: linear-gradient(100deg, #ffc46b 0%, var(--color-rift) 55%, #d9561a 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
   .text-prestige {
-    background: linear-gradient(100deg, #ffe39a 0%, var(--color-gold) 50%, #e49b2f 100%);
+    background: linear-gradient(100deg, var(--color-gold-strong) 0%, var(--color-gold) 50%, #a8823f 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -118,7 +141,7 @@
     min-height: 48px;
     background: var(--color-surface-2);
     border: 1px solid var(--color-line);
-    border-radius: 14px;
+    border-radius: 8px;
     padding: 12px 14px;
     color: var(--color-ink);
     transition: border-color 0.15s, background-color 0.15s;
@@ -143,7 +166,7 @@
   }
   select.input {
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%239aa0c7' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23a3adbf' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 14px center;
     padding-right: 40px;

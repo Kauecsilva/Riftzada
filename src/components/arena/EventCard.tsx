@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CalendarDays, MapPin, Repeat, Store, Users } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Photo } from "@/components/ui/Photo";
+import { ART } from "@/lib/art";
 import { countdown, eventWhen } from "@/lib/format";
 import { EVENT_STATUS } from "@/lib/domain/labels";
 import { weeklyLabel } from "@/lib/domain/schedule";
@@ -33,16 +34,16 @@ export function EventCard({ event, highlight }: { event: EventSummary; highlight
     <article className="card overflow-hidden transition-transform hover:-translate-y-0.5">
       <Link href={`/arena/eventos/${event.id}`} className="block">
         <div className="relative">
-          <Photo src={event.imageUrl} alt="" ratio={highlight ? "16/9" : "21/9"} />
+          <Photo src={event.imageUrl ?? ART.stage} alt="" ratio={highlight ? "16/9" : "21/9"} />
           <div className="absolute inset-0 bg-linear-to-t from-surface via-surface/30 to-transparent" />
-          <div className="absolute top-3 left-3 flex gap-2">
+          <div className="absolute top-3 left-3 flex gap-2 [&>span]:bg-bg/85 [&>span]:backdrop-blur">
             {soon && <Badge tone="energy">{soon}</Badge>}
             {event.status === "live" && <Badge tone="sell">{EVENT_STATUS.live}</Badge>}
             {event.format && <Badge>{event.format}</Badge>}
           </div>
         </div>
         <div className="space-y-3 px-4 pt-1 pb-2">
-          <h3 className="font-display text-xl leading-tight font-bold">{event.name}</h3>
+          <h3 className="font-display text-2xl leading-tight font-bold uppercase tracking-wide">{event.name}</h3>
           <EventMeta event={event} />
         </div>
       </Link>

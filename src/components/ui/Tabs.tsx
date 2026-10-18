@@ -19,7 +19,7 @@ export function Tabs({ items, label }: { items: { href: string; label: string; e
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "inline-flex min-h-10 items-center rounded-full px-4 text-sm font-semibold transition-colors",
-                  active ? "bg-rift text-white" : "text-muted hover:text-ink",
+                  active ? "bg-rift text-on-rift" : "text-muted hover:text-ink",
                 )}
               >
                 {item.label}

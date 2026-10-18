@@ -9,13 +9,14 @@ import type { MiniProfile } from "@/types/domain";
 import { Logo } from "./Logo";
 import { isActive, NAV_ITEMS } from "./nav-items";
 import { PublishMenu } from "./PublishMenu";
+import { RiftboundCredit } from "./RiftboundCredit";
 
 /** Navegação lateral do desktop (≥1024px). */
 export function SideNav({ me, isAdmin }: { me: MiniProfile; isAdmin: boolean }) {
   const path = usePathname();
 
   return (
-    <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-line px-4 py-6 lg:flex">
+    <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-gold-line/40 bg-linear-to-b from-surface/60 to-bg px-4 py-6 lg:flex">
       <Link href="/" className="mb-8 px-3" aria-label="Riftzada, início">
         <Logo />
       </Link>
@@ -28,9 +29,14 @@ export function SideNav({ me, isAdmin }: { me: MiniProfile; isAdmin: boolean }) 
                 <Link
                   href={it.href}
                   aria-current={active ? "page" : undefined}
-                  className={cn("flex min-h-12 items-center gap-3 rounded-2xl px-3 font-semibold transition-colors", active ? "bg-surface-2 text-ink" : "text-muted hover:bg-surface hover:text-ink")}
+                  className={cn(
+                    "relative flex min-h-12 items-center gap-3 rounded-md px-3 font-display text-lg font-semibold tracking-wide uppercase transition-colors",
+                    active
+                      ? "bg-linear-to-r from-gold-soft to-transparent text-gold-strong before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:bg-gold"
+                      : "text-muted hover:bg-surface hover:text-ink",
+                  )}
                 >
-                  <it.icon size={22} className={active ? "text-rift-strong" : undefined} aria-hidden />
+                  <it.icon size={21} className={active ? "text-gold" : undefined} aria-hidden />
                   {it.label}
                 </Link>
               </li>
@@ -41,13 +47,14 @@ export function SideNav({ me, isAdmin }: { me: MiniProfile; isAdmin: boolean }) 
       <div className="mt-6">
         <PublishMenu isAdmin={isAdmin} variant="sidebar" />
       </div>
-      <div className="mt-auto space-y-1">
+      <div className="mt-auto space-y-3">
+        <RiftboundCredit className="px-3" />
         {isAdmin && (
-          <Link href="/admin" className="flex min-h-11 items-center gap-3 rounded-2xl px-3 text-sm font-semibold text-muted hover:bg-surface hover:text-ink">
+          <Link href="/admin" className="flex min-h-11 items-center gap-3 rounded-md px-3 text-sm font-semibold text-muted hover:bg-surface hover:text-ink">
             <Shield size={19} aria-hidden /> Painel admin
           </Link>
         )}
-        <div className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-2.5">
+        <div className="flex items-center gap-3 rounded-md border border-line bg-surface p-2.5">
           <Avatar name={me.displayName} src={me.avatarUrl} size={36} />
           <Link href={`/jogador/${me.username}`} className="min-w-0 flex-1 hover:underline">
             <span className="block truncate text-sm font-semibold">{me.displayName}</span>
