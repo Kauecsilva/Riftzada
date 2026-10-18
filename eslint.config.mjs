@@ -29,6 +29,7 @@ const eslintConfig = defineConfig([
     "coverage/**",
     // Skills de agentes vendorizadas (código de terceiros).
     ".claude/**",
+    ".agents/**",
   ]),
 ]);
 
