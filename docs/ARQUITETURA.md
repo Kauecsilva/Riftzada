@@ -154,6 +154,8 @@ Todas as tabelas têm `id uuid` (exceto junções), `created_at`, RLS ligado, e 
 | `decks` | id, community_id, author_id, name, legend_id → cards, description, visibility, event_id?, record?, placement?, created_at | Fase 2 na UI completa; MVP já mostra e cria. |
 | `deck_cards` | deck_id, card_id?, card_name, quantity, section (`main`, `runes`, `battlefields`, `side`) | `card_name` garante a lista mesmo sem a carta no catálogo; `card_id` liga quando existir. |
 | `market_listings` | id, community_id, seller_id, kind, card_id?, card_name, set_name?, variant?, condition, quantity, price_cents?, accepts_trade, description?, image_path?, status, is_hidden, created_at | Sem pagamento. `card_id` opcional, `card_name` obrigatório. |
+| `listing_offers` | id, listing_id, buyer_id, amount_cents, cards (jsonb), counter_cents?, message?, status | Oferta em dinheiro (venda que aceita ofertas) ou cartas + dinheiro (troca, ou venda que aceita troca). Escrita só por `make_listing_offer`/`respond_listing_offer` (0008, cartas na 0014). |
+| `listing_messages` | id, listing_id, buyer_id, sender_id, body, read_at?, created_at | Conversa do anúncio: uma por (anúncio, interessado). Só as duas pontas leem; escrita por `send_listing_message`, que deixa o anunciante só responder a quem chamou ou ofertou. Realtime ligado (0014). |
 | `achievements` | id, code (único), name, description, icon, tier | Catálogo de badges. |
 | `user_achievements` | user_id, achievement_id, community_id, awarded_at, event_id? | Fase 2 concede automaticamente. |
 | `ranking_rules` | community_id (PK), points_by_placement int[], participation_points, updated_at | Pontuação configurável: ex. `{100,70,50,50}` + 10 por presença. |
@@ -199,7 +201,7 @@ achievements 1─N user_achievements N─1 profiles
 
 | Entra no MVP 0.1 | Preparado (tabela/campo existe), UI depois | Fica para depois |
 |---|---|---|
-| Cadastro, login, logout, recuperar senha | Papel `moderator` | Chat, mensagens privadas |
+| Cadastro, login, logout, recuperar senha | Papel `moderator` | Chat fora do mercado, mensagens privadas soltas |
 | Perfil com estatísticas automáticas | Curtidas e comentários (`post_likes`, `post_comments`) | Pagamento, checkout, frete |
 | Mural (post comum, pull, campeão, deck) com fotos | Conquistas (`achievements`) | Notificações push |
 | Arena: próximos, anteriores, "Vou jogar" | Meta local (`legend_usage`) | IA, recomendação de decks |
@@ -278,8 +280,9 @@ Decks aparecem no MVP numa versão simples porque o "+" e o seed já pedem; curt
 | `/arena/ranking` | Ranking | Lista com posição, foto, pontos, títulos; destaque para o usuário logado. Explica a regra de pontos. |
 | `/arena/hall` | Hall da Riftzada | Cartões grandes com foto: títulos, top 4, torneios, último título. |
 | `/mercado` | Mercado | Filtros VENDE / TROCA / PROCURA, busca por nome, cards com foto, preço e status. |
-| `/mercado/[id]` | Anúncio | Foto, carta, set, variante, condição, quantidade, preço, aceita troca, vendedor, "Tenho interesse" (WhatsApp se o vendedor liberou, senão perfil). Dono: editar, mudar status, apagar. |
-| `/mercado/novo`, `/mercado/[id]/editar` | Anunciar carta | Tipo, carta, set, condição, quantidade, preço, troca, foto, descrição. |
+| `/mercado/[id]` | Anúncio | Foto, carta, set, variante, condição, quantidade, preço e uma frase que diz como negociar (venda, oferta em dinheiro, troca). Oferta com dinheiro e/ou cartas, "Conversar" (chat do app) e WhatsApp com a carta e a oferta na mensagem, se o vendedor liberou. Dono: editar, mudar status, apagar, responder ofertas e ver as conversas. |
+| `/mensagens`, `/mensagens/[anúncio]/[interessado]` | Conversas | Lista das conversas do mercado com não lidas (contador no item Mercado do menu) e a conversa em si, atualizada pelo Realtime. |
+| `/mercado/novo`, `/mercado/[id]/editar` | Anunciar carta | Tipo, carta, set, condição, quantidade, preço, troca, foto, descrição. Quem ainda não compartilha WhatsApp pode informar ali (vai para o perfil, já compartilhado). |
 | `/decks/[id]`, `/decks/novo` | Deck | Lenda, autor, resultado, lista por seção, copiar lista, compartilhar. Novo deck por lista colada. |
 | `/jogador/[username]` | Perfil | Foto, nome, @, bio, deck favorito, Instagram · torneios, títulos, 2º, top 4 · histórico de resultados · decks · anúncios ativos · posts recentes. |
 | `/perfil/editar` | Editar perfil | Foto, nome, bio, lenda favorita, Instagram, WhatsApp e se quer mostrá-lo. |

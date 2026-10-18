@@ -216,9 +216,9 @@ export type PostRow = {
   event_id: string | null; deck_id: string | null; author: MiniRow; post_images: { path: string; position: number }[];
 };
 
-export const OFFER_FIELDS = `id, amount_cents, counter_cents, message, status, created_at, updated_at, buyer:profiles!listing_offers_buyer_id_fkey(${MINI})`;
+export const OFFER_FIELDS = `id, amount_cents, cards, counter_cents, message, status, created_at, updated_at, buyer:profiles!listing_offers_buyer_id_fkey(${MINI})`;
 export type OfferRow = {
-  id: string; amount_cents: number; counter_cents: number | null; message: string | null; status: OfferStatus;
+  id: string; amount_cents: number; cards: { name: string; qty: number; card_id: string | null }[]; counter_cents: number | null; message: string | null; status: OfferStatus;
   created_at: string; updated_at: string; buyer: MiniRow;
 };
 
@@ -227,6 +227,7 @@ export function mapOffer(row: OfferRow): ListingOffer {
     id: row.id,
     buyer: mapMini(row.buyer),
     amountCents: row.amount_cents,
+    cards: row.cards.map((c) => ({ name: c.name, qty: c.qty, cardId: c.card_id })),
     counterCents: row.counter_cents,
     message: row.message,
     status: row.status,

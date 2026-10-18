@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Library, Plus, Search, Store } from "lucide-react";
+import { Library, MessagesSquare, Plus, Search, Store } from "lucide-react";
 import { ListingCard } from "@/components/market/ListingCard";
 import { buttonClass } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -9,7 +9,9 @@ import { FlashToast } from "@/components/ui/Toast";
 import { ART } from "@/lib/art";
 import { cn } from "@/lib/cn";
 import { LISTING_KIND } from "@/lib/domain/labels";
+import { getUnreadCount } from "@/server/queries/chat";
 import { getListings } from "@/server/queries/market";
+import { requireSession } from "@/server/session";
 import type { ListingKind } from "@/types/domain";
 
 export const metadata: Metadata = { title: "Mercado" };
@@ -20,7 +22,8 @@ export default async function MarketPage({ searchParams }: PageProps<"/mercado">
   const params = await searchParams;
   const kind = KINDS.find((k) => k === params.tipo);
   const search = typeof params.q === "string" ? params.q.trim().slice(0, 60) : "";
-  const listings = await getListings({ kind, search: search || undefined });
+  const session = await requireSession();
+  const [listings, unread] = await Promise.all([getListings({ kind, search: search || undefined }), getUnreadCount(session.userId)]);
 
   const chip = (value: ListingKind | undefined, label: string) => {
     const query = new URLSearchParams({ ...(value ? { tipo: value } : {}), ...(search ? { q: search } : {}) });
@@ -47,6 +50,10 @@ export default async function MarketPage({ searchParams }: PageProps<"/mercado">
         art={ART.bazaar}
         action={
           <div className="flex gap-2">
+            <Link href="/mensagens" className={buttonClass("secondary", "md", "relative")} aria-label={unread ? `Conversas, ${unread} não lidas` : "Conversas"}>
+              <MessagesSquare size={18} aria-hidden /><span className="hidden md:inline">Conversas</span>
+              {unread > 0 && <span className="absolute -top-1.5 -right-1.5 min-w-5 rounded-full bg-gold px-1 text-center text-xs leading-5 font-bold text-bg" aria-hidden>{unread > 9 ? "9+" : unread}</span>}
+            </Link>
             <Link href="/colecao" className={buttonClass("secondary", "md")} aria-label="Minha coleção"><Library size={18} aria-hidden /><span className="hidden md:inline">Minha coleção</span></Link>
             <Link href="/mercado/novo" className={buttonClass("primary", "md", "hidden md:inline-flex")}><Plus size={18} aria-hidden /> Anunciar</Link>
           </div>

@@ -222,8 +222,20 @@ export const demoRankingEntries = [
   { id: "00000000-0000-4000-8000-800000000001", userId: USERS.thiago, points: 20, reason: "Bônus de boas-vindas da Liga", createdAt: { days: -10, at: "12:00" } as RelDate },
 ];
 
-export type DemoOffer = { id: string; listingId: string; buyerId: string; amountCents: number; counterCents: number | null; message: string | null; status: OfferStatus; createdAt: RelDate };
+export type DemoOffer = {
+  id: string; listingId: string; buyerId: string; amountCents: number; cards: { name: string; qty: number }[];
+  counterCents: number | null; message: string | null; status: OfferStatus; createdAt: RelDate;
+};
 
 export const demoOffers: DemoOffer[] = [
-  { id: "00000000-0000-4000-8000-b00000000001", listingId: l(1), buyerId: USERS.joao, amountCents: 7500, counterCents: null, message: "Fecha por 75 e te encontro no sábado?", status: "pending", createdAt: { days: 0, at: "10:30" } },
+  { id: "00000000-0000-4000-8000-b00000000001", listingId: l(1), buyerId: USERS.joao, amountCents: 7500, cards: [], counterCents: null, message: "Fecha por 75 e te encontro no sábado?", status: "pending", createdAt: { days: 0, at: "10:30" } },
+  { id: "00000000-0000-4000-8000-b00000000002", listingId: l(3), buyerId: USERS.kaue, amountCents: 1000, cards: [{ name: "Ahri, Alluring", qty: 1 }], counterCents: null, message: "Ahri + 10 conto pelo Viktor?", status: "pending", createdAt: { days: 0, at: "11:00" } },
+];
+
+/** Conversas do mercado: (anúncio, interessado). */
+export type DemoMessage = { id: string; listingId: string; buyerId: string; senderId: string; body: string; read: boolean; createdAt: RelDate };
+
+export const demoMessages: DemoMessage[] = [
+  { id: "00000000-0000-4000-8000-c00000000001", listingId: l(3), buyerId: USERS.kaue, senderId: USERS.kaue, body: "Oi Bia! O Viktor ainda tá disponível? Te mandei uma oferta com a Ahri.", read: true, createdAt: { days: 0, at: "11:01" } },
+  { id: "00000000-0000-4000-8000-c00000000002", listingId: l(3), buyerId: USERS.kaue, senderId: USERS.bia, body: "Tá sim! Leva na loja sábado que a gente fecha.", read: false, createdAt: { days: 0, at: "11:20" } },
 ];

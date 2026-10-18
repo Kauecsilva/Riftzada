@@ -303,9 +303,9 @@ export function demoOffers(listingId: string): ListingOffer[] {
   const seller = demoListings.find((l) => l.id === listingId)?.sellerId;
   return demoOfferRows
     .filter((o) => o.listingId === listingId && (seller === DEMO_USER_ID || o.buyerId === DEMO_USER_ID))
-    .map((o) => {
-      const at = resolveRelDate(o.createdAt);
-      return { id: o.id, buyer: mini(o.buyerId), amountCents: o.amountCents, counterCents: o.counterCents, message: o.message, status: o.status, createdAt: at, updatedAt: at };
+    .map(({ id, buyerId, amountCents, cards, counterCents, message, status, createdAt }) => {
+      const at = resolveRelDate(createdAt);
+      return { id, buyer: mini(buyerId), amountCents, cards: cards.map((c) => ({ ...c, cardId: null })), counterCents, message, status, createdAt: at, updatedAt: at };
     });
 }
 

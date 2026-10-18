@@ -2,7 +2,7 @@
 // Uso: npm run seed:sql
 import { writeFileSync } from "node:fs";
 import {
-  COMMUNITY_ID, DEMO_PASSWORD, demoCards, demoDecks, demoEvents, demoListings, demoOffers, demoParticipants, demoPosts,
+  COMMUNITY_ID, DEMO_PASSWORD, demoCards, demoDecks, demoEvents, demoListings, demoMessages, demoOffers, demoParticipants, demoPosts,
   demoRankingEntries, demoRankingRules, demoResults, demoUsers, USERS, type RelDate,
 } from "../src/lib/demo/fixtures.ts";
 
@@ -75,8 +75,11 @@ sql += rows("public.market_listings",
     q(l.minOfferCents !== undefined), q(l.minOfferCents)]));
 
 sql += rows("public.listing_offers",
-  ["id", "listing_id", "buyer_id", "amount_cents", "counter_cents", "message", "status", "created_at"],
-  demoOffers.map((o) => [q(o.id), q(o.listingId), q(o.buyerId), q(o.amountCents), q(o.counterCents), q(o.message), q(o.status), at(o.createdAt)]));
+  ["id", "listing_id", "buyer_id", "amount_cents", "cards", "counter_cents", "message", "status", "created_at"],
+  demoOffers.map((o) => [q(o.id), q(o.listingId), q(o.buyerId), q(o.amountCents), q(JSON.stringify(o.cards.map((c) => ({ ...c, card_id: null })))), q(o.counterCents), q(o.message), q(o.status), at(o.createdAt)]));
+sql += rows("public.listing_messages",
+  ["id", "listing_id", "buyer_id", "sender_id", "body", "read_at", "created_at"],
+  demoMessages.map((m) => [q(m.id), q(m.listingId), q(m.buyerId), q(m.senderId), q(m.body), m.read ? at(m.createdAt) : "null", at(m.createdAt)]));
 
 sql += "\n-- Mural\n";
 sql += rows("public.posts",
