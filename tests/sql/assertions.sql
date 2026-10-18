@@ -308,8 +308,24 @@ select pg_temp.check((select status from market_listings where id = '00000000-00
 -- ---------- Lojas ----------
 begin;
 select pg_temp.login('00000000-0000-4000-8000-100000000002'); -- João (user) cadastra a loja dele
-insert into public.stores (id, community_id, owner_id, name, address)
-values ('00000000-0000-4000-8000-b00000000001', '00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-100000000002', 'Toca do Rift', 'Rua das Cartas, 123');
+insert into public.stores (id, community_id, owner_id, name, address, approved_at)
+values ('00000000-0000-4000-8000-b00000000001', '00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-100000000002', 'Toca do Rift', 'Rua das Cartas, 123', now());
+select pg_temp.check((select approved_at from stores where id = '00000000-0000-4000-8000-b00000000001') is null, 'Loja nasce pendente, mesmo mandando approved_at');
+do $$ begin
+  insert into public.events (community_id, store_id, name, starts_at, location, created_by)
+  values ('00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-b00000000001', 'Antes da aprovação', now(), 'Toca', '00000000-0000-4000-8000-100000000002');
+  raise exception 'FALHOU: loja pendente criou evento';
+exception when insufficient_privilege then null;
+end $$;
+update public.stores set approved_at = now() where id = '00000000-0000-4000-8000-b00000000001';
+select pg_temp.check((select approved_at from stores where id = '00000000-0000-4000-8000-b00000000001') is null, 'Dono não aprova a própria loja');
+
+select pg_temp.login('00000000-0000-4000-8000-100000000003'); -- Rafael não vê loja pendente
+select pg_temp.check((select count(*) from stores) = 0, 'Loja pendente fica escondida');
+select pg_temp.login('00000000-0000-4000-8000-100000000001'); -- Kauê (admin) vê e aprova
+select pg_temp.check((select count(*) from stores where approved_at is null) = 1, 'Admin vê a loja pendente');
+update public.stores set approved_at = now(), approved_by = auth.uid() where id = '00000000-0000-4000-8000-b00000000001';
+select pg_temp.login('00000000-0000-4000-8000-100000000002'); -- João, agora com loja aprovada
 do $$ begin
   insert into public.stores (community_id, owner_id, name)
   values ('00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-100000000003', 'Loja do Rafael');

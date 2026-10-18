@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AtSign, MapPin, Pencil, Plus } from "lucide-react";
+import { AtSign, Clock, MapPin, Pencil, Plus } from "lucide-react";
 import { StoreForm } from "@/components/stores/StoreForm";
 import { StoreSchedule } from "@/components/stores/StoreSchedule";
 import { buttonClass } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { getMyStores, getStoreEvents } from "@/server/queries/stores";
 export const metadata: Metadata = { title: "Minha loja" };
 
 const FLASH: Record<string, string> = {
-  "loja-criada": "Loja cadastrada! Agora é só criar os eventos.",
+  "loja-criada": "Pedido enviado! Assim que a organização aprovar a loja, você já cria os eventos.",
   "loja-salva": "Loja salva!",
   "evento-salvo": "Evento salvo!",
   "evento-apagado": "Evento apagado.",
@@ -26,7 +26,7 @@ export default async function MyStorePage({ searchParams }: PageProps<"/loja">) 
   if (!stores.length) {
     return (
       <div className="mx-auto max-w-2xl">
-        <PageHeader title="Cadastre sua loja" subtitle="Lojas divulgam aqui o semanal, o skirmish de sábado, o pré-release… e a galera marca “Vou jogar”." back="/arena/lojas" />
+        <PageHeader title="Cadastre sua loja" subtitle="Lojas divulgam aqui o semanal, o skirmish de sábado, os campeonatos… e a galera marca “Vou jogar”. A organização confere e aprova a conta da loja antes dos eventos." back="/arena/lojas" />
         <StoreForm />
       </div>
     );
@@ -50,8 +50,16 @@ export default async function MyStorePage({ searchParams }: PageProps<"/loja">) 
               </div>
               <Link href={`/loja/${store.id}/editar`} className={buttonClass("ghost", "sm")}><Pencil size={14} aria-hidden /> Editar loja</Link>
             </div>
-            <Link href={`/loja/${store.id}/eventos/novo`} className={buttonClass("primary", "md", "mb-2")}><Plus size={18} aria-hidden /> Novo evento</Link>
-            <StoreSchedule events={schedules[i]} manage storeId={store.id} />
+            {store.approved ? (
+              <>
+                <Link href={`/loja/${store.id}/eventos/novo`} className={buttonClass("primary", "md", "mb-2")}><Plus size={18} aria-hidden /> Novo evento</Link>
+                <StoreSchedule events={schedules[i]} manage storeId={store.id} />
+              </>
+            ) : (
+              <p className="flex items-center gap-2 rounded-2xl bg-surface-2 px-4 py-3 text-sm text-muted">
+                <Clock size={16} aria-hidden /> Aguardando a aprovação da organização. Depois dela você já cria os eventos da loja.
+              </p>
+            )}
           </section>
         ))}
       </div>

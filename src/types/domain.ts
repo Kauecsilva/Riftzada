@@ -78,6 +78,8 @@ export type Store = StoreRef & {
   instagram: string | null;
   description: string | null;
   owner: MiniProfile;
+  /** Loja pendente não cria eventos nem aparece na Arena até um admin aprovar. */
+  approved: boolean;
 };
 
 export type ResultPlayer =
