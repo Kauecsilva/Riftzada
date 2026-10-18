@@ -36,6 +36,8 @@ export async function updateProfile(_: ActionState, form: FormData): Promise<Act
       bio: v.bio,
       favorite_legend_id: v.favoriteLegendId,
       instagram: v.instagram,
+      city: v.city,
+      state: v.state,
       ...(v.avatarPath ? { avatar_path: v.avatarPath } : {}),
     })
     .eq("id", session.userId);

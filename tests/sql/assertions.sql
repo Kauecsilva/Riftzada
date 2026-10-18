@@ -290,4 +290,21 @@ select pg_temp.check((select count(*) from events where store_id = '00000000-000
 select pg_temp.check((select name from stores where id = '00000000-0000-4000-8000-b00000000001') = 'Toca do Rift', 'Outro membro não edita a loja');
 delete from public.events where series_id = '00000000-0000-4000-8000-b90000000001';
 select pg_temp.check((select count(*) from events where store_id is not null) = 0, 'Dono apaga o semanal');
+
+-- ---------- Região no perfil ----------
+select pg_temp.login('00000000-0000-4000-8000-100000000003'); -- Rafael
+update public.profiles set city = 'Campinas', state = 'SP' where id = '00000000-0000-4000-8000-100000000003';
+select pg_temp.check((select city || '/' || state from profiles where id = '00000000-0000-4000-8000-100000000003') = 'Campinas/SP', 'Dono edita a própria região');
+do $$ begin
+  update public.profiles set city = 'Niterói', state = null where id = '00000000-0000-4000-8000-100000000003';
+  raise exception 'FALHOU: cidade sem UF';
+exception when check_violation then null;
+end $$;
+do $$ begin
+  update public.profiles set state = 'XX' where id = '00000000-0000-4000-8000-100000000003';
+  raise exception 'FALHOU: UF inválida';
+exception when check_violation then null;
+end $$;
+update public.profiles set city = 'Hackeada', state = 'AC' where id = '00000000-0000-4000-8000-100000000002';
+select pg_temp.check((select coalesce(city, '') from profiles where id = '00000000-0000-4000-8000-100000000002') <> 'Hackeada', 'Não edita a região de outro');
 rollback;

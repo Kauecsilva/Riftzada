@@ -31,19 +31,19 @@ export const LEGENDS = {
 
 export type DemoUser = {
   id: string; email: string; username: string; displayName: string; bio: string | null;
-  favoriteLegendId: string | null; instagram: string | null; role: MemberRole; avatarPath: string | null;
+  favoriteLegendId: string | null; instagram: string | null; city: string | null; state: string | null; role: MemberRole; avatarPath: string | null;
   whatsapp: string | null; shareWhatsapp: boolean; joined: RelDate;
 };
 
 export const demoUsers: DemoUser[] = [
-  { id: USERS.kaue, email: "kaue@riftzada.dev", username: "kaue", displayName: "Kauê", bio: "Jinx até o fim. Organizo a resenha de sexta.", favoriteLegendId: LEGENDS.jinx, instagram: "kaue.rift", role: "admin", avatarPath: "demo/avatar-kaue.svg", whatsapp: "11987654321", shareWhatsapp: true, joined: { days: -120, at: "10:00" } },
-  { id: USERS.joao, email: "joao@riftzada.dev", username: "joao", displayName: "João", bio: "Kai'Sa main. Atual bicampeão consecutivo.", favoriteLegendId: LEGENDS.kaisa, instagram: null, role: "user", avatarPath: "demo/avatar-joao.svg", whatsapp: null, shareWhatsapp: false, joined: { days: -118, at: "10:00" } },
-  { id: USERS.rafael, email: "rafael@riftzada.dev", username: "rafael", displayName: "Rafael", bio: "Ahri control, café e paciência.", favoriteLegendId: LEGENDS.ahri, instagram: "rafa.tcg", role: "user", avatarPath: "demo/avatar-rafael.svg", whatsapp: "11912345678", shareWhatsapp: true, joined: { days: -110, at: "10:00" } },
-  { id: USERS.pedro, email: "pedro@riftzada.dev", username: "pedro", displayName: "Pedro", bio: "Abro booster demais. Às vezes sai coisa boa.", favoriteLegendId: LEGENDS.yasuo, instagram: null, role: "user", avatarPath: null, whatsapp: null, shareWhatsapp: false, joined: { days: -95, at: "10:00" } },
-  { id: USERS.bia, email: "bia@riftzada.dev", username: "bia", displayName: "Bia", bio: "Viktor e matemática.", favoriteLegendId: LEGENDS.viktor, instagram: "bia.plays", role: "user", avatarPath: "demo/avatar-bia.svg", whatsapp: null, shareWhatsapp: false, joined: { days: -80, at: "10:00" } },
-  { id: USERS.lucas, email: "lucas@riftzada.dev", username: "lucas", displayName: "Lucas", bio: null, favoriteLegendId: LEGENDS.darius, instagram: null, role: "user", avatarPath: null, whatsapp: null, shareWhatsapp: false, joined: { days: -60, at: "10:00" } },
-  { id: USERS.marina, email: "marina@riftzada.dev", username: "marina", displayName: "Marina", bio: "Volibear na cara do gol.", favoriteLegendId: LEGENDS.volibear, instagram: null, role: "user", avatarPath: null, whatsapp: null, shareWhatsapp: false, joined: { days: -45, at: "10:00" } },
-  { id: USERS.thiago, email: "thiago@riftzada.dev", username: "thiago", displayName: "Thiago", bio: "Novo na Rift, aprendendo com a galera.", favoriteLegendId: null, instagram: null, role: "user", avatarPath: null, whatsapp: null, shareWhatsapp: false, joined: { days: -12, at: "10:00" } },
+  { id: USERS.kaue, email: "kaue@riftzada.dev", username: "kaue", displayName: "Kauê", bio: "Jinx até o fim. Organizo a resenha de sexta.", favoriteLegendId: LEGENDS.jinx, instagram: "kaue.rift", city: "São Paulo", state: "SP", role: "admin", avatarPath: "demo/avatar-kaue.svg", whatsapp: "11987654321", shareWhatsapp: true, joined: { days: -120, at: "10:00" } },
+  { id: USERS.joao, email: "joao@riftzada.dev", username: "joao", displayName: "João", bio: "Kai'Sa main. Atual bicampeão consecutivo.", favoriteLegendId: LEGENDS.kaisa, instagram: null, city: "São Paulo", state: "SP", role: "user", avatarPath: "demo/avatar-joao.svg", whatsapp: null, shareWhatsapp: false, joined: { days: -118, at: "10:00" } },
+  { id: USERS.rafael, email: "rafael@riftzada.dev", username: "rafael", displayName: "Rafael", bio: "Ahri control, café e paciência.", favoriteLegendId: LEGENDS.ahri, instagram: "rafa.tcg", city: "Campinas", state: "SP", role: "user", avatarPath: "demo/avatar-rafael.svg", whatsapp: "11912345678", shareWhatsapp: true, joined: { days: -110, at: "10:00" } },
+  { id: USERS.pedro, email: "pedro@riftzada.dev", username: "pedro", displayName: "Pedro", bio: "Abro booster demais. Às vezes sai coisa boa.", favoriteLegendId: LEGENDS.yasuo, instagram: null, city: "Santo André", state: "SP", role: "user", avatarPath: null, whatsapp: null, shareWhatsapp: false, joined: { days: -95, at: "10:00" } },
+  { id: USERS.bia, email: "bia@riftzada.dev", username: "bia", displayName: "Bia", bio: "Viktor e matemática.", favoriteLegendId: LEGENDS.viktor, instagram: "bia.plays", city: null, state: "RJ", role: "user", avatarPath: "demo/avatar-bia.svg", whatsapp: null, shareWhatsapp: false, joined: { days: -80, at: "10:00" } },
+  { id: USERS.lucas, email: "lucas@riftzada.dev", username: "lucas", displayName: "Lucas", bio: null, favoriteLegendId: LEGENDS.darius, instagram: null, city: "Curitiba", state: "PR", role: "user", avatarPath: null, whatsapp: null, shareWhatsapp: false, joined: { days: -60, at: "10:00" } },
+  { id: USERS.marina, email: "marina@riftzada.dev", username: "marina", displayName: "Marina", bio: "Volibear na cara do gol.", favoriteLegendId: LEGENDS.volibear, instagram: null, city: null, state: null, role: "user", avatarPath: null, whatsapp: null, shareWhatsapp: false, joined: { days: -45, at: "10:00" } },
+  { id: USERS.thiago, email: "thiago@riftzada.dev", username: "thiago", displayName: "Thiago", bio: "Novo na Rift, aprendendo com a galera.", favoriteLegendId: null, instagram: null, city: null, state: null, role: "user", avatarPath: null, whatsapp: null, shareWhatsapp: false, joined: { days: -12, at: "10:00" } },
 ];
 
 export type DemoCard = { id: string; name: string; setName: string; setCode: string; type: "legend" };

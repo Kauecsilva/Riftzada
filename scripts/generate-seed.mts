@@ -41,7 +41,7 @@ sql += rows("public.cards", ["id", "name", "set_name", "set_code", "card_type"],
 
 sql += "\n-- Perfis, contatos e papéis\n";
 for (const user of demoUsers) {
-  sql += `update public.profiles set bio = ${q(user.bio)}, favorite_legend_id = ${q(user.favoriteLegendId)}, instagram = ${q(user.instagram)}, avatar_path = ${q(user.avatarPath)}, created_at = ${at(user.joined)} where id = ${q(user.id)};\n`;
+  sql += `update public.profiles set bio = ${q(user.bio)}, favorite_legend_id = ${q(user.favoriteLegendId)}, instagram = ${q(user.instagram)}, city = ${q(user.city)}, state = ${q(user.state)}, avatar_path = ${q(user.avatarPath)}, created_at = ${at(user.joined)} where id = ${q(user.id)};\n`;
   if (user.role !== "user") sql += `update public.community_members set role = ${q(user.role)} where user_id = ${q(user.id)};\n`;
   if (user.whatsapp) sql += `insert into public.profile_contacts (user_id, whatsapp, share_whatsapp) values (${q(user.id)}, ${q(user.whatsapp)}, ${q(user.shareWhatsapp)});\n`;
 }

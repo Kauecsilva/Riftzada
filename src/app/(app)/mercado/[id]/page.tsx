@@ -101,6 +101,7 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
                         <Avatar name={offer.seller.displayName} src={offer.seller.avatarUrl} size={28} />
                         <span className="min-w-0 flex-1 text-sm">
                           <strong>{offer.seller.displayName}</strong> {offerVerb(offer)} essa carta
+                          {offer.sellerRegion && <span className="block text-xs text-muted">{offer.sellerRegion}</span>}
                         </span>
                         {offer.priceCents != null && <span className="font-display font-bold">{formatPrice(offer.priceCents)}</span>}
                       </Link>
@@ -119,7 +120,7 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
             ))}
           </dl>
           {listing.description && <p className="leading-relaxed whitespace-pre-line">{listing.description}</p>}
-          <div className="card p-4"><AuthorLine author={listing.seller} at={listing.createdAt}>anunciou</AuthorLine></div>
+          <div className="card p-4"><AuthorLine author={listing.seller} at={listing.createdAt} region={listing.sellerRegion}>anunciou</AuthorLine></div>
           {mine ? (
             <>
               <OwnerActions id={listing.id} status={listing.status} />

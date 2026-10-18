@@ -1,6 +1,7 @@
 // Monta os objetos de domínio a partir dos fixtures, para o modo demonstração.
 // Mesmas regras das views SQL (via src/lib/domain/stats.ts).
 
+import { formatRegion } from "@/lib/domain/region";
 import { computePlayerStats, computeRanking, hallOfFame, type StatsInput } from "@/lib/domain/stats";
 import { mediaUrl } from "@/lib/images";
 import type {
@@ -49,6 +50,11 @@ export function demoCollectionList(userId: string): CollectionItem[] {
     }));
 }
 
+function sellerRegion(id: string): string | null {
+  const user = demoUsers.find((u) => u.id === id);
+  return formatRegion(user?.city, user?.state);
+}
+
 function mini(id: string): MiniProfile {
   const user = demoUsers.find((u) => u.id === id)!;
   return { id: user.id, username: user.username, displayName: user.displayName, avatarUrl: mediaUrl(user.avatarPath) };
@@ -62,6 +68,8 @@ export function demoProfile(username: string): Profile | null {
     bio: user.bio,
     favoriteLegend: legendById(user.favoriteLegendId),
     instagram: user.instagram,
+    city: user.city,
+    state: user.state,
     createdAt: resolveRelDate(user.joined),
   };
 }
@@ -277,6 +285,7 @@ function listing(id: string): Listing {
     isHidden: false,
     createdAt: resolveRelDate(item.createdAt),
     seller: mini(item.sellerId),
+    sellerRegion: sellerRegion(item.sellerId),
   };
 }
 

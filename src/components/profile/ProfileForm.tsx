@@ -5,6 +5,7 @@ import { Field, fieldProps } from "@/components/ui/Field";
 import { FormMessage } from "@/components/ui/FormMessage";
 import { ImageInput } from "@/components/ui/ImageInput";
 import { SubmitButton } from "@/components/ui/SubmitButton";
+import { UFS } from "@/lib/domain/region";
 import { initialActionState } from "@/lib/validation/common";
 import { updateProfile } from "@/server/actions/content";
 import type { Legend, Profile } from "@/types/domain";
@@ -35,6 +36,17 @@ export function ProfileForm({ profile, legends, contact }: {
       <Field label="Instagram" name="instagram" error={err.instagram} optional>
         <input {...fieldProps("instagram", err.instagram)} defaultValue={profile.instagram ?? ""} className="input" placeholder="@seu.user" autoCapitalize="none" />
       </Field>
+      <div className="grid grid-cols-[1fr_6.5rem] gap-3">
+        <Field label="Cidade" name="city" error={err.city} optional hint="Aparece no perfil e nos seus anúncios do Mercado.">
+          <input {...fieldProps("city", err.city, "hint")} defaultValue={profile.city ?? ""} maxLength={60} className="input" placeholder="Campinas" autoComplete="address-level2" />
+        </Field>
+        <Field label="Estado" name="state" error={err.state}>
+          <select {...fieldProps("state", err.state)} defaultValue={profile.state ?? ""} className="input" autoComplete="address-level1">
+            <option value="">UF</option>
+            {UFS.map((uf) => <option key={uf} value={uf}>{uf}</option>)}
+          </select>
+        </Field>
+      </div>
 
       <fieldset className="card space-y-4 p-4">
         <legend className="sr-only">Contato</legend>

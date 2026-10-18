@@ -1,9 +1,12 @@
 import Link from "next/link";
+import { MapPin } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { timeAgo } from "@/lib/format";
 import type { MiniProfile } from "@/types/domain";
 
-export function AuthorLine({ author, at, children }: { author: MiniProfile; at: string; children?: React.ReactNode }) {
+export function AuthorLine({ author, at, region, children }: {
+  author: MiniProfile; at: string; region?: string | null; children?: React.ReactNode;
+}) {
   return (
     <div className="flex items-center gap-3">
       <Link href={`/jogador/${author.username}`} className="shrink-0" tabIndex={-1} aria-hidden>
@@ -14,7 +17,10 @@ export function AuthorLine({ author, at, children }: { author: MiniProfile; at: 
           <Link href={`/jogador/${author.username}`} className="font-semibold hover:underline">{author.displayName}</Link>
           {children && <span className="text-muted"> {children}</span>}
         </p>
-        <p className="text-xs text-faint"><time dateTime={at}>{timeAgo(at)}</time></p>
+        <p className="flex items-center gap-1 text-xs text-faint">
+          <time dateTime={at}>{timeAgo(at)}</time>
+          {region && <><span aria-hidden>·</span><MapPin size={12} aria-hidden /><span className="truncate">{region}</span></>}
+        </p>
       </div>
     </div>
   );

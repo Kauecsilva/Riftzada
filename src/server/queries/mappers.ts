@@ -2,6 +2,7 @@
 // Os relacionamentos usam o nome da FK (!tabela_coluna_fkey) para nunca ficarem ambíguos.
 
 import { cardImageUrl } from "@/lib/cards";
+import { formatRegion } from "@/lib/domain/region";
 import { mediaUrl } from "@/lib/images";
 import type {
   CardCondition, DeckDetail, DeckSection, DeckSummary, DeckVisibility, EventResult, EventStatus, EventSummary,
@@ -21,11 +22,16 @@ export function mapMini(row: MiniRow): MiniProfile {
 const mapLegend = (row: LegendRow): Legend | null => (row ? { id: row.id, name: row.name } : null);
 
 // ---------- Perfil ----------
-export const PROFILE_FIELDS = `${MINI}, bio, instagram, created_at, legend:cards!profiles_favorite_legend_id_fkey(id, name)`;
-export type ProfileRow = MiniRow & { bio: string | null; instagram: string | null; created_at: string; legend: LegendRow };
+export const PROFILE_FIELDS = `${MINI}, bio, instagram, city, state, created_at, legend:cards!profiles_favorite_legend_id_fkey(id, name)`;
+export type ProfileRow = MiniRow & {
+  bio: string | null; instagram: string | null; city: string | null; state: string | null; created_at: string; legend: LegendRow;
+};
 
 export function mapProfile(row: ProfileRow): Profile {
-  return { ...mapMini(row), bio: row.bio, instagram: row.instagram, createdAt: row.created_at, favoriteLegend: mapLegend(row.legend) };
+  return {
+    ...mapMini(row), bio: row.bio, instagram: row.instagram, city: row.city, state: row.state,
+    createdAt: row.created_at, favoriteLegend: mapLegend(row.legend),
+  };
 }
 
 // ---------- Estatísticas (views) ----------
@@ -162,14 +168,14 @@ export function mapCard(row: CardRow): CardSummary {
 
 export const LISTING_FIELDS = `id, kind, card_name, collection_item_id, card:cards!market_listings_card_id_fkey(${CARD_FIELDS}), set_name, variant, condition, quantity, price_cents, accepts_trade,
   price_base, price_base_cents, discount_pct, liga_price_cents, liga_language, liga_condition, accepts_offers, min_offer_cents,
-  description, image_path, status, is_hidden, created_at, seller:profiles!market_listings_seller_id_fkey(${MINI})`;
+  description, image_path, status, is_hidden, created_at, seller:profiles!market_listings_seller_id_fkey(${MINI}, city, state)`;
 export type ListingRow = {
   id: string; kind: ListingKind; card_name: string; collection_item_id: string | null; card: CardRow | null; set_name: string | null; variant: string | null; condition: CardCondition;
   quantity: number; price_cents: number | null; accepts_trade: boolean; description: string | null; image_path: string | null;
   price_base: PriceBase | null; price_base_cents: number | null; discount_pct: number | null;
   liga_price_cents: number | null; liga_language: LigaLanguage | null; liga_condition: CardCondition | null;
   accepts_offers: boolean; min_offer_cents: number | null;
-  status: ListingStatus; is_hidden: boolean; created_at: string; seller: MiniRow;
+  status: ListingStatus; is_hidden: boolean; created_at: string; seller: MiniRow & { city: string | null; state: string | null };
 };
 
 export function mapListing(row: ListingRow): Listing {
@@ -198,6 +204,7 @@ export function mapListing(row: ListingRow): Listing {
     isHidden: row.is_hidden,
     createdAt: row.created_at,
     seller: mapMini(row.seller),
+    sellerRegion: formatRegion(row.seller.city, row.seller.state),
   };
 }
 

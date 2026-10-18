@@ -3,6 +3,7 @@
 
 import { z } from "zod";
 import { parseBrl } from "@/lib/domain/pricing";
+import { UFS } from "@/lib/domain/region";
 import { checkbox, optionalInt, optionalText, optionalUuid, record, requiredText, uuid } from "./common";
 
 const email = z.email("E-mail inválido").trim().toLowerCase();
@@ -36,19 +37,31 @@ const instagram = z
   .pipe(z.union([z.literal(""), z.string().regex(/^[A-Za-z0-9_.]{1,30}$/, "Instagram inválido")]))
   .transform((v) => v || null);
 
-export const profileSchema = z.object({
-  displayName: requiredText(1, 40, "Nome"),
-  bio: optionalText(160),
-  favoriteLegendId: optionalUuid,
-  instagram,
-  whatsapp: z
-    .string()
-    .transform((v) => v.replace(/\D/g, ""))
-    .pipe(z.union([z.literal(""), z.string().regex(/^\d{10,13}$/, "WhatsApp: DDD + número")]))
-    .transform((v) => v || null),
-  shareWhatsapp: checkbox,
-  avatarPath: optionalText(200),
-});
+export const profileSchema = z
+  .object({
+    displayName: requiredText(1, 40, "Nome"),
+    bio: optionalText(160),
+    favoriteLegendId: optionalUuid,
+    instagram,
+    city: z
+      .string()
+      .trim()
+      .pipe(z.union([z.literal(""), z.string().min(2, "Cidade: mínimo de 2 letras").max(60, "Cidade: máximo de 60 caracteres")]))
+      .optional()
+      .transform((v) => v || null),
+    state: z
+      .union([z.literal(""), z.enum(UFS, "Estado inválido")])
+      .optional()
+      .transform((v) => v || null),
+    whatsapp: z
+      .string()
+      .transform((v) => v.replace(/\D/g, ""))
+      .pipe(z.union([z.literal(""), z.string().regex(/^\d{10,13}$/, "WhatsApp: DDD + número")]))
+      .transform((v) => v || null),
+    shareWhatsapp: checkbox,
+    avatarPath: optionalText(200),
+  })
+  .refine((v) => !v.city || v.state, { message: "Escolhe o estado da cidade", path: ["state"] });
 
 export const postSchema = z
   .object({

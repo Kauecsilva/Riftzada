@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { isOwnMediaPath } from "@/lib/images";
 import { formatPrice } from "@/lib/format";
+import { formatRegion } from "@/lib/domain/region";
 import { listingSchema, profileSchema, signUpSchema } from "@/lib/validation/schemas";
 
 const base = { kind: "sell", cardName: "Jinx", condition: "nm", quantity: "1" };
@@ -31,6 +32,25 @@ describe("perfil", () => {
     expect(v.instagram).toBe("kaue.rift");
     expect(v.whatsapp).toBe("11987654321");
     expect(v.shareWhatsapp).toBe(false);
+    expect(v.city).toBeNull();
+    expect(v.state).toBeNull();
+  });
+
+  it("região: cidade + UF, e cidade sozinha não vale", () => {
+    const base = { displayName: "Kauê", instagram: "", whatsapp: "" };
+    const v = profileSchema.parse({ ...base, city: "  Campinas ", state: "SP" });
+    expect([v.city, v.state]).toEqual(["Campinas", "SP"]);
+    expect(profileSchema.parse({ ...base, city: "", state: "RJ" }).state).toBe("RJ");
+    expect(profileSchema.safeParse({ ...base, city: "Campinas", state: "" }).success).toBe(false);
+    expect(profileSchema.safeParse({ ...base, state: "XX" }).success).toBe(false);
+  });
+});
+
+describe("formatRegion", () => {
+  it("monta Cidade/UF", () => {
+    expect(formatRegion("Campinas", "SP")).toBe("Campinas/SP");
+    expect(formatRegion(null, "RJ")).toBe("RJ");
+    expect(formatRegion("Campinas", null)).toBeNull();
   });
 });
 
