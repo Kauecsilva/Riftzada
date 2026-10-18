@@ -27,12 +27,14 @@ export async function syncLigaPrices(env: { firecrawlKey: string; syncToken: str
   if (error) throw new Error(`liga_sync_targets: ${error.message}`);
 
   const bySet = new Map<string, { names: Set<string>; cards: LigaTarget[] }>();
-  for (const row of data as { name: string; cards: LigaTarget[] }[]) {
+  type Row = { name: string; cards: (Omit<LigaTarget, "name"> & { name?: string; alternateArt?: boolean })[] };
+  for (const row of data as Row[]) {
     for (const card of row.cards) {
       if (!card.setCode) continue;
       const group = bySet.get(card.setCode) ?? { names: new Set(), cards: [] };
       group.names.add(row.name);
-      group.cards.push(card);
+      // Sem a migration 0016 a carta vem sem o nome completo (e sem assinadas/overnumbered)
+      group.cards.push({ ...card, name: card.name ?? `${row.name}${card.alternateArt ? " (Alternate Art)" : ""}` });
       bySet.set(card.setCode, group);
     }
   }
