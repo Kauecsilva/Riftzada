@@ -90,7 +90,7 @@ end $$;
 
 -- Grava o resultado de um lote: names são os nomes consultados; items, os preços achados
 -- ([{card_id, finish, low_cents, avg_cents, high_cents, language, condition}]). Preço que sumiu da
--- Liga (sem oferta hoje) é apagado.
+-- Liga (sem oferta hoje) fica com a data antiga, e o app ignora preço com mais de 7 dias.
 create or replace function public.upsert_liga_prices(sync_token text, names text[], items jsonb) returns int
 language plpgsql security definer set search_path = public as $$
 declare
@@ -124,14 +124,6 @@ begin
     returning 1
   )
   select count(*) into n from upserted;
-
-  delete from public.liga_prices lp
-  using public.cards c
-  where c.id = lp.card_id and public.liga_base_name(c.name) = any (names)
-    and not exists (
-      select 1 from jsonb_array_elements(coalesce(items, '[]')) i
-      where (i->>'card_id')::uuid = lp.card_id and i->>'finish' = lp.finish
-    );
 
   insert into public.liga_sync_log (name, checked_at)
   select distinct unnest(names), now()

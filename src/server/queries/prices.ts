@@ -22,6 +22,8 @@ export async function getPriceReference(cardId: string): Promise<PriceReference>
       .from("liga_prices")
       .select("finish, low_cents, avg_cents, language, condition, url, updated_at")
       .eq("card_id", cardId)
+      // Preço que a coleta não renovou numa semana (carta sem oferta na Liga) não vale mais
+      .gte("updated_at", new Date(Date.now() - 7 * 86_400_000).toISOString())
       .returns<LigaRow[]>(),
     supabase.from("exchange_rates").select("rate, updated_at").eq("base", "USD").eq("quote", "BRL").maybeSingle(),
   ]);

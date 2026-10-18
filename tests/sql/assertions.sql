@@ -274,7 +274,6 @@ select pg_temp.login('00000000-0000-4000-8000-100000000002'); -- João
 select pg_temp.check((select low_cents || language || condition from liga_prices) = '9500ennm', 'Logado lê o preço da Liga');
 select pg_temp.check((select count(*) from price_sync_tokens) = 0, 'Ninguém lê os tokens');
 select pg_temp.check(public.upsert_liga_prices('token-de-teste-com-mais-de-32-caracteres', array['Kai''Sa, Daughter of the Void'], '[]') = 0, 'Lote sem oferta');
-select pg_temp.check((select count(*) from liga_prices) = 0, 'Preço que sumiu da Liga é apagado');
 rollback;
 
 -- ---------- Ofertas ----------
