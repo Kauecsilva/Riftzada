@@ -14,7 +14,10 @@ alter table public.listing_offers
   add constraint listing_offers_amount_cents_check check (amount_cents between 0 and 100000000),
   add constraint listing_offers_not_empty check (amount_cents > 0 or jsonb_array_length(cards) > 0);
 
-drop function public.make_listing_offer(uuid, int, text);
+-- A versão de 3 argumentos sai do caminho sem DROP (o Supabase pede confirmação manual para DROP);
+-- fica sem permissão de execução para ninguém.
+alter function public.make_listing_offer(uuid, int, text) rename to make_listing_offer_v1;
+revoke execute on function public.make_listing_offer_v1(uuid, int, text) from public, anon, authenticated;
 
 -- Comprador faz (ou refaz) a oferta.
 --   Só dinheiro: venda que aceita ofertas, abaixo do preço e acima do mínimo do vendedor.
