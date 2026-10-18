@@ -137,6 +137,62 @@ select pg_temp.check((select count(*) from cards where external_id = 'rc-2') = 1
 select pg_temp.check((select rarity from cards where external_id = 'rc-2') = 'Showcase', 'Upsert atualiza');
 rollback;
 
+-- ---------- Catálogo (galeria da Riot, coleções que o Riftcodex ainda não tem) ----------
+begin;
+select public.upsert_riftcodex_cards('[{"id": "rc-ogn", "name": "Blazing Scorcher", "collector_number": 1, "set": {"set_id": "OGN", "label": "Origins"}}]');
+select pg_temp.check(public.upsert_riot_gallery_cards($j$[
+  {"id": "rad-038-167", "name": "Ahri", "subtitle": "Confident", "collectorNumber": 38, "publicCode": "RAD-038/167",
+   "set": {"value": {"id": "RAD", "label": "Radiance"}},
+   "cardType": {"type": [{"id": "unit"}], "superType": [{"id": "champion"}]},
+   "rarity": {"value": {"id": "rare"}}, "domain": {"values": [{"label": "Calm"}]},
+   "energy": {"value": {"id": 4}}, "might": {"value": {"id": 4}}, "power": {"value": {"id": 1}},
+   "text": {"richText": {"body": "<p>[Disarm]<br />When you reduce Might, give me +1.</p>"}},
+   "illustrator": {"values": [{"label": "Naifan Zhang"}]},
+   "cardImage": {"url": "https://cmsassets.rgpub.io/ahri.png"}},
+  {"id": "rad-038a-167", "name": "Ahri", "subtitle": "Confident", "collectorNumber": 38, "publicCode": "RAD-038a/167",
+   "set": {"value": {"id": "RAD", "label": "Radiance"}}, "cardType": {"type": [{"id": "unit"}]}, "rarity": {"value": {"id": "showcase"}}},
+  {"id": "rad-175-167", "name": "Agony's Embrace", "collectorNumber": 175, "publicCode": "RAD-175/167", "tags": {"tags": ["Evelynn"]},
+   "set": {"value": {"id": "RAD", "label": "Radiance"}}, "cardType": {"type": [{"id": "legend"}]}, "rarity": {"value": {"id": "showcase"}}},
+  {"id": "rad-176-star-167", "name": "Agony's Embrace", "collectorNumber": 176, "publicCode": "RAD-176*/167", "tags": {"tags": ["Evelynn"]},
+   "set": {"value": {"id": "RAD", "label": "Radiance"}}, "cardType": {"type": [{"id": "legend"}]}, "rarity": {"value": {"id": "showcase"}}},
+  {"id": "rad-180-167", "name": "Hexplosives Expert", "collectorNumber": 160, "publicCode": "RAD-160/167", "tags": {"tags": ["Yordle", "Ziggs"]},
+   "set": {"value": {"id": "RAD", "label": "Radiance"}}, "cardType": {"type": [{"id": "legend"}]}, "rarity": {"value": {"id": "rare"}}},
+  {"id": "rad-r04a", "name": "Body Rune", "collectorNumber": 4, "publicCode": "RAD-R04a",
+   "set": {"value": {"id": "RAD", "label": "Radiance"}}, "cardType": {"type": [{"id": "rune"}]}, "rarity": {"value": {"id": "showcase"}}},
+  {"id": "rad-sp1-005", "name": "Ahri", "subtitle": "Confident", "collectorNumber": 1, "publicCode": "RAD-SP1/005",
+   "set": {"value": {"id": "RAD", "label": "Radiance"}}, "cardType": {"type": [{"id": "unit"}]}, "rarity": {"value": {"id": "showcase"}}},
+  {"id": "ogn-001-298", "name": "Blazing Scorcher", "collectorNumber": 1, "publicCode": "OGN-001/298",
+   "set": {"value": {"id": "OGN", "label": "Origins"}}, "cardType": {"type": [{"id": "unit"}]}}
+]$j$) = 7, 'Galeria: importa as 7 da Radiance e pula a coleção que o Riftcodex já tem');
+select pg_temp.check((select name from cards where external_id = 'rad-038-167') = 'Ahri - Confident', 'Galeria: nome no padrão do Riftcodex');
+select pg_temp.check((select card_type from cards where external_id = 'rad-038-167') = 'champion', 'Galeria: campeã vira champion');
+select pg_temp.check((select public_code from cards where external_id = 'rad-038-167') = 'RAD-038', 'Galeria: código sem o total do set');
+select pg_temp.check((select rules_text from cards where external_id = 'rad-038-167') = E'[Disarm]\nWhen you reduce Might, give me +1.', 'Galeria: texto sem HTML');
+select pg_temp.check((select rarity from cards where external_id = 'rad-038-167') = 'Rare', 'Galeria: raridade');
+select pg_temp.check((select name from cards where external_id = 'rad-038a-167') = 'Ahri - Confident (Alternate Art)', 'Galeria: arte alternativa');
+select pg_temp.check((select name from cards where external_id = 'rad-175-167') = 'Evelynn - Agony''s Embrace (Overnumbered)', 'Galeria: lenda leva o campeão e overnumbered');
+select pg_temp.check((select is_signature from cards where external_id = 'rad-176-star-167'), 'Galeria: assinatura');
+select pg_temp.check((select name from cards where external_id = 'rad-180-167') = 'Ziggs - Hexplosives Expert', 'Galeria: lenda pula a tag de região');
+select pg_temp.check((select (public_code, collector_no, name) from cards where external_id = 'rad-r04a') = ('RAD-R04'::text, 'R04'::text, 'Body Rune (Alternate Art)'::text), 'Galeria: runa com código R04a');
+select pg_temp.check((select (public_code, name, is_overnumbered) from cards where external_id = 'rad-sp1-005') = ('RAD-SP1'::text, 'Ahri - Confident (Alternate Art)'::text, false), 'Galeria: impressão especial SP');
+select pg_temp.check((select collector_no from cards where external_id = 'rad-038a-167') = '38', 'Galeria: número sem zeros nem letra');
+-- O Riftcodex passa a ter a Radiance: assume a carta da galeria em vez de duplicar
+select public.upsert_riftcodex_cards('[{"id": "rc-ahri", "name": "Ahri - Confident", "collector_number": 38, "classification": {"type": "Unit", "rarity": "Rare"}, "set": {"set_id": "RAD", "label": "Radiance"}}]');
+select pg_temp.check((select count(*) from cards where set_code = 'RAD' and name = 'Ahri - Confident') = 1, 'Riftcodex não duplica carta da galeria');
+select pg_temp.check((select source from cards where external_id = 'rc-ahri') = 'riftcodex', 'Riftcodex assume a carta da galeria');
+-- Depois disso a galeria não mexe mais na Radiance
+select pg_temp.check(public.upsert_riot_gallery_cards('[{"id": "rad-038-167", "name": "Ahri", "collectorNumber": 38, "publicCode": "RAD-038/167", "set": {"value": {"id": "RAD"}}}]') = 0, 'Galeria pula coleção que o Riftcodex já tem');
+rollback;
+
+begin;
+select pg_temp.login('00000000-0000-4000-8000-100000000001'); -- Kauê (admin)
+do $$ begin
+  perform public.upsert_riot_gallery_cards('[]');
+  raise exception 'FALHOU: usuário rodou a importação da galeria';
+exception when insufficient_privilege then null;
+end $$;
+rollback;
+
 begin;
 select pg_temp.login('00000000-0000-4000-8000-100000000001'); -- Kauê (admin)
 do $$ begin

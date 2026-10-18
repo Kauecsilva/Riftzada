@@ -37,7 +37,8 @@ where user_id = (select id from profiles where username = 'seu_apelido');
 
 As cartas vêm do [Riftcodex](https://riftcodex.com), uma API pública e gratuita com todas as cartas de Riftbound (a mesma base do piltoverarchive.com). A migration `0006_card_catalog.sql` cria a importação dentro do próprio banco:
 
-- No Supabase, o `pg_cron` roda `public.sync_cards_from_riftcodex()` toda segunda às 06:00 (Brasília). Para importar na hora, rode `select public.sync_cards_from_riftcodex();` no SQL Editor.
+- Coleção recém-lançada costuma demorar para chegar no Riftcodex. Para não ficar sem ela, a migration `0010_riot_gallery.sql` importa também da [galeria oficial da Riot](https://riftbound.leagueoflegends.com/en-us/card-gallery/) as coleções que o Riftcodex ainda não tem (foi assim que a Radiance entrou). Quando o Riftcodex passa a ter a coleção, ele assume essas cartas sem mudar o id, então coleção e anúncios continuam valendo.
+- No Supabase, o `pg_cron` roda as duas importações todo dia: `public.sync_cards_from_riftcodex()` às 06:00 e `public.sync_cards_from_riot_gallery()` às 06:30 (Brasília). Para importar na hora, rode as duas no SQL Editor.
 - As imagens são servidas pelo CDN da Riot (`cmsassets.rgpub.io`), liberado no `next.config.ts`.
 - Anúncios e coleção apontam para `cards`. No anúncio, a carta fora do catálogo ainda pode ser digitada à mão.
 - Em `/colecao/importar` dá para subir a coleção por CSV: exportação da LigaRiftbound ou qualquer CSV com nome e quantidade. O casamento com o catálogo é por sigla da edição + número (regras em `src/lib/domain/collection-import.ts`).
