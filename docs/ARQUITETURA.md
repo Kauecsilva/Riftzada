@@ -278,6 +278,7 @@ Decks aparecem no MVP numa versão simples porque o "+" e o seed já pedem; curt
 | `/` | Home / Mural | "Olá, Kauê." · Campeão da semana (foto grande, lenda, evento) · Próximo evento com "Vou jogar" · Feed "Na Riftzada" (posts, pulls, decks, anúncios, campeões) · Top 3 do ranking. No desktop, evento e ranking numa coluna lateral. |
 | `+` (sheet) | Publicar | Publicar no mural · Anunciar carta · Publicar deck · Registrar resultado (só admin). |
 | `/publicar` | Novo post | Tipo (Resenha ou Pull), texto, até 4 fotos. |
+| `/sugestao` | Sugerir melhoria | Melhoria ou ideia, título e detalhes; vira issue no GitHub do app (aberta pelo "+"). |
 | `/arena` | Na Arena | Abas: Próximos · Resultados · Ranking · Hall. Próximos lista eventos com vagas e "Vou jogar". |
 | `/arena/eventos/[id]` | Evento | Capa, data, horário, local, vagas, quem vai, link de inscrição; depois do torneio, pódio com lendas, decks e record. |
 | `/arena/resultados` | Quem levou essa? | Eventos finalizados com campeão e top 4. |
