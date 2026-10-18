@@ -38,7 +38,7 @@ export async function signUp(_: ActionState, form: FormData): Promise<ActionStat
   const { data: available } = await supabase.rpc("username_available", { name: username });
   if (available === false) return { ok: false, message: "Esse apelido já tem dono.", fieldErrors: { username: "Esse apelido já tem dono." } };
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: { data: { username, display_name: displayName }, emailRedirectTo: `${SITE_URL}/auth/confirm` },
@@ -46,8 +46,13 @@ export async function signUp(_: ActionState, form: FormData): Promise<ActionStat
   if (error) {
     console.error("[auth] signUp", error.code, error.message);
     if (error.code === "weak_password") return { ok: false, message: "Senha fraca demais. Tenta uma mais longa." };
+    if (error.code === "over_email_send_rate_limit") {
+      return { ok: false, message: "Muita gente se cadastrando agora e o envio de e-mails travou. Tenta de novo daqui a uma hora." };
+    }
     return { ok: false, message: "Não deu para criar a conta agora. Tenta de novo em instantes." };
   }
+  // Sem confirmação de e-mail ligada no Supabase, o cadastro já volta com sessão: entra direto
+  if (data.session) redirect("/?bemvindo=1");
   // Mesma resposta se o e-mail já existir: não revela quem tem conta
   return { ok: true, message: "Conta criada! Enviamos um link de confirmação para o teu e-mail." };
 }
