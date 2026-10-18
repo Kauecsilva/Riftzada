@@ -46,6 +46,16 @@ export async function requireSession(): Promise<Session> {
   return session;
 }
 
+/**
+ * Para as telas de visitante (entrar, cadastro, esqueci a senha). Usa a mesma sessão que
+ * requireSession: decidir isso no proxy só pelo JWT criava loop com /entrar quando o
+ * usuário tinha token mas o perfil não carregava.
+ */
+export async function redirectIfSignedIn(): Promise<void> {
+  if (isDemoMode) return;
+  if (await getSession()) redirect("/");
+}
+
 /** Para o painel e as ações administrativas. */
 export async function requireAdmin(): Promise<Session> {
   const session = await requireSession();
