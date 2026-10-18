@@ -16,7 +16,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
 import { listingPhotos, offerVerb } from "@/lib/cards";
 import { CONDITION, LISTING_STATUS } from "@/lib/domain/labels";
-import { pickTcgPrice, tcgBrlCents } from "@/lib/domain/pricing";
+import { pickFinish, tcgBrlCents } from "@/lib/domain/pricing";
 import { formatPrice } from "@/lib/format";
 import { moderateListing } from "@/server/actions/admin";
 import { getListing, getListingOffers, getOffersFor, getSharedWhatsapp, getSharedWhatsapps } from "@/server/queries/market";
@@ -47,7 +47,7 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
   const buyerWhatsapps = mine ? await getSharedWhatsapps(offers.map((o) => o.buyer.id)) : {};
   // Conversas deste anúncio sem oferta (as com oferta já têm o botão no painel)
   const chats = conversations.filter((c) => c.listing.id === listing.id && !offers.some((o) => o.buyer.id === c.buyer.id));
-  const tcgCents = priceRef ? tcgBrlCents(pickTcgPrice(priceRef.tcgplayer, listing.variant), priceRef.usdBrl) : null;
+  const tcgCents = priceRef ? tcgBrlCents(pickFinish(priceRef.tcgplayer, listing.variant), priceRef.usdBrl) : null;
   const photos = listingPhotos(listing);
 
   const details = [

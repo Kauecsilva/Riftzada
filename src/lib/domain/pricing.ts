@@ -47,7 +47,7 @@ export function applyDiscount(cents: number, pct: number): number {
 }
 
 /** Preço do acabamento certo: foil se a variante diz "foil"; senão normal; senão o que tiver. */
-export function pickTcgPrice(prices: CardPrice[], variant: string | null | undefined): CardPrice | null {
+export function pickFinish<T extends Pick<CardPrice, "finish">>(prices: T[], variant: string | null | undefined): T | null {
   const wanted = /foil/i.test(variant ?? "") ? "foil" : "normal";
   return prices.find((p) => p.finish === wanted) ?? prices[0] ?? null;
 }
