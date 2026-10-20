@@ -41,14 +41,18 @@ export function useToast() {
   return useContext(ToastContext);
 }
 
-/** Mostra um toast quando a página abre com ?param (ex.: depois de salvar e redirecionar). */
-export function FlashToast({ text, tone = "ok" }: { text: string; tone?: Toast["tone"] }) {
+/**
+ * Mostra um toast quando a página abre com ?param (ex.: depois de salvar e redirecionar) e limpa a URL.
+ * Com `param`, tira só esse parâmetro e mantém os outros.
+ */
+export function FlashToast({ text, tone = "ok", param }: { text: string; tone?: Toast["tone"]; param?: string }) {
   const toast = useToast();
   useEffect(() => {
     toast(text, tone);
     const url = new URL(window.location.href);
-    url.search = "";
+    if (param) url.searchParams.delete(param);
+    else url.search = "";
     window.history.replaceState(null, "", url);
-  }, [toast, text, tone]);
+  }, [toast, text, tone, param]);
   return null;
 }

@@ -6,6 +6,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { parseDecklist } from "@/lib/domain/decklist";
+import { listingQueueHref } from "@/lib/domain/listing-queue";
 import { isOwnMediaPath } from "@/lib/images";
 import { createClient } from "@/lib/supabase/server";
 import { formToObject, zodErrorState, type ActionState } from "@/lib/validation/common";
@@ -195,6 +196,8 @@ export async function saveListing(listingId: string | null, _: ActionState, form
   revalidatePath("/mercado");
   revalidatePath("/");
   if (parsed.data.collectionItemId) revalidatePath("/colecao");
+  // Na fila do cadastro rápido, segue para a próxima carta em vez de abrir o anúncio
+  if (!listingId && parsed.data.queue.length) redirect(`${listingQueueHref(parsed.data.queue)}&anunciado=1`);
   redirect(`/mercado/${id}?salvo=1`);
 }
 

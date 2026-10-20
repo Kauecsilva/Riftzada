@@ -90,6 +90,14 @@ const brl = (message: string) =>
       return cents;
     });
 
+/** Fila do cadastro rápido vindo da coleção: ids de itens separados por vírgula. Ignora o que não for id e repetições. */
+export const listingQueue = z
+  .string()
+  .max(8000)
+  .optional()
+  .catch(undefined)
+  .transform((text) => [...new Set((text ?? "").split(",").map((id) => id.trim()).filter((id) => z.uuid().safeParse(id).success))].slice(0, 200));
+
 export const listingSchema = z.object({
   kind: z.enum(["sell", "trade", "want"]),
   cardId: optionalUuid,
@@ -113,6 +121,8 @@ export const listingSchema = z.object({
   imagePath: optionalText(200),
   /** Só vem quando o vendedor ainda não compartilha WhatsApp: preenchido, passa a compartilhar. */
   whatsapp: whatsapp.optional().transform((v) => v ?? null),
+  /** Próximos itens da coleção na fila de cadastro rápido. */
+  queue: listingQueue,
 });
 
 const offerCard = z.object({
