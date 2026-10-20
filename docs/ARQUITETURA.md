@@ -280,7 +280,7 @@ O tema inicial segue a preferência de cores do sistema. O controle no menu da c
 | `/` | Home / Mural | Banner Radiance com a arte-chave e o logo oficiais da Riot · Atalhos para Arena, Mercado e Coleção · Próximo evento com "Vou jogar" · Carrossel "Lendas por coleção" (Origins, Spiritforged, Unleashed, Vendetta, Radiance; abre na mais recente, cada lenda leva à busca do Mercado) · Campeão da semana · Mural e top 3 do ranking. |
 | `+` (sheet) | Publicar | Publicar no mural · Anunciar carta · Publicar deck · Registrar resultado (só admin). |
 | `/publicar` | Novo post | Tipo (Resenha ou Pull), texto, até 4 fotos. |
-| `/sugestao` | Sugerir melhoria | Melhoria ou ideia, título e detalhes; vira issue no GitHub do app (aberta pelo "+"). |
+| `/sugestao` | Sugerir melhoria | Melhoria ou ideia, título e detalhes; vira issue no GitHub do app (aberta pelo menu da conta). |
 | `/arena` | Na Arena | Abas: Próximos · Resultados · Ranking · Hall. Próximos lista eventos com vagas e "Vou jogar". |
 | `/arena/eventos/[id]` | Evento | Capa, data, horário, local, vagas, quem vai, link de inscrição; depois do torneio, pódio com lendas, decks e record. |
 | `/arena/resultados` | Quem levou essa? | Eventos finalizados com campeão e top 4. |
