@@ -234,13 +234,13 @@ O tema inicial segue a preferência de cores do sistema. O controle no masthead 
 | `--color-surface-2` | `#EDE5D9` | `#30273B` | Superfície secundária |
 | `--color-line` | `#CDBFAE` | `#5B4B65` | Bordas e divisórias |
 | `--color-ink` | `#292338` | `#F7F0E8` | Texto principal |
-| `--color-muted` | `#615B69` | `#D1C4D3` | Texto secundário |
+| `--color-muted` / `--color-faint` | `#57515F` / `#68626E` | `#D1C4D3` / `#B5A8BA` | Texto secundário e terciário (≥ 4,5:1 sobre `surface-2` no claro) |
 | `--color-rift` / `--color-on-rift` | `#603B87` / `#FFFAF4` | `#C997E0` / `#211629` | Ações e seleção; texto sobre elas |
 | `--color-energy` | `#166D70` | `#80D2CC` | Atividade e confirmação |
 | `--color-radiance` / `--color-radiance-soft` | `#7E438D` / `#F0E4F1` | `#E6A7E6` / `#412B46` | Coleção Radiance |
-| `--color-gold` / `--color-gold-strong` / `--color-gold-line` | `#96671F` / `#744C14` / `#B99961` | `#E6C57E` / `#F2D692` / `#AE8B56` | Campeão, ranking e filetes de carta |
+| `--color-gold` / `--color-gold-strong` / `--color-gold-line` | `#845A1A` / `#744C14` / `#B99961` | `#E6C57E` / `#F2D692` / `#AE8B56` | Campeão, ranking e filetes de carta |
 | `--color-silver` / `--color-bronze` | `#68758B` / `#985B31` | `#C0CBE0` / `#DBA579` | 2º e 3º lugares |
-| `--color-sell` / `--color-trade` / `--color-want` | `#A73A57` / `#166D70` / `#96671F` | `#F092AA` / `#80D2CC` / `#E6C57E` | Etiquetas VENDE / TROCA / PROCURA |
+| `--color-sell` / `--color-trade` / `--color-want` | `#A73A57` / `#166D70` / `#845A1A` | `#F092AA` / `#80D2CC` / `#E6C57E` | Etiquetas VENDE / TROCA / PROCURA |
 | `--color-danger` | `#AC3346` | `#F598A8` | Erros e exclusões |
 
 ### Tipografia
@@ -248,7 +248,7 @@ O tema inicial segue a preferência de cores do sistema. O controle no masthead 
 - **Cerimonial:** Cinzel Variable nos títulos de destaque Radiance e nos cabeçalhos ilustrados.
 - **Display utilitário:** Barlow Condensed 600/700/800 para navegação, números e títulos menores.
 - **Texto:** Barlow 400/500/600/700.
-- Fontes OFL incluídas em `src/fonts/`, para o design e o build funcionarem sem acesso ao Google Fonts.
+- Fontes OFL incluídas em `src/fonts/` em WOFF2 com subconjunto latino (~210 KB as oito), para o design e o build funcionarem sem acesso ao Google Fonts. Como gerar: `src/fonts/README.md`.
 - Escala: 12 · 14 · 16 (base) · 18 · 22 · 34 · 40–60 (hero).
 
 ### Forma e movimento
@@ -264,9 +264,9 @@ O tema inicial segue a preferência de cores do sistema. O controle no masthead 
 
 ### Layout
 
-- **Celular (360–430 px):** masthead com logo e menu de conta, barra inferior fixa com 5 destinos e botão "+" central. Home começa com Radiance, atalhos de jogar/trocar/coleção, cartas reais, próxima batalha e mural. Anúncios do mercado são linhas legíveis.
+- **Celular (360–430 px):** masthead com logo e menu de conta, barra inferior fixa com 5 destinos e botão "+" central. Home começa com Radiance e atalhos de jogar/trocar/coleção, depois próxima batalha, carrossel de lendas, mural, campeão da semana e ranking. Anúncios do mercado são linhas legíveis.
 - **Tablet (768 px):** conteúdo em até 1280 px, grades de 2 colunas no mercado e barra inferior até a navegação desktop aparecer.
-- **Desktop (≥1024 px):** masthead horizontal com navegação, conteúdo central amplo; Home coloca cartas de Radiance ao lado do próximo evento e usa coluna lateral para ranking. Mercado em até 4 colunas.
+- **Desktop (≥1024 px):** masthead horizontal com navegação. Home usa até 1280 px: carrossel de lendas e mural à esquerda; próxima batalha, campeão e ranking na coluna lateral. Larguras das outras telas: navegação (Mercado, Arena, Coleção, perfil, anúncio) até 1024 px; leitura (notificações, conversas, evento) até 768 px; formulários até 576 px. Mercado em até 4 colunas.
 
 ---
 
@@ -277,7 +277,7 @@ O tema inicial segue a preferência de cores do sistema. O controle no masthead 
 | `/entrar` | Entrar na Riftzada | Logo, frase "Onde a galera do Rift se encontra", e-mail, senha, links para cadastro e "esqueci a senha". |
 | `/cadastro` | Criar conta | Jogador ou Loja, apelido, e-mail, senha. Entra direto (ou aviso de confirmação, se ela estiver ligada). |
 | `/esqueci-senha`, `/redefinir-senha` | Recuperar acesso | Um campo por vez. |
-| `/` | Home / Mural | Radiance com ilustração de fãs e cartas oficiais de Seraphine, Ekko e Riven · Atalhos para Arena, Mercado e Coleção · Próximo evento com "Vou jogar" · Campeão da semana · Mural e top 3 do ranking. |
+| `/` | Home / Mural | Radiance com ilustração de fãs · Atalhos para Arena, Mercado e Coleção · Próximo evento com "Vou jogar" · Carrossel "Lendas por coleção" (Origins, Spiritforged, Unleashed, Vendetta, Radiance; abre na mais recente, cada lenda leva à busca do Mercado) · Campeão da semana · Mural e top 3 do ranking. |
 | `+` (sheet) | Publicar | Publicar no mural · Anunciar carta · Publicar deck · Registrar resultado (só admin). |
 | `/publicar` | Novo post | Tipo (Resenha ou Pull), texto, até 4 fotos. |
 | `/sugestao` | Sugerir melhoria | Melhoria ou ideia, título e detalhes; vira issue no GitHub do app (aberta pelo "+"). |
@@ -285,12 +285,12 @@ O tema inicial segue a preferência de cores do sistema. O controle no masthead 
 | `/arena/eventos/[id]` | Evento | Capa, data, horário, local, vagas, quem vai, link de inscrição; depois do torneio, pódio com lendas, decks e record. |
 | `/arena/resultados` | Quem levou essa? | Eventos finalizados com campeão e top 4. |
 | `/arena/ranking` | Ranking | Lista com posição, foto, pontos, títulos; destaque para o usuário logado. Explica a regra de pontos. |
-| `/arena/hall` | Hall da Riftzada | Cartões grandes com foto: títulos, top 4, torneios, último título. |
+| `/arena/hall` | Hall da Riftzada | Cartões grandes com a foto num medalhão: títulos, top 4, torneios, último título. |
 | `/mercado` | Mercado | Filtros VENDE / TROCA / PROCURA, busca por nome, cards com foto, preço e status. |
 | `/mercado/[id]` | Anúncio | Foto, carta, set, variante, condição, quantidade, preço e uma frase que diz como negociar (venda, oferta em dinheiro, troca). Oferta com dinheiro e/ou cartas, "Conversar" (chat do app) e WhatsApp com a carta e a oferta na mensagem, se o vendedor liberou. Dono: editar, mudar status, apagar, responder ofertas e ver as conversas. |
 | `/mensagens`, `/mensagens/[anúncio]/[interessado]` | Conversas | Lista das conversas do mercado com não lidas (somadas ao contador de Avisos) e a conversa em si, atualizada pelo Realtime. |
 | `/mercado/novo`, `/mercado/[id]/editar` | Anunciar carta | Tipo, carta, set, condição, quantidade, preço, troca, foto, descrição. Quem ainda não compartilha WhatsApp pode informar ali (vai para o perfil, já compartilhado). |
-| `/notificacoes` | Notificações | Conversas com mensagem nova no topo (abrem o chat), depois propostas recebidas e respostas às suas, mais novas primeiro; não lidas destacadas. Tocar marca como lida e abre o anúncio. Um contador só (avisos + mensagens não lidas): sininho no topo do site e ponto na Home da barra inferior. |
+| `/notificacoes` | Notificações | Conversas com mensagem nova no topo (abrem o chat), depois propostas recebidas e respostas às suas, mais novas primeiro; não lidas destacadas. Tocar marca como lida e abre o anúncio. Um contador só (avisos + mensagens não lidas): sininho no topo do site (desktop e celular). |
 | `/decks/[id]`, `/decks/novo` | Deck | Lenda, autor, resultado, lista por seção, copiar lista, compartilhar. Novo deck por lista colada. |
 | `/jogador/[username]` | Perfil | Foto, nome, @, bio, deck favorito, Instagram · torneios, títulos, 2º, top 4 · histórico de resultados · decks · anúncios ativos · posts recentes. |
 | `/perfil/editar` | Editar perfil | Foto, nome, bio, lenda favorita, Instagram, WhatsApp e se quer mostrá-lo. |

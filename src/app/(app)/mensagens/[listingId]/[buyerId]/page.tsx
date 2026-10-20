@@ -37,7 +37,7 @@ export default async function ChatPage({ params }: PageProps<"/mensagens/[listin
   const unread = conversations.find((c) => c.listing.id === listingId && c.buyer.id === buyerId)?.unread ?? 0;
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-3xl">
       <PageHeader title={other.displayName} subtitle={`Sobre ${listing.cardName}`} back="/mensagens" />
       <Link href={`/mercado/${listing.id}`} className="card mb-5 flex items-center gap-3 p-3 transition-colors hover:bg-surface-2">
         <CardThumb card={{ name: listing.cardName, imageUrl: listingImageUrl(listing) }} width={44} />

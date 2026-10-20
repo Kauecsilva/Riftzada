@@ -13,7 +13,7 @@ export function AuthorLine({ author, at, region, children }: {
         <Avatar name={author.displayName} src={author.avatarUrl} size={40} />
       </Link>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[15px]">
+        <p className="text-[15px] leading-snug [overflow-wrap:anywhere]">
           <Link href={`/jogador/${author.username}`} className="font-semibold hover:underline">{author.displayName}</Link>
           {children && <span className="text-muted"> {children}</span>}
         </p>

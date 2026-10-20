@@ -9,25 +9,25 @@ import "./globals.css";
 // Arquivos OFL locais: a interface e o build funcionam mesmo sem acesso ao Google Fonts.
 const display = localFont({
   src: [
-    { path: "../fonts/BarlowCondensed-SemiBold.ttf", weight: "600" },
-    { path: "../fonts/BarlowCondensed-Bold.ttf", weight: "700" },
-    { path: "../fonts/BarlowCondensed-ExtraBold.ttf", weight: "800" },
+    { path: "../fonts/BarlowCondensed-SemiBold.woff2", weight: "600" },
+    { path: "../fonts/BarlowCondensed-Bold.woff2", weight: "700" },
+    { path: "../fonts/BarlowCondensed-ExtraBold.woff2", weight: "800" },
   ],
   variable: "--font-display-face",
   display: "swap",
 });
 const sans = localFont({
   src: [
-    { path: "../fonts/Barlow-Regular.ttf", weight: "400" },
-    { path: "../fonts/Barlow-Medium.ttf", weight: "500" },
-    { path: "../fonts/Barlow-SemiBold.ttf", weight: "600" },
-    { path: "../fonts/Barlow-Bold.ttf", weight: "700" },
+    { path: "../fonts/Barlow-Regular.woff2", weight: "400" },
+    { path: "../fonts/Barlow-Medium.woff2", weight: "500" },
+    { path: "../fonts/Barlow-SemiBold.woff2", weight: "600" },
+    { path: "../fonts/Barlow-Bold.woff2", weight: "700" },
   ],
   variable: "--font-body-face",
   display: "swap",
 });
 const ceremony = localFont({
-  src: "../fonts/Cinzel-Variable.ttf",
+  src: "../fonts/Cinzel-Variable.woff2",
   weight: "400 900",
   variable: "--font-ceremony-face",
   display: "swap",

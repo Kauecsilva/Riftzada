@@ -7,11 +7,11 @@ import { isActive, NAV_ITEMS } from "./nav-items";
 import { PublishMenu } from "./PublishMenu";
 
 /** Navegação principal do celular, sempre visível acima da área segura. */
-export function BottomNav({ isAdmin, isStore, unread }: { isAdmin: boolean; isStore: boolean; unread: number }) {
+export function BottomNav({ isAdmin, isStore }: { isAdmin: boolean; isStore: boolean }) {
   const path = usePathname();
   const [home, arena, market, profile] = NAV_ITEMS;
 
-  const item = (it: (typeof NAV_ITEMS)[number], dot = false) => {
+  const item = (it: (typeof NAV_ITEMS)[number]) => {
     const active = isActive(path, it.href, "exact" in it ? it.exact : false);
     return (
       <li key={it.href} className="min-w-0 flex-1">
@@ -24,12 +24,8 @@ export function BottomNav({ isAdmin, isStore, unread }: { isAdmin: boolean; isSt
           )}
         >
           {active && <span className="absolute top-0 h-0.5 w-7 rounded-full bg-rift" aria-hidden />}
-          <span className="relative">
-            <it.icon size={21} strokeWidth={active ? 2.25 : 1.8} aria-hidden />
-            {dot && <span className="absolute -top-0.5 -right-1 size-2.5 rounded-full bg-rift ring-2 ring-surface" aria-hidden />}
-          </span>
+          <it.icon size={21} strokeWidth={active ? 2.25 : 1.8} aria-hidden />
           {it.label}
-          {dot && <span className="sr-only">(notificações novas)</span>}
         </Link>
       </li>
     );
@@ -38,7 +34,7 @@ export function BottomNav({ isAdmin, isStore, unread }: { isAdmin: boolean; isSt
   return (
     <nav aria-label="Principal" className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 shadow-[0_-8px_24px_rgb(47_29_56/0.10)] backdrop-blur-xl lg:hidden">
       <ul className="mx-auto flex max-w-lg items-center px-2">
-        {item(home, unread > 0)}
+        {item(home)}
         {item(arena)}
         <li className="flex min-w-0 flex-1 justify-center"><PublishMenu isAdmin={isAdmin} isStore={isStore} variant="fab" /></li>
         {item(market)}

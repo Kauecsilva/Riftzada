@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, CalendarX2, Library, Store, Swords } from "lucide-react";
 import { ChampionHero } from "@/components/arena/ChampionHero";
+import { LegendCarousel } from "@/components/cards/LegendCarousel";
 import { NextEventCard } from "@/components/arena/NextEventCard";
 import { RankingList } from "@/components/arena/RankingList";
 import { FeedList } from "@/components/feed/FeedList";
@@ -9,6 +10,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { FlashToast } from "@/components/ui/Toast";
 import { getLatestChampion, getNextEvent, getRanking } from "@/server/queries/arena";
+import { getSetLegends } from "@/server/queries/cards";
 import { getFeed } from "@/server/queries/feed";
 import { requireSession } from "@/server/session";
 
@@ -18,12 +20,6 @@ const FLASH: Record<string, string> = {
   bemvindo: "Bem-vindo à Riftzada!",
   senha: "Senha nova salva.",
 };
-const RADIANCE_CARDS = [
-  { name: "Seraphine", src: "/art/cards/RAD-151.webp" },
-  { name: "Ekko", src: "/art/cards/RAD-139.webp" },
-  { name: "Riven", src: "/art/cards/RAD-149.webp" },
-] as const;
-const SETS = ["Origins", "Spiritforged", "Unleashed", "Vendetta", "Radiance"] as const;
 const SHORTCUTS = [
   { href: "/arena", label: "Jogar", detail: "Torneios e ranking", icon: Swords },
   { href: "/mercado", label: "Trocar", detail: "Cartas da comunidade", icon: Store },
@@ -33,12 +29,13 @@ const SHORTCUTS = [
 export default async function HomePage({ searchParams }: PageProps<"/">) {
   const params = await searchParams;
   const before = typeof params.antes === "string" ? params.antes : undefined;
-  const [session, champion, nextEvent, ranking, feed] = await Promise.all([
+  const [session, champion, nextEvent, ranking, feed, legends] = await Promise.all([
     requireSession(),
     before ? null : getLatestChampion(),
     getNextEvent(),
     getRanking(5),
     getFeed({ limit: PAGE, before }),
+    before ? [] : getSetLegends(),
   ]);
   const flash = Object.keys(FLASH).find((key) => params[key]);
 
@@ -77,56 +74,30 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
         ))}
       </nav>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(300px,0.8fr)]">
-        <section aria-labelledby="radiance-destaque" className="card relative overflow-hidden px-5 py-6 md:px-7 md:py-7">
-          <div className="pointer-events-none absolute -right-12 -top-24 size-72 rounded-full bg-[#eac5e7]/35 blur-3xl" aria-hidden />
-          <div className="relative flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-bold tracking-[0.18em] text-radiance uppercase">Da coleção para a mesa</p>
-              <h2 id="radiance-destaque" className="mt-1 font-ceremony text-[26px] leading-tight font-bold text-ink md:text-[31px]">Lendas de Radiance</h2>
-              <p className="mt-2 max-w-[45ch] text-sm leading-relaxed text-muted">Conheça três das novas lendas. Cada carta traz uma forma diferente de jogar.</p>
-            </div>
-            <span className="rounded-sm border border-gold-line bg-gold-soft px-2.5 py-1 text-xs font-bold text-gold-strong">RAD · 2026</span>
-          </div>
-
-          <div className="relative mx-auto mt-6 grid max-w-[530px] grid-cols-3 items-end gap-2 sm:gap-4" aria-label="Cartas oficiais da coleção Radiance">
-            {RADIANCE_CARDS.map((card, index) => (
-              <div key={card.name} className={index === 1 ? "translate-y-1" : "-translate-y-1"}>
-                <div className="relative aspect-[744/1039] overflow-hidden rounded-[5px] border border-[#d6b770] bg-[#251d39] shadow-[0_14px_24px_-11px_rgb(25_17_41/0.65)]">
-                  <Image src={card.src} alt={`Carta de ${card.name} da coleção Radiance`} fill sizes="(min-width: 1024px) 160px, 30vw" className="object-cover" />
-                </div>
-                <p className="mt-2 text-center font-display text-base font-bold text-ink">{card.name}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="relative mt-6 flex gap-2 overflow-x-auto border-t border-line pt-4 text-[11px] font-semibold whitespace-nowrap text-muted [scrollbar-width:none]" aria-label="Coleções de Riftbound">
-            {SETS.map((set) => <span key={set} className={set === "Radiance" ? "rounded-sm bg-rift px-2.5 py-1 text-on-rift" : "rounded-sm border border-line px-2.5 py-1"}>{set}</span>)}
-          </div>
-        </section>
-
-        {!before && (
-          <aside className="space-y-6">
-            <section aria-labelledby="proximo-evento">
+      {/* Celular: próxima batalha, lendas, mural, campeão e ranking. Desktop: mural à esquerda, o resto na coluna. */}
+      <div className="flex flex-col gap-7 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+        <div className="contents lg:block lg:min-w-0 lg:space-y-7">
+          {!before && legends.length > 0 && <div className="order-2 min-w-0"><LegendCarousel sets={legends} /></div>}
+          <section id="mural" aria-labelledby="mural-titulo" className="order-3 min-w-0 scroll-mt-24">
+            <SectionHeader id="mural-titulo" title="Mural da galera" />
+            <FeedList items={feed} session={session} pageSize={PAGE} />
+          </section>
+        </div>
+        <div className="contents lg:block lg:space-y-6">
+          {!before && (
+            <section aria-labelledby="proximo-evento" className="order-1">
               <SectionHeader id="proximo-evento" title="Próxima batalha" href="/arena" linkLabel="Arena" />
               {nextEvent ? <NextEventCard event={nextEvent} /> : <EmptyState icon={CalendarX2} title="Nenhum torneio marcado." text="A Rift está tranquila demais…" />}
             </section>
-            {champion && <section aria-label="Campeão da semana"><ChampionHero event={champion} /></section>}
-          </aside>
-        )}
-      </div>
-
-      <div className="grid gap-7 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <section id="mural" aria-labelledby="mural-titulo" className="min-w-0 scroll-mt-24">
-          <SectionHeader id="mural-titulo" title="Mural da galera" />
-          <FeedList items={feed} session={session} pageSize={PAGE} />
-        </section>
-        {ranking.length > 0 && (
-          <aside aria-labelledby="ranking-home" className="card h-fit p-4 md:p-5">
-            <SectionHeader id="ranking-home" title="Ranking" href="/arena/ranking" />
-            <RankingList rows={ranking.slice(0, 3)} meId={session.userId} compact />
-          </aside>
-        )}
+          )}
+          {champion && <section aria-label="Campeão da semana" className="order-4"><ChampionHero event={champion} /></section>}
+          {ranking.length > 0 && (
+            <section aria-labelledby="ranking-home" className="card order-5 h-fit p-4 md:p-5">
+              <SectionHeader id="ranking-home" title="Ranking" href="/arena/ranking" />
+              <RankingList rows={ranking.slice(0, 3)} meId={session.userId} compact />
+            </section>
+          )}
+        </div>
       </div>
     </div>
   );

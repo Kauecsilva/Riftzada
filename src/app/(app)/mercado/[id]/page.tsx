@@ -60,7 +60,7 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
   ].filter((d): d is [string, string] => Boolean(d[1]));
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-5xl">
       {query.salvo && <FlashToast text="Anúncio salvo!" />}
       <PageHeader title={listing.cardName} back="/mercado" />
       <div className="grid gap-6 md:grid-cols-2">

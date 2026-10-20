@@ -47,7 +47,7 @@ export function EventCard({ event, highlight }: { event: EventSummary; highlight
             src={image}
             alt=""
             ratio={highlight ? "16/7" : "16/9"}
-            className={`transition-transform duration-500 group-hover:scale-[1.02] ${image.startsWith("/art/cards/") ? "[&_img]:object-top" : ""}`}
+            className={`transition-transform duration-500 group-hover:scale-[1.02] ${highlight ? "md:aspect-[3/1]!" : ""} ${image.startsWith("/art/cards/") ? "[&_img]:object-top" : ""}`}
           />
           <div className="absolute inset-0 bg-linear-to-t from-[#161725]/75 via-transparent to-[#161725]/10" aria-hidden />
           <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 [&>span]:border-[#efe0b6]/50 [&>span]:bg-[#1d1b30]/80 [&>span]:text-[#fff4df] [&>span]:backdrop-blur-sm">
