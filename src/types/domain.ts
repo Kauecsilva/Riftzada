@@ -137,6 +137,9 @@ export type CardSummary = {
   imageUrl: string | null;
 };
 
+/** Lendas de uma coleção, na ordem do número da carta. Alimenta o carrossel da Home. */
+export type SetLegends = { code: string; name: string; legends: CardSummary[] };
+
 export type Listing = {
   id: string;
   kind: ListingKind;

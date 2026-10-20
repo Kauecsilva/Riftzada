@@ -20,7 +20,7 @@ export function ResetRequestForm() {
       <FormMessage state={state} />
       {!state.ok && <SubmitButton pendingLabel="Enviando…">Enviar link</SubmitButton>}
       <p className="text-center text-sm">
-        <Link href="/entrar" className="text-muted hover:text-ink">Voltar para o login</Link>
+        <Link href="/entrar" className="inline-flex min-h-11 items-center text-muted hover:text-ink">Voltar para o login</Link>
       </p>
     </form>
   );

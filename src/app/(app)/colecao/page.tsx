@@ -50,7 +50,7 @@ export default async function CollectionPage({ searchParams }: PageProps<"/colec
   );
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-5xl">
       <PageHeader
         title="Minha coleção"
         subtitle={items.length ? `${copies} ${copies === 1 ? "carta" : "cartas"} · ${items.length} diferentes · ${listed} anunciadas` : "Registra o que você tem. Sobrou? Anuncia direto daqui."}

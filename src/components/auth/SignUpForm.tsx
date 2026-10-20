@@ -23,7 +23,7 @@ export function SignUpForm() {
     return (
       <div className="space-y-4 text-center">
         <FormMessage state={state} />
-        <Link href="/entrar" className="text-sm font-semibold text-rift-strong hover:underline">Voltar para o login</Link>
+        <Link href="/entrar" className="inline-flex min-h-11 items-center text-sm font-semibold text-rift-strong hover:underline">Voltar para o login</Link>
       </div>
     );
   }
@@ -56,7 +56,7 @@ export function SignUpForm() {
       <FormMessage state={state} />
       <SubmitButton pendingLabel="Criando…">Criar conta</SubmitButton>
       <p className="text-center text-sm text-muted">
-        Já tem conta? <Link href="/entrar" className="font-semibold text-rift-strong hover:underline">Entrar</Link>
+        Já tem conta? <Link href="/entrar" className="inline-flex min-h-11 items-center font-semibold text-rift-strong hover:underline">Entrar</Link>
       </p>
     </form>
   );

@@ -53,3 +53,25 @@ export function uniqueLegends(rows: { id: string; name: string; rarity: string |
   }
   return [...byName.values()].map(({ id, name }) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
 }
+
+/**
+ * Lendas do carrossel: uma por código. A importação da galeria da Riot às vezes traz a mesma carta
+ * sem o nome do campeão ("Rogue Assassin"); fica só a versão "Campeão - Título".
+ */
+export function pickLegendPrints<T extends { name: string; public_code: string | null }>(rows: T[]): T[] {
+  const byCode = new Map<string, T>();
+  for (const row of rows) {
+    if (row.public_code && row.name.includes(" - ") && !byCode.has(row.public_code)) byCode.set(row.public_code, row);
+  }
+  return [...byCode.values()];
+}
+
+/** "Ekko - Boy Who Shattered Time" (ou "Riven, The Exile") vira campeão + título. */
+export function splitLegendName(name: string): [string, string | null] {
+  const dash = name.indexOf(" - ");
+  const sep = dash !== -1 ? dash : name.indexOf(", ");
+  if (sep === -1) return [name, null];
+  // "Yordle, Kennen - Heart of the Tempest": o campeão é o último nome antes do título.
+  const champion = name.slice(0, sep).split(",").at(-1)!.trim();
+  return [champion, name.slice(sep + (dash !== -1 ? 3 : 2)).trim()];
+}

@@ -23,8 +23,8 @@ export function SignInForm({ next }: { next?: string }) {
       <FormMessage state={state} />
       <SubmitButton pendingLabel="Entrando…">Entrar na Riftzada</SubmitButton>
       <div className="flex justify-between text-sm">
-        <Link href="/esqueci-senha" className="text-muted hover:text-ink">Esqueci a senha</Link>
-        <Link href="/cadastro" className="font-semibold text-rift-strong hover:underline">Criar conta</Link>
+        <Link href="/esqueci-senha" className="inline-flex min-h-11 items-center text-muted hover:text-ink">Esqueci a senha</Link>
+        <Link href="/cadastro" className="inline-flex min-h-11 items-center font-semibold text-rift-strong hover:underline">Criar conta</Link>
       </div>
     </form>
   );

@@ -24,15 +24,15 @@ export default async function NotificationsPage() {
   const unread = unreadNotifications + chats.reduce((sum, c) => sum + c.unread, 0);
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-3xl">
       <PageHeader
         title="Notificações"
         back="/"
         subtitle={unread ? `${unread} ${unread === 1 ? "nova" : "novas"}` : "Propostas e interações da galera com você."}
         action={unreadNotifications > 0 && (
           <form action={markAllNotificationsRead}>
-            <button type="submit" className={buttonClass("secondary", "md")} aria-label="Marcar todas como lidas">
-              <CheckCheck size={18} aria-hidden /><span className="hidden md:inline">Marcar todas como lidas</span>
+            <button type="submit" className={buttonClass("secondary", "md")} >
+              <CheckCheck size={18} aria-hidden /><span className="md:hidden">Marcar lidas</span><span className="hidden md:inline">Marcar todas como lidas</span>
             </button>
           </form>
         )}

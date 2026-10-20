@@ -38,7 +38,7 @@ export default async function PlayerPage({ params, searchParams }: PageProps<"/j
   const achievements = earnedAchievements(stats, { decks: 0, listings: listings.length });
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8">
+    <div className="mx-auto max-w-5xl space-y-8">
       {query.salvo && <FlashToast text="Perfil atualizado!" />}
       <ProfileHeader profile={profile} mine={mine} champion={(stats?.titles ?? 0) > 0} />
       <StatsGrid stats={stats} />
@@ -90,7 +90,7 @@ export default async function PlayerPage({ params, searchParams }: PageProps<"/j
       )}
 
       {posts.length > 0 && (
-        <section aria-labelledby="posts" className="max-w-2xl">
+        <section aria-labelledby="posts" className="max-w-3xl">
           <SectionHeader id="posts" title="Posts recentes" />
           <div className="space-y-4">
             {posts.map((p) => <PostCard key={p.id} post={p} canDelete={mine} canModerate={canModerate(session)} />)}

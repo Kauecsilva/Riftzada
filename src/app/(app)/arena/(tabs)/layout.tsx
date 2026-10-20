@@ -11,7 +11,7 @@ const TABS = [
 
 export default function ArenaLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-5xl">
       <PageHeader title="Na Arena" subtitle="Torneios, resultados e quem manda na Riftzada." art="/art/rift-map.webp" />
       <Tabs items={TABS} label="Seções da Arena" />
       {children}

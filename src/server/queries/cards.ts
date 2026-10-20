@@ -1,8 +1,10 @@
 import "server-only";
+import { pickLegendPrints } from "@/lib/cards";
 import { isDemoMode } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import * as demo from "@/lib/demo/store";
-import type { CardSummary } from "@/types/domain";
+import { demoSetLegends } from "@/lib/demo/legends";
+import type { CardSummary, SetLegends } from "@/types/domain";
 import { CARD_FIELDS, mapCard, type CardRow } from "./mappers";
 
 /**
@@ -38,4 +40,36 @@ export async function getCard(id: string): Promise<CardSummary | null> {
   const supabase = await createClient();
   const { data } = await supabase.from("cards").select(CARD_FIELDS).eq("id", id).maybeSingle<CardRow>();
   return data ? mapCard(data) : null;
+}
+
+/** Coleções principais, da mais antiga para a atual (a última abre selecionada na Home). */
+export const LEGEND_SETS = [
+  { code: "OGN", name: "Origins" },
+  { code: "SFD", name: "Spiritforged" },
+  { code: "UNL", name: "Unleashed" },
+  { code: "VEN", name: "Vendetta" },
+  { code: "RAD", name: "Radiance" },
+] as const;
+
+/** Lendas de cada coleção principal, só a impressão normal (sem arte alternativa, numeração extra ou assinatura). */
+export async function getSetLegends(): Promise<SetLegends[]> {
+  if (isDemoMode) return demoSetLegends();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("cards")
+    .select(`${CARD_FIELDS}, set_code`)
+    .eq("game", "riftbound")
+    .eq("card_type", "legend")
+    .in("set_code", LEGEND_SETS.map((s) => s.code))
+    .eq("is_alternate_art", false)
+    .eq("is_overnumbered", false)
+    .eq("is_signature", false)
+    .order("public_code")
+    .returns<(CardRow & { set_code: string })[]>();
+  if (error) throw error;
+  const rows = pickLegendPrints(data);
+  return LEGEND_SETS.map((set) => ({
+    ...set,
+    legends: rows.filter((row) => row.set_code === set.code).map(mapCard).filter((card) => card.imageUrl),
+  })).filter((set) => set.legends.length > 0);
 }

@@ -17,7 +17,7 @@ export default async function ConversationsPage() {
   const session = await requireSession();
   const conversations = await getConversations(session.userId);
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-3xl">
       <PageHeader title="Conversas" subtitle="Papo do mercado: quem te chamou e quem você chamou." back="/mercado" />
       {conversations.length === 0 ? (
         <EmptyState icon={MessagesSquare} title="Nenhuma conversa ainda." text="Abre um anúncio e toca em “Conversar” para chamar quem anunciou." action={{ href: "/mercado", label: "Ir para o Mercado" }} />

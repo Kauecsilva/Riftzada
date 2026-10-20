@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cardImageUrl, cardLine, listingImageUrl, listingPhotos, offerVerb, uniqueLegends } from "@/lib/cards";
+import { cardImageUrl, cardLine, listingImageUrl, listingPhotos, offerVerb, pickLegendPrints, splitLegendName, uniqueLegends } from "@/lib/cards";
 import { collectionItemSchema, listingSchema } from "@/lib/validation/schemas";
 
 const CARD_ID = "00000000-0000-4000-8000-200000000001";
@@ -86,5 +86,25 @@ describe("lendas sem repetição", () => {
       { id: "3", name: "Ahri - Nine-Tailed Fox" },
       { id: "4", name: "Annie - Dark Child" },
     ]);
+  });
+});
+
+describe("carrossel de lendas", () => {
+  it("separa campeão e título", () => {
+    expect(splitLegendName("Ekko - Boy Who Shattered Time")).toEqual(["Ekko", "Boy Who Shattered Time"]);
+    expect(splitLegendName("Riven, The Exile")).toEqual(["Riven", "The Exile"]);
+    expect(splitLegendName("Yordle, Kennen - Heart of the Tempest")).toEqual(["Kennen", "Heart of the Tempest"]);
+    expect(splitLegendName("Sett")).toEqual(["Sett", null]);
+  });
+
+  it("fica uma impressão por código, a que tem o nome do campeão", () => {
+    const rows = [
+      { name: "Rogue Assassin", public_code: "VEN-139" },
+      { name: "Akali - Rogue Assassin", public_code: "VEN-139" },
+      { name: "Heart of the Tempest", public_code: "VEN-197" },
+      { name: "Ekko - Boy Who Shattered Time", public_code: "RAD-139" },
+      { name: "Ekko - Boy Who Shattered Time", public_code: null },
+    ];
+    expect(pickLegendPrints(rows).map((r) => r.name)).toEqual(["Akali - Rogue Assassin", "Ekko - Boy Who Shattered Time"]);
   });
 });

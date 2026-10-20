@@ -53,12 +53,13 @@ export default async function MarketPage({ searchParams }: PageProps<"/mercado">
         art="/art/rift-market.webp"
         action={
           <div className="flex gap-2">
-            <Link href="/mensagens" className={buttonClass("secondary", "md", "relative border-white/40 bg-surface/90")} aria-label={unread ? `Conversas, ${unread} não lidas` : "Conversas"}>
-              <MessagesSquare size={18} aria-hidden /><span className="hidden sm:inline">Conversas</span>
+            <Link href="/mensagens" className={buttonClass("secondary", "md", "relative border-white/40 bg-surface/90")} >
+              <MessagesSquare size={18} aria-hidden /><span>Conversas</span>
+              {unread > 0 && <span className="sr-only">, {unread} {unread === 1 ? "não lida" : "não lidas"}</span>}
               {unread > 0 && <span className="absolute -top-1.5 -right-1.5 min-w-5 rounded-full bg-gold px-1 text-center text-xs leading-5 font-bold text-bg" aria-hidden>{unread > 9 ? "9+" : unread}</span>}
             </Link>
-            <Link href="/colecao" className={buttonClass("secondary", "md", "border-white/40 bg-surface/90")} aria-label="Minha coleção">
-              <Library size={18} aria-hidden /><span className="hidden sm:inline">Minha coleção</span>
+            <Link href="/colecao" className={buttonClass("secondary", "md", "border-white/40 bg-surface/90")}>
+              <Library size={18} aria-hidden /><span>Minha coleção</span>
             </Link>
           </div>
         }

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Crown, Medal } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Photo } from "@/components/ui/Photo";
 import { cn } from "@/lib/cn";
 import { plural } from "@/lib/format";
 import { getHallOfFame } from "@/server/queries/arena";
@@ -29,16 +28,15 @@ function Legend({ player, rank }: { player: PlayerStats; rank: number }) {
         rank === 1 ? "border-gold/40 md:col-span-2" : "border-line",
       )}
     >
-      <Photo
-        src={player.avatarUrl}
-        alt={player.displayName}
-        ratio="1/1"
-        className={cn("transition-transform duration-500 group-hover:scale-[1.03]", rank === 1 ? "md:aspect-[2/1]!" : "md:aspect-[4/3]!")}
-        fallback={<div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgb(245_193_75/0.25),transparent_65%)]" />}
-      />
-      <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 p-5">
-        {!player.avatarUrl && <Avatar name={player.displayName} src={null} size={56} className="mb-3" />}
+      {/* A foto fica num medalhão: selfie esticada em tela cheia cortava o rosto e brigava com o nome. */}
+      <div className="absolute inset-0 bg-[#1d1729] bg-[radial-gradient(circle_at_50%_0%,rgb(245_193_75/0.28),transparent_60%)] transition-transform duration-500 group-hover:scale-[1.03]" aria-hidden />
+      <div className={cn("relative flex flex-col justify-end p-5", rank === 1 ? "min-h-72 md:min-h-80" : "min-h-72")}>
+        <Avatar
+          name={player.displayName}
+          src={player.avatarUrl}
+          size={rank === 1 ? 96 : 72}
+          className={cn("mb-4 ring-2 ring-offset-2 ring-offset-[#1d1729]", rank === 1 ? "ring-[#e8c77e]" : "ring-white/30")}
+        />
         {player.titles > 0 && (
           <p className="mb-1 inline-flex items-center gap-1 text-xs font-bold tracking-[0.14em] text-gold uppercase">
             <Crown size={14} aria-hidden /> {plural(player.titles, "título", "títulos")}

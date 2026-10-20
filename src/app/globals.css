@@ -8,8 +8,8 @@
   --color-surface-3: light-dark(#e0d3c1, #3c3049);
   --color-line: light-dark(#cdbfae, #5b4b65);
   --color-ink: light-dark(#292338, #f7f0e8);
-  --color-muted: light-dark(#615b69, #d1c4d3);
-  --color-faint: light-dark(#77717c, #b5a8ba);
+  --color-muted: light-dark(#57515f, #d1c4d3);
+  --color-faint: light-dark(#68626e, #b5a8ba);
 
   --color-rift: light-dark(#603b87, #c997e0);
   --color-rift-strong: light-dark(#764b9b, #e1b8ef);
@@ -19,7 +19,7 @@
   --color-radiance: light-dark(#7e438d, #e6a7e6);
   --color-radiance-soft: light-dark(#f0e4f1, #412b46);
   --color-radiance-line: light-dark(#b88fbc, #9c74a5);
-  --color-gold: light-dark(#96671f, #e6c57e);
+  --color-gold: light-dark(#845a1a, #e6c57e);
   --color-gold-strong: light-dark(#744c14, #f2d692);
   --color-gold-soft: light-dark(#f5ecd5, #3e332b);
   --color-gold-line: light-dark(#b99961, #ae8b56);
@@ -27,7 +27,7 @@
   --color-bronze: light-dark(#985b31, #dba579);
   --color-sell: light-dark(#a73a57, #f092aa);
   --color-trade: light-dark(#166d70, #80d2cc);
-  --color-want: light-dark(#96671f, #e6c57e);
+  --color-want: light-dark(#845a1a, #e6c57e);
   --color-danger: light-dark(#ac3346, #f598a8);
 
   --font-display: var(--font-display-face), ui-sans-serif, system-ui, sans-serif;
@@ -100,7 +100,7 @@
     min-height: 100dvh;
     background:
       linear-gradient(180deg, color-mix(in srgb, var(--color-bg) 88%, transparent) 0, color-mix(in srgb, var(--color-bg) 92%, transparent) 340px, var(--color-bg) 760px),
-      url("/art/rift-map.webp") center top / auto 760px no-repeat,
+      url("/art/rift-map.webp") center top / max(100%, 1350px) auto no-repeat,
       var(--color-bg);
   }
   /* Superfícies lembram fichas e folhas de coleção; a arte fica com o destaque. */
