@@ -166,6 +166,10 @@ export const collectionItemSchema = z.object({
 
 export const collectionQuantitySchema = z.object({ id: uuid, quantity: z.coerce.number().int().min(0).max(999) });
 
+export const collectionRemoveSchema = z.object({
+  ids: z.array(uuid).min(1, "Escolhe pelo menos uma carta").max(5000, "Seleção grande demais"),
+});
+
 export const listingStatusSchema = z.object({ id: uuid, status: z.enum(["available", "reserved", "done"]) });
 
 export const deckSchema = z.object({

@@ -8,9 +8,11 @@ import {
 } from "@/lib/domain/collection-import";
 import { createClient } from "@/lib/supabase/server";
 import { formToObject, zodErrorState, type ActionState } from "@/lib/validation/common";
-import { collectionItemSchema, collectionQuantitySchema } from "@/lib/validation/schemas";
+import { collectionItemSchema, collectionQuantitySchema, collectionRemoveSchema } from "@/lib/validation/schemas";
 import { requireSession } from "../session";
 import { dbError, demoBlocked } from "./helpers";
+
+const chunks = <T,>(list: T[], size: number) => Array.from({ length: Math.ceil(list.length / size) }, (_, i) => list.slice(i * size, (i + 1) * size));
 
 /** Adiciona uma carta. Se já tem a mesma carta, condição e variante, soma a quantidade. */
 export async function addCollectionItem(_: ActionState, form: FormData): Promise<ActionState> {
@@ -64,6 +66,34 @@ export async function setCollectionQuantity(id: string, quantity: number): Promi
   return { ok: true, message: parsed.data.quantity === 0 ? "Carta removida da coleção." : undefined };
 }
 
+/** Tira várias cartas da coleção de uma vez. Anúncios ligados a elas continuam, só perdem o vínculo. */
+export async function removeCollectionItems(ids: string[]): Promise<ActionState> {
+  const blocked = demoBlocked();
+  if (blocked) return blocked;
+  const session = await requireSession();
+  const parsed = collectionRemoveSchema.safeParse({ ids });
+  if (!parsed.success) return zodErrorState(parsed.error);
+
+  const supabase = await createClient();
+  let removed = 0;
+  for (const part of chunks([...new Set(parsed.data.ids)], 200)) {
+    const { error, count } = await supabase
+      .from("collection_items")
+      .delete({ count: "exact" })
+      .eq("user_id", session.userId)
+      .in("id", part);
+    if (error) {
+      if (removed) revalidatePath("/colecao");
+      return dbError(error);
+    }
+    removed += count ?? 0;
+  }
+  if (!removed) return { ok: false, message: "Essas cartas não estão na tua coleção." };
+
+  revalidatePath("/colecao");
+  return { ok: true, message: removed === 1 ? "1 carta removida da coleção." : `${removed} cartas removidas da coleção.` };
+}
+
 // ---------- Importação por CSV ----------
 
 export type ImportState = ActionState & {
@@ -74,7 +104,6 @@ export type ImportState = ActionState & {
 };
 
 const MAX_IMPORT_BYTES = 1024 * 1024;
-const chunks = <T,>(list: T[], size: number) => Array.from({ length: Math.ceil(list.length / size) }, (_, i) => list.slice(i * size, (i + 1) * size));
 
 /**
  * Importa a coleção de um CSV (LigaRiftbound ou formato genérico com nome e quantidade).
