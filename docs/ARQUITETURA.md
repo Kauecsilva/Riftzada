@@ -223,7 +223,7 @@ Decks aparecem no MVP numa versão simples porque o "+" e o seed já pedem; curt
 
 **Conceito:** mesa de jogo e galeria de coleção. O canvas claro deixa as cores impressas das cartas Radiance aparecerem; o modo escuro usa ameixa e ouro, em sintonia com o masthead e as molduras das cartas. O novo monograma em forma de R separa a haste dourada da perna violeta por uma fenda; ele aparece na marca, no ícone da PWA e no ícone para iOS. A Home mostra cartas oficiais de Seraphine, Ekko e Riven (Radiance), com os sets anteriores numa linha de coleção. Ilustrações originais de personagens, mapa de Runeterra e bazar de Shurima dão contexto à Home, Arena e Mercado, sem repetir a mesma capa em todos os módulos. O crédito Riot aparece no rodapé global; origem das cartas locais, URLs oficiais e artistas estão em `public/art/cards/README.md`.
 
-O tema inicial segue a preferência de cores do sistema. O controle no masthead desktop, no menu da conta no celular e na tela de autenticação alterna claro/escuro e salva a escolha em `localStorage` (`riftzada-theme`), válida nas próximas visitas e sincronizada entre abas. Os tokens `light-dark()` em `globals.css` cobrem superfícies, texto, estados e formulários; o script antes da hidratação aplica a escolha salva para evitar troca de cores ao abrir a página.
+O tema inicial segue a preferência de cores do sistema. O controle no menu da conta (desktop e celular) e na tela de autenticação alterna claro/escuro e salva a escolha em `localStorage` (`riftzada-theme`), válida nas próximas visitas e sincronizada entre abas. Os tokens `light-dark()` em `globals.css` cobrem superfícies, texto, estados e formulários; o script antes da hidratação aplica a escolha salva para evitar troca de cores ao abrir a página.
 
 ### Cores (tokens em `globals.css`)
 
@@ -264,9 +264,9 @@ O tema inicial segue a preferência de cores do sistema. O controle no masthead 
 
 ### Layout
 
-- **Celular (360–430 px):** masthead com logo e menu de conta, barra inferior fixa com 5 destinos e botão "+" central. Home começa com Radiance e atalhos de jogar/trocar/coleção, depois próxima batalha, carrossel de lendas, mural, campeão da semana e ranking. Anúncios do mercado são linhas legíveis.
+- **Celular (360–430 px):** masthead com logo e menu de conta, barra inferior fixa com 5 destinos e botão "+" central. Home começa com Radiance e atalhos de jogar/trocar/minha coleção, depois próxima batalha, carrossel de lendas, mural, campeão da semana e ranking. Anúncios do mercado são linhas legíveis.
 - **Tablet (768 px):** conteúdo em até 1280 px, grades de 2 colunas no mercado e barra inferior até a navegação desktop aparecer.
-- **Desktop (≥1024 px):** masthead horizontal com navegação. Home usa até 1280 px: carrossel de lendas e mural à esquerda; próxima batalha, campeão e ranking na coluna lateral. Larguras das outras telas: navegação (Mercado, Arena, Coleção, perfil, anúncio) até 1024 px; leitura (notificações, conversas, evento) até 768 px; formulários até 576 px. Mercado em até 4 colunas.
+- **Desktop (≥1024 px):** masthead horizontal com navegação; o avatar abre o menu da conta (perfil, coleção, sugestão, tema, admin, sair) ao passar o mouse ou ao clicar/tocar. Home usa até 1280 px: carrossel de lendas e mural à esquerda; próxima batalha, campeão e ranking na coluna lateral. Larguras das outras telas: navegação (Mercado, Arena, Coleção, perfil, anúncio) até 1024 px; leitura (notificações, conversas, evento) até 768 px; formulários até 576 px. Mercado em até 4 colunas.
 
 ---
 
