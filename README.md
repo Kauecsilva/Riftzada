@@ -42,6 +42,7 @@ As cartas vêm do [Riftcodex](https://riftcodex.com), uma API pública e gratuit
 - As imagens são servidas pelo CDN da Riot (`cmsassets.rgpub.io`), liberado no `next.config.ts`.
 - Anúncios e coleção apontam para `cards`. No anúncio, a carta fora do catálogo ainda pode ser digitada à mão.
 - Em `/colecao/importar` dá para subir a coleção por CSV: exportação da LigaRiftbound ou qualquer CSV com nome e quantidade. O casamento com o catálogo é por sigla da edição + número (regras em `src/lib/domain/collection-import.ts`).
+- Em `/colecao`, "Selecionar várias" abre a seleção múltipla (com "Selecionar tudo", que respeita a busca) e remove as cartas marcadas depois de uma confirmação. Anúncios ligados a elas continuam no Mercado.
 
 ## Preço sugerido e ofertas
 

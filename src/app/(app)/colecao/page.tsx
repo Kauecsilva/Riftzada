@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FileUp, Library, Plus, Search } from "lucide-react";
 import { CollectionAddForm } from "@/components/collection/CollectionAddForm";
-import { CollectionItemCard } from "@/components/collection/CollectionItemCard";
+import { CollectionList } from "@/components/collection/CollectionList";
 import { buttonClass } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -38,9 +38,7 @@ export default async function CollectionPage({ searchParams }: PageProps<"/colec
         </form>
       )}
       {shown.length ? (
-        <ul className="grid gap-3 sm:grid-cols-2">
-          {shown.map((item) => <li key={`${item.id}-${item.quantity}`}><CollectionItemCard item={item} /></li>)}
-        </ul>
+        <CollectionList items={shown} />
       ) : search ? (
         <EmptyState icon={Search} title="Nada com esse nome." text="Confere a grafia ou adiciona outra carta." />
       ) : (

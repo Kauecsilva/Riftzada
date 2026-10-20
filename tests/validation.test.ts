@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { isOwnMediaPath } from "@/lib/images";
 import { formatPrice } from "@/lib/format";
 import { formatRegion } from "@/lib/domain/region";
-import { listingSchema, profileSchema, signUpSchema } from "@/lib/validation/schemas";
+import { collectionRemoveSchema, listingSchema, profileSchema, signUpSchema } from "@/lib/validation/schemas";
 
 const base = { kind: "sell", cardName: "Jinx", condition: "nm", quantity: "1" };
 
@@ -71,5 +71,19 @@ describe("fotos enviadas", () => {
     expect(isOwnMediaPath(`${other}/posts/${file}`, me)).toBe(false);
     expect(isOwnMediaPath(`${me}/../${other}/posts/${file}`, me)).toBe(false);
     expect(isOwnMediaPath(`${me}/segredos/${file}`, me)).toBe(false);
+  });
+});
+
+describe("remoção em massa da coleção", () => {
+  const id = "3f1c2b4a-5d6e-4f70-8a9b-0c1d2e3f4a5b";
+
+  it("aceita uma lista de ids", () => {
+    expect(collectionRemoveSchema.parse({ ids: [id] }).ids).toEqual([id]);
+  });
+
+  it("recusa lista vazia, id inválido e lista grande demais", () => {
+    expect(collectionRemoveSchema.safeParse({ ids: [] }).success).toBe(false);
+    expect(collectionRemoveSchema.safeParse({ ids: ["abc"] }).success).toBe(false);
+    expect(collectionRemoveSchema.safeParse({ ids: Array(5001).fill(id) }).success).toBe(false);
   });
 });
