@@ -44,13 +44,17 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       {flash && <FlashToast text={FLASH[flash]} />}
 
       <section aria-label="Radiance, coleção atual de Riftbound" className="radiance-panel relative isolate overflow-hidden text-[#fff8ee]">
-        <Image src="/art/radiance-champions.webp" alt="" fill priority sizes="(min-width: 1280px) 1240px, 100vw" className="object-cover object-[62%_center] md:object-center" />
-        <div className="absolute inset-0 bg-linear-to-r from-[#171326]/95 via-[#171326]/74 to-[#171326]/5" aria-hidden />
+        <div className="absolute inset-y-0 right-0 w-full lg:w-[76%]">
+          <Image src="/art/radiance-key-art.webp" alt="" fill priority sizes="(min-width: 1280px) 940px, (min-width: 1024px) 76vw, 100vw" className="object-cover object-[58%_center] lg:object-[22%_center]" />
+        </div>
+        <div className="absolute inset-0 bg-linear-to-r from-[#171326]/95 via-[#171326]/74 to-[#171326]/5 lg:from-[#171326] lg:from-24% lg:via-[#171326]/50 lg:via-48%" aria-hidden />
         <div className="absolute inset-0 bg-linear-to-t from-[#171326]/80 via-transparent to-transparent md:hidden" aria-hidden />
         <div className="pointer-events-none absolute inset-2 rounded-md border border-[#f1d292]/45" aria-hidden />
         <div className="relative flex min-h-[370px] flex-col justify-end px-7 py-9 sm:px-9 md:min-h-[440px] md:px-12 md:py-12">
           <p className="mb-3 text-xs font-bold tracking-[0.24em] text-[#f4d891] uppercase">Riftbound · coleção atual</p>
-          <h1 className="font-ceremony text-[46px] leading-none font-bold tracking-[-0.06em] text-[#fff5dd] sm:text-[64px] md:text-[82px] xl:text-[100px]">Radiance</h1>
+          <h1 className="w-[min(100%,260px)] sm:w-[340px] md:w-[420px] xl:w-[500px]">
+            <Image src="/art/radiance-logo.webp" alt="Radiance" width={1200} height={300} priority sizes="(min-width: 1280px) 500px, (min-width: 768px) 420px, 340px" className="h-auto w-full drop-shadow-[0_4px_14px_rgb(0_0_0/0.45)]" />
+          </h1>
           <p className="mt-4 max-w-md text-sm leading-relaxed text-[#f6e8da] md:text-base">
             Ekko, Riven e Seraphine chegam à mesa. Encontre a galera para jogar, trocar cartas e construir sua próxima história no Rift.
           </p>

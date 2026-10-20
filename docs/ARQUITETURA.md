@@ -277,7 +277,7 @@ O tema inicial segue a preferência de cores do sistema. O controle no masthead 
 | `/entrar` | Entrar na Riftzada | Logo, frase "Onde a galera do Rift se encontra", e-mail, senha, links para cadastro e "esqueci a senha". |
 | `/cadastro` | Criar conta | Jogador ou Loja, apelido, e-mail, senha. Entra direto (ou aviso de confirmação, se ela estiver ligada). |
 | `/esqueci-senha`, `/redefinir-senha` | Recuperar acesso | Um campo por vez. |
-| `/` | Home / Mural | Radiance com ilustração de fãs · Atalhos para Arena, Mercado e Coleção · Próximo evento com "Vou jogar" · Carrossel "Lendas por coleção" (Origins, Spiritforged, Unleashed, Vendetta, Radiance; abre na mais recente, cada lenda leva à busca do Mercado) · Campeão da semana · Mural e top 3 do ranking. |
+| `/` | Home / Mural | Banner Radiance com a arte-chave e o logo oficiais da Riot · Atalhos para Arena, Mercado e Coleção · Próximo evento com "Vou jogar" · Carrossel "Lendas por coleção" (Origins, Spiritforged, Unleashed, Vendetta, Radiance; abre na mais recente, cada lenda leva à busca do Mercado) · Campeão da semana · Mural e top 3 do ranking. |
 | `+` (sheet) | Publicar | Publicar no mural · Anunciar carta · Publicar deck · Registrar resultado (só admin). |
 | `/publicar` | Novo post | Tipo (Resenha ou Pull), texto, até 4 fotos. |
 | `/sugestao` | Sugerir melhoria | Melhoria ou ideia, título e detalhes; vira issue no GitHub do app (aberta pelo "+"). |
