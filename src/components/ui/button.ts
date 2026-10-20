@@ -4,11 +4,11 @@ export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "gold
 export type ButtonSize = "sm" | "md" | "lg";
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary: "bg-linear-to-b from-rift-strong to-rift text-on-rift border border-gold-strong/40 shadow-glow hover:brightness-110",
-  secondary: "bg-surface-2 text-gold-strong border border-gold-line hover:border-gold hover:bg-surface-3",
+  primary: "bg-rift text-on-rift border border-rift shadow-glow hover:bg-rift-strong",
+  secondary: "bg-surface text-ink border border-line hover:border-radiance-line hover:bg-rift-soft",
   ghost: "text-muted hover:text-ink hover:bg-surface-2",
-  danger: "bg-danger/15 text-danger border border-danger/30 hover:bg-danger/25",
-  gold: "bg-linear-to-b from-gold-strong to-gold text-[#1d1606] hover:brightness-110",
+  danger: "bg-danger/10 text-danger border border-danger/30 hover:bg-danger/20",
+  gold: "bg-[#e6c680] text-[#261b2b] border border-[#b28c46] hover:bg-[#f2d697]",
 };
 
 const SIZES: Record<ButtonSize, string> = {

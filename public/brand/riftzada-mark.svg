@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Riftzada</title>
+  <path d="M9 10H43L55 23L41 37L32 32L41 24H27L18 18L24 31V49L10 60L14 45V23Z" fill="#e8c77e" stroke="#211a32" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M18 28L29 32L41 49L34 52L24 40Z" fill="#e8c77e" stroke="#211a32" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M32 35L42 36L59 58L48 56Z" fill="#b98ad3" stroke="#211a32" stroke-width="1.2" stroke-linejoin="round"/>
+</svg>

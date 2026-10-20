@@ -25,7 +25,7 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
       aria-label={title}
       className="m-0 mt-auto w-full max-w-none bg-transparent p-0 text-ink backdrop:bg-black/60 backdrop:backdrop-blur-sm open:animate-sheet-in md:m-auto md:max-w-md"
     >
-      <div className="safe-bottom rounded-t-[28px] border border-line bg-surface p-5 md:rounded-[28px]">
+      <div className="safe-bottom rounded-t-xl border border-line bg-surface p-5 md:rounded-xl">
         <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-surface-3 md:hidden" aria-hidden />
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-xl font-bold">{title}</h2>

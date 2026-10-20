@@ -58,8 +58,8 @@ export const demoCards: DemoCard[] = [
   { id: LEGENDS.volibear, name: "Volibear, Relentless Storm", setName: "Origins", setCode: "OGN", type: "legend" },
   { id: LEGENDS.darius, name: "Darius, Hand of Noxus", setName: "Origins", setCode: "OGN", type: "legend" },
   { id: LEGENDS.missfortune, name: "Miss Fortune, Bounty Hunter", setName: "Origins", setCode: "OGN", type: "legend" },
-  { id: LEGENDS.garen, name: "Garen, Might of Demacia", setName: "Origins", setCode: "OGN", type: "legend" },
-  { id: LEGENDS.annie, name: "Annie, Dark Child", setName: "Origins", setCode: "OGN", type: "legend" },
+  { id: LEGENDS.garen, name: "Garen, Might of Demacia", setName: "Proving Grounds", setCode: "OGS", type: "legend" },
+  { id: LEGENDS.annie, name: "Annie, Dark Child", setName: "Proving Grounds", setCode: "OGS", type: "legend" },
   { id: LEGENDS.masteryi, name: "Master Yi, Wuju Bladesman", setName: "Origins", setCode: "OGN", type: "legend" },
 ];
 

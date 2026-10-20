@@ -17,7 +17,7 @@ export function Photo({
         <Image src={src} alt={alt} fill sizes={sizes} priority={priority} className="object-cover" unoptimized={src.endsWith(".svg")} />
       ) : (
         fallback ?? (
-          <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_30%_20%,rgb(242_138_31/0.18),transparent_60%)] text-faint">
+          <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_30%_20%,rgb(126_67_141/0.16),transparent_60%)] text-faint">
             <ImageOff size={28} aria-hidden />
             <span className="sr-only">{alt || "Sem foto"}</span>
           </div>

@@ -154,12 +154,9 @@ Todas as tabelas têm `id uuid` (exceto junções), `created_at`, RLS ligado, e 
 | `decks` | id, community_id, author_id, name, legend_id → cards, description, visibility, event_id?, record?, placement?, created_at | Fase 2 na UI completa; MVP já mostra e cria. |
 | `deck_cards` | deck_id, card_id?, card_name, quantity, section (`main`, `runes`, `battlefields`, `side`) | `card_name` garante a lista mesmo sem a carta no catálogo; `card_id` liga quando existir. |
 | `market_listings` | id, community_id, seller_id, kind, card_id?, card_name, set_name?, variant?, condition, quantity, price_cents?, accepts_trade, description?, image_path?, status, is_hidden, created_at | Sem pagamento. `card_id` opcional, `card_name` obrigatório. |
-<<<<<<< HEAD
 | `notifications` | id, user_id → profiles, actor_id? → profiles, kind, listing_id?, offer_id?, amount_cents?, body?, read_at?, created_at | Avisos do que outro jogador fez com você (oferta recebida, contraproposta, aceite, recusa, retirada; `trade_offer` e `message` reservados para troca e chat). Nascem só por trigger via `notify()` (0015); o dono lê e marca como lido por `mark_notifications_read()`. |
-=======
 | `listing_offers` | id, listing_id, buyer_id, amount_cents, cards (jsonb), counter_cents?, message?, status | Oferta em dinheiro (venda que aceita ofertas) ou cartas + dinheiro (troca, ou venda que aceita troca). Escrita só por `make_listing_offer`/`respond_listing_offer` (0008, cartas na 0014). |
 | `listing_messages` | id, listing_id, buyer_id, sender_id, body, read_at?, created_at | Conversa do anúncio: uma por (anúncio, interessado). Só as duas pontas leem; escrita por `send_listing_message`, que deixa o anunciante só responder a quem chamou ou ofertou. Realtime ligado (0014). |
->>>>>>> origin/main
 | `achievements` | id, code (único), name, description, icon, tier | Catálogo de badges. |
 | `user_achievements` | user_id, achievement_id, community_id, awarded_at, event_id? | Fase 2 concede automaticamente. |
 | `ranking_rules` | community_id (PK), points_by_placement int[], participation_points, updated_at | Pontuação configurável: ex. `{100,70,50,50}` + 10 por presença. |
@@ -224,34 +221,39 @@ Decks aparecem no MVP numa versão simples porque o "+" e o seed já pedem; curt
 
 ## 6. Design system inicial
 
-**Conceito:** "noite no Rift". Azul-noite de Runeterra no fundo, laranja do logo de Riftbound para ação, teal hextech para o que está vivo e ouro hextech reservado a prestígio (campeões, Hall, 1º lugar). Molduras com filete dourado e cantos chanfrados lembram o cliente do League of Legends. As seções principais (Home, Arena, Mercado, login) abrem com arte oficial de Riftbound, e o logo oficial aparece na barra lateral, no fim da Home (celular) e no login, sempre com o crédito à Riot: é um site de fãs, sem afiliação. URLs das artes e o texto do crédito ficam em `src/lib/art.ts`.
+**Conceito:** mesa de jogo e galeria de coleção. O canvas claro deixa as cores impressas das cartas Radiance aparecerem; o modo escuro usa ameixa e ouro, em sintonia com o masthead e as molduras das cartas. O novo monograma em forma de R separa a haste dourada da perna violeta por uma fenda; ele aparece na marca, no ícone da PWA e no ícone para iOS. A Home mostra cartas oficiais de Seraphine, Ekko e Riven (Radiance), com os sets anteriores numa linha de coleção. Ilustrações originais de personagens, mapa de Runeterra e bazar de Shurima dão contexto à Home, Arena e Mercado, sem repetir a mesma capa em todos os módulos. O crédito Riot aparece no rodapé global; origem das cartas locais, URLs oficiais e artistas estão em `public/art/cards/README.md`.
+
+O tema inicial segue a preferência de cores do sistema. O controle no masthead desktop, no menu da conta no celular e na tela de autenticação alterna claro/escuro e salva a escolha em `localStorage` (`riftzada-theme`), válida nas próximas visitas e sincronizada entre abas. Os tokens `light-dark()` em `globals.css` cobrem superfícies, texto, estados e formulários; o script antes da hidratação aplica a escolha salva para evitar troca de cores ao abrir a página.
 
 ### Cores (tokens em `globals.css`)
 
-| Token | Valor | Uso |
-|---|---|---|
-| `--color-bg` | `#050B14` | Fundo do app |
-| `--color-surface` | `#0B1626` | Cartões |
-| `--color-surface-2` | `#112038` | Cartão sobre cartão, inputs |
-| `--color-line` | `#22344F` | Bordas e divisórias |
-| `--color-ink` | `#F0E6D2` | Texto principal (creme do LoL) |
-| `--color-muted` | `#A3ADBF` | Texto secundário (contraste ≥ 4.5:1 no fundo) |
-| `--color-rift` / `--color-on-rift` | `#F28A1F` / `#1F1000` | Ação principal, botão "+", links; texto sobre ela |
-| `--color-energy` | `#0AC8B9` | Destaques vivos, "ao vivo", sucesso |
-| `--color-gold` / `--color-gold-strong` / `--color-gold-line` | `#D9B76C` / `#F0D9A0` / `#785A28` | Campeão, 1º lugar, Hall, títulos de seção, molduras |
-| `--color-silver` / `--color-bronze` | `#C9CEE6` / `#D58A54` | 2º e 3º lugares |
-| `--color-sell` / `--color-trade` / `--color-want` | `#FF6B7F` / `#0AC8B9` / `#D9B76C` | Etiquetas VENDE / TROCA / PROCURA |
-| `--color-danger` | `#FF5470` | Erros e exclusões |
+| Token | Claro | Escuro | Uso |
+|---|---|---|---|
+| `--color-bg` | `#F3EFE6` | `#17131F` | Fundo do app |
+| `--color-surface` | `#FFFBF3` | `#241D30` | Cartões e formulários |
+| `--color-surface-2` | `#EDE5D9` | `#30273B` | Superfície secundária |
+| `--color-line` | `#CDBFAE` | `#5B4B65` | Bordas e divisórias |
+| `--color-ink` | `#292338` | `#F7F0E8` | Texto principal |
+| `--color-muted` | `#615B69` | `#D1C4D3` | Texto secundário |
+| `--color-rift` / `--color-on-rift` | `#603B87` / `#FFFAF4` | `#C997E0` / `#211629` | Ações e seleção; texto sobre elas |
+| `--color-energy` | `#166D70` | `#80D2CC` | Atividade e confirmação |
+| `--color-radiance` / `--color-radiance-soft` | `#7E438D` / `#F0E4F1` | `#E6A7E6` / `#412B46` | Coleção Radiance |
+| `--color-gold` / `--color-gold-strong` / `--color-gold-line` | `#96671F` / `#744C14` / `#B99961` | `#E6C57E` / `#F2D692` / `#AE8B56` | Campeão, ranking e filetes de carta |
+| `--color-silver` / `--color-bronze` | `#68758B` / `#985B31` | `#C0CBE0` / `#DBA579` | 2º e 3º lugares |
+| `--color-sell` / `--color-trade` / `--color-want` | `#A73A57` / `#166D70` / `#96671F` | `#F092AA` / `#80D2CC` / `#E6C57E` | Etiquetas VENDE / TROCA / PROCURA |
+| `--color-danger` | `#AC3346` | `#F598A8` | Erros e exclusões |
 
 ### Tipografia
 
-- **Display:** Barlow Condensed 600/700/800, em caixa alta nos títulos (condensada como o logotipo de Riftbound).
+- **Cerimonial:** Cinzel Variable nos títulos de destaque Radiance e nos cabeçalhos ilustrados.
+- **Display utilitário:** Barlow Condensed 600/700/800 para navegação, números e títulos menores.
 - **Texto:** Barlow 400/500/600/700.
+- Fontes OFL incluídas em `src/fonts/`, para o design e o build funcionarem sem acesso ao Google Fonts.
 - Escala: 12 · 14 · 16 (base) · 18 · 22 · 34 · 40–60 (hero).
 
 ### Forma e movimento
 
-- Cantos: 8 (inputs e botões), 10 (cartões), 28 (bottom sheet), chanfrados com moldura dourada (`.frame-hex`) nos destaques, pílula nos chips.
+- Cantos: 6 (inputs e botões), 8 (cartões), 10 (banners), 12 (sheet). O recorte angular acompanha imagens de cartas; ouro marca conquistas e molduras, com superfícies simples no restante.
 - Áreas clicáveis ≥ 44 px. Foco visível com anel `--color-rift`.
 - Microinterações: botão afunda em 0.97 ao tocar; cartões sobem 2 px no hover (desktop); sheets entram de baixo em 200 ms. Tudo desligado com `prefers-reduced-motion`.
 - Skeletons com brilho suave em todo `loading.tsx`.
@@ -262,9 +264,9 @@ Decks aparecem no MVP numa versão simples porque o "+" e o seed já pedem; curt
 
 ### Layout
 
-- **Celular (360–430 px):** coluna única, barra inferior fixa com 5 itens; o "+" central é um losango elevado em `--color-rift`.
-- **Tablet (768 px):** mesma barra, conteúdo em até 640 px, grades de 2 colunas no mercado.
-- **Desktop (≥1024 px):** barra lateral à esquerda com logo e navegação, conteúdo central, e na Home uma coluna lateral fixa com próximo evento e ranking. Mercado em 3 colunas.
+- **Celular (360–430 px):** masthead com logo e menu de conta, barra inferior fixa com 5 destinos e botão "+" central. Home começa com Radiance, atalhos de jogar/trocar/coleção, cartas reais, próxima batalha e mural. Anúncios do mercado são linhas legíveis.
+- **Tablet (768 px):** conteúdo em até 1280 px, grades de 2 colunas no mercado e barra inferior até a navegação desktop aparecer.
+- **Desktop (≥1024 px):** masthead horizontal com navegação, conteúdo central amplo; Home coloca cartas de Radiance ao lado do próximo evento e usa coluna lateral para ranking. Mercado em até 4 colunas.
 
 ---
 
@@ -275,7 +277,7 @@ Decks aparecem no MVP numa versão simples porque o "+" e o seed já pedem; curt
 | `/entrar` | Entrar na Riftzada | Logo, frase "Onde a galera do Rift se encontra", e-mail, senha, links para cadastro e "esqueci a senha". |
 | `/cadastro` | Criar conta | Jogador ou Loja, apelido, e-mail, senha. Entra direto (ou aviso de confirmação, se ela estiver ligada). |
 | `/esqueci-senha`, `/redefinir-senha` | Recuperar acesso | Um campo por vez. |
-| `/` | Home / Mural | "Olá, Kauê." · Campeão da semana (foto grande, lenda, evento) · Próximo evento com "Vou jogar" · Feed "Na Riftzada" (posts, pulls, decks, anúncios, campeões) · Top 3 do ranking. No desktop, evento e ranking numa coluna lateral. |
+| `/` | Home / Mural | Radiance com ilustração de fãs e cartas oficiais de Seraphine, Ekko e Riven · Atalhos para Arena, Mercado e Coleção · Próximo evento com "Vou jogar" · Campeão da semana · Mural e top 3 do ranking. |
 | `+` (sheet) | Publicar | Publicar no mural · Anunciar carta · Publicar deck · Registrar resultado (só admin). |
 | `/publicar` | Novo post | Tipo (Resenha ou Pull), texto, até 4 fotos. |
 | `/sugestao` | Sugerir melhoria | Melhoria ou ideia, título e detalhes; vira issue no GitHub do app (aberta pelo "+"). |
@@ -285,15 +287,10 @@ Decks aparecem no MVP numa versão simples porque o "+" e o seed já pedem; curt
 | `/arena/ranking` | Ranking | Lista com posição, foto, pontos, títulos; destaque para o usuário logado. Explica a regra de pontos. |
 | `/arena/hall` | Hall da Riftzada | Cartões grandes com foto: títulos, top 4, torneios, último título. |
 | `/mercado` | Mercado | Filtros VENDE / TROCA / PROCURA, busca por nome, cards com foto, preço e status. |
-<<<<<<< HEAD
-| `/mercado/[id]` | Anúncio | Foto, carta, set, variante, condição, quantidade, preço, aceita troca, vendedor, "Tenho interesse" (WhatsApp se o vendedor liberou, senão perfil). Dono: editar, mudar status, apagar. |
-| `/mercado/novo`, `/mercado/[id]/editar` | Anunciar carta | Tipo, carta, set, condição, quantidade, preço, troca, foto, descrição. |
-| `/notificacoes` | Notificações | Conversas com mensagem nova no topo (abrem o chat), depois propostas recebidas e respostas às suas, mais novas primeiro; não lidas destacadas. Tocar marca como lida e abre o anúncio. Um contador só (avisos + mensagens não lidas): sininho no topo da Home (celular), "Avisos" na barra lateral (desktop) e ponto na Home da barra inferior. |
-=======
 | `/mercado/[id]` | Anúncio | Foto, carta, set, variante, condição, quantidade, preço e uma frase que diz como negociar (venda, oferta em dinheiro, troca). Oferta com dinheiro e/ou cartas, "Conversar" (chat do app) e WhatsApp com a carta e a oferta na mensagem, se o vendedor liberou. Dono: editar, mudar status, apagar, responder ofertas e ver as conversas. |
 | `/mensagens`, `/mensagens/[anúncio]/[interessado]` | Conversas | Lista das conversas do mercado com não lidas (somadas ao contador de Avisos) e a conversa em si, atualizada pelo Realtime. |
 | `/mercado/novo`, `/mercado/[id]/editar` | Anunciar carta | Tipo, carta, set, condição, quantidade, preço, troca, foto, descrição. Quem ainda não compartilha WhatsApp pode informar ali (vai para o perfil, já compartilhado). |
->>>>>>> origin/main
+| `/notificacoes` | Notificações | Conversas com mensagem nova no topo (abrem o chat), depois propostas recebidas e respostas às suas, mais novas primeiro; não lidas destacadas. Tocar marca como lida e abre o anúncio. Um contador só (avisos + mensagens não lidas): sininho no topo do site e ponto na Home da barra inferior. |
 | `/decks/[id]`, `/decks/novo` | Deck | Lenda, autor, resultado, lista por seção, copiar lista, compartilhar. Novo deck por lista colada. |
 | `/jogador/[username]` | Perfil | Foto, nome, @, bio, deck favorito, Instagram · torneios, títulos, 2º, top 4 · histórico de resultados · decks · anúncios ativos · posts recentes. |
 | `/perfil/editar` | Editar perfil | Foto, nome, bio, lenda favorita, Instagram, WhatsApp e se quer mostrá-lo. |

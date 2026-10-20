@@ -14,8 +14,8 @@ export const metadata: Metadata = { title: "Hall da Fama" };
 function Stat({ value, label, gold }: { value: number; label: string; gold?: boolean }) {
   return (
     <div className="text-center">
-      <p className={cn("font-display text-2xl font-extrabold tabular-nums", gold && "text-prestige")}>{value}</p>
-      <p className="text-xs text-muted">{label}</p>
+      <p className={cn("font-display text-2xl font-extrabold tabular-nums text-[#fff8ec]", gold && "text-[#e8c77e]")}>{value}</p>
+      <p className="text-xs text-[#fff8ec]/75">{label}</p>
     </div>
   );
 }

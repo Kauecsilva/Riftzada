@@ -1,45 +1,44 @@
 @import "tailwindcss";
 
-/* ---------- Design system da Riftzada ----------
-   "Noite no Rift": azul-noite de Runeterra, laranja Riftbound para ação (o mesmo do logo do jogo),
-   teal hextech para o que está vivo, ouro hextech só para prestígio (campeão, 1º lugar, Hall).
-   Molduras com filete dourado e cantos chanfrados lembram o cliente do League of Legends.
-   Use sempre os tokens (bg-surface, text-muted, text-gold…), nunca cores soltas. */
+/* Radiance: mesa de coleção em pergaminho ou ameixa, com molduras de tinta e ouro. */
 @theme {
-  --color-bg: #050b14;
-  --color-surface: #0b1626;
-  --color-surface-2: #112038;
-  --color-surface-3: #1a2d4a;
-  --color-line: #22344f;
-  --color-ink: #f0e6d2;
-  --color-muted: #a3adbf;
-  --color-faint: #6f7c93;
+  --color-bg: light-dark(#f3efe6, #17131f);
+  --color-surface: light-dark(#fffbf3, #241d30);
+  --color-surface-2: light-dark(#ede5d9, #30273b);
+  --color-surface-3: light-dark(#e0d3c1, #3c3049);
+  --color-line: light-dark(#cdbfae, #5b4b65);
+  --color-ink: light-dark(#292338, #f7f0e8);
+  --color-muted: light-dark(#615b69, #d1c4d3);
+  --color-faint: light-dark(#77717c, #b5a8ba);
 
-  /* "rift" continua sendo o token de ação: agora é o laranja do logo de Riftbound */
-  --color-rift: #f28a1f;
-  --color-rift-strong: #ffa947;
-  --color-rift-soft: #3a240e;
-  --color-on-rift: #1f1000;
-  --color-energy: #0ac8b9;
-  --color-gold: #d9b76c;
-  --color-gold-strong: #f0d9a0;
-  --color-gold-soft: #2c2412;
-  --color-gold-line: #785a28;
-  --color-silver: #c9cee6;
-  --color-bronze: #d58a54;
-  --color-sell: #ff6b7f;
-  --color-trade: #0ac8b9;
-  --color-want: #d9b76c;
-  --color-danger: #ff5470;
+  --color-rift: light-dark(#603b87, #c997e0);
+  --color-rift-strong: light-dark(#764b9b, #e1b8ef);
+  --color-rift-soft: light-dark(#efe3f1, #38263f);
+  --color-on-rift: light-dark(#fffaf4, #211629);
+  --color-energy: light-dark(#166d70, #80d2cc);
+  --color-radiance: light-dark(#7e438d, #e6a7e6);
+  --color-radiance-soft: light-dark(#f0e4f1, #412b46);
+  --color-radiance-line: light-dark(#b88fbc, #9c74a5);
+  --color-gold: light-dark(#96671f, #e6c57e);
+  --color-gold-strong: light-dark(#744c14, #f2d692);
+  --color-gold-soft: light-dark(#f5ecd5, #3e332b);
+  --color-gold-line: light-dark(#b99961, #ae8b56);
+  --color-silver: light-dark(#68758b, #c0cbe0);
+  --color-bronze: light-dark(#985b31, #dba579);
+  --color-sell: light-dark(#a73a57, #f092aa);
+  --color-trade: light-dark(#166d70, #80d2cc);
+  --color-want: light-dark(#96671f, #e6c57e);
+  --color-danger: light-dark(#ac3346, #f598a8);
 
   --font-display: var(--font-display-face), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-body-face), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-ceremony: var(--font-ceremony-face), Georgia, serif;
 
-  --radius-card: 10px;
-  --radius-hero: 14px;
+  --radius-card: 8px;
+  --radius-hero: 10px;
 
-  --shadow-float: 0 14px 40px -12px rgb(0 0 0 / 0.75);
-  --shadow-glow: 0 8px 26px -8px rgb(242 138 31 / 0.6);
+  --shadow-float: 0 18px 48px -24px rgb(27 22 41 / 0.38);
+  --shadow-glow: 0 12px 24px -14px rgb(96 59 135 / 0.55);
 
   --animate-sheet-in: sheet-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
   --animate-fade-in: fade-in 0.18s ease-out;
@@ -61,23 +60,21 @@
 
 @layer base {
   html {
-    color-scheme: dark;
+    color-scheme: light dark;
     background: var(--color-bg);
     -webkit-tap-highlight-color: transparent;
   }
+  html[data-theme="light"] { color-scheme: light; }
+  html[data-theme="dark"] { color-scheme: dark; }
   body {
-    background:
-      radial-gradient(1100px 560px at 15% -12%, rgb(10 200 185 / 0.09), transparent 60%),
-      radial-gradient(900px 520px at 105% 0%, rgb(242 138 31 / 0.08), transparent 60%),
-      var(--color-bg);
-    background-attachment: fixed;
+    background: var(--color-bg);
     color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     min-height: 100dvh;
   }
   :focus-visible {
-    outline: 3px solid var(--color-rift-strong);
+    outline: 3px solid #b961c0;
     outline-offset: 2px;
     border-radius: 6px;
   }
@@ -91,20 +88,33 @@
 }
 
 @layer components {
-  /* Cartão padrão: painel azul-noite com um filete dourado no topo, como os painéis do cliente do LoL */
-  .card {
+  .auth-map-shade {
+    background: linear-gradient(
+      180deg,
+      light-dark(rgb(33 26 50 / 0.30), rgb(17 13 28 / 0.68)) 0%,
+      color-mix(in srgb, var(--color-bg) 78%, transparent) 62%,
+      var(--color-bg) 100%
+    );
+  }
+  .app-shell {
+    min-height: 100dvh;
     background:
-      linear-gradient(90deg, transparent, rgb(217 183 108 / 0.45), transparent) top / 100% 1px no-repeat,
-      linear-gradient(180deg, var(--color-surface) 0%, rgb(11 22 38 / 0.92) 100%);
+      linear-gradient(180deg, color-mix(in srgb, var(--color-bg) 88%, transparent) 0, color-mix(in srgb, var(--color-bg) 92%, transparent) 340px, var(--color-bg) 760px),
+      url("/art/rift-map.webp") center top / auto 760px no-repeat,
+      var(--color-bg);
+  }
+  /* Superfícies lembram fichas e folhas de coleção; a arte fica com o destaque. */
+  .card {
+    background: color-mix(in srgb, var(--color-surface) 97%, transparent);
     border: 1px solid var(--color-line);
     border-radius: var(--radius-card);
+    box-shadow: 0 8px 28px -22px rgb(38 24 49 / 0.45);
   }
-  /* Moldura hextech: filete em degradê dourado e cantos chanfrados. Para o que é destaque (hero, campeão). */
+  /* Recorte angular inspirado na borda impressa das cartas Radiance. */
   .frame-hex {
-    --chamfer: 12px;
+    --chamfer: 11px;
     position: relative;
-    border: 1.5px solid var(--color-gold-line);
-    border-image: linear-gradient(160deg, var(--color-gold-strong), var(--color-gold) 30%, var(--color-gold-line) 65%, var(--color-gold) 100%) 1;
+    border: 1px solid var(--color-gold-line);
     clip-path: polygon(var(--chamfer) 0, calc(100% - var(--chamfer)) 0, 100% var(--chamfer), 100% calc(100% - var(--chamfer)), calc(100% - var(--chamfer)) 100%, var(--chamfer) 100%, 0 calc(100% - var(--chamfer)), 0 var(--chamfer));
   }
   /* Losango de ornamento (títulos de seção) */
@@ -120,20 +130,44 @@
     background: linear-gradient(90deg, var(--color-surface-2) 0%, var(--color-surface-3) 50%, var(--color-surface-2) 100%);
     background-size: 200% 100%;
     animation: var(--animate-shimmer);
-    border-radius: 12px;
+    border-radius: 6px;
   }
-  /* Texto com o degradê da marca */
+  /* Cores da impressão de Radiance: magenta, azul e ouro. */
   .text-brand {
-    background: linear-gradient(100deg, #ffc46b 0%, var(--color-rift) 55%, #d9561a 100%);
+    background: linear-gradient(100deg, #d8bb76 0%, #f8e3a0 55%, #b978c3 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
   .text-prestige {
-    background: linear-gradient(100deg, var(--color-gold-strong) 0%, var(--color-gold) 50%, #a8823f 100%);
+    background: linear-gradient(100deg, light-dark(#694515, #d4ae68) 0%, light-dark(#a8792b, #ffdfa0) 50%, light-dark(#694515, #d4ae68) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+  }
+  .radiance-panel {
+    background: #201b32;
+    border: 1px solid #d7b879;
+    border-radius: var(--radius-hero);
+    box-shadow: 0 25px 55px -35px rgb(27 22 41 / 0.9), inset 0 1px rgb(255 244 221 / 0.22);
+  }
+  .art-banner {
+    background:
+      linear-gradient(90deg, rgb(24 21 39 / 0.74), rgb(24 21 39 / 0.18)),
+      url("/art/rift-map.webp") 72% 42% / cover no-repeat,
+      #252139;
+    border: 1px solid #bca276;
+    border-radius: var(--radius-hero);
+    box-shadow: 0 18px 35px -28px rgb(27 22 41 / 0.85);
+  }
+  .art-banner::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgb(250 220 154 / 0.45);
+    border-radius: calc(var(--radius-hero) - 4px);
+    margin: 5px;
+    pointer-events: none;
   }
   /* Campos de formulário */
   .input {
@@ -141,7 +175,7 @@
     min-height: 48px;
     background: var(--color-surface-2);
     border: 1px solid var(--color-line);
-    border-radius: 8px;
+    border-radius: 6px;
     padding: 12px 14px;
     color: var(--color-ink);
     transition: border-color 0.15s, background-color 0.15s;
@@ -150,7 +184,7 @@
     color: var(--color-faint);
   }
   .input:hover {
-    border-color: var(--color-surface-3);
+    border-color: var(--color-radiance-line);
   }
   .input:focus {
     outline: none;

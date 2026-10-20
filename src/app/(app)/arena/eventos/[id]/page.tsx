@@ -34,6 +34,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/ar
     ? `/loja/${event.store.id}/eventos/${event.id}`
     : isAdmin ? `/admin/eventos/${event.id}` : null;
   const people = event.participants.filter((p) => (finished ? p.played : true));
+  const eventImage = finished && event.resultsImageUrl ? event.resultsImageUrl : event.imageUrl;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -47,7 +48,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/ar
       />
 
       <div className="card overflow-hidden">
-        <Photo src={finished && event.resultsImageUrl ? event.resultsImageUrl : event.imageUrl} alt={finished ? `Pódio do ${event.name}` : ""} ratio="16/9" priority />
+        <Photo src={eventImage ?? "/art/rift-map.webp"} alt={finished && event.resultsImageUrl ? `Pódio do ${event.name}` : ""} ratio="16/9" priority />
         <div className="space-y-4 p-5">
           <div className="flex flex-wrap gap-2">
             <Badge tone={finished ? "gold" : event.status === "cancelled" ? "danger" : "energy"}>{EVENT_STATUS[event.status]}</Badge>

@@ -12,7 +12,7 @@ import { resolveRelDate } from "./dates";
 import { demoStoreEvents, demoStores, type DemoStoreEvent } from "./stores";
 import {
   demoCards, demoCollection, demoDecks, demoEvents, demoListings, demoOffers as demoOfferRows, demoParticipants, demoPosts, demoRankingEntries, demoRankingRules,
-  demoResults, demoUsers, USERS, type DemoEvent,
+  demoResults, demoUsers, LEGENDS, USERS, type DemoEvent,
 } from "./fixtures";
 
 export const DEMO_USER_ID = USERS.kaue;
@@ -28,8 +28,14 @@ export function demoLegends(): Legend[] {
 
 // ---------- Catálogo e coleção ----------
 
+const demoCardArt: Record<string, string> = {
+  [LEGENDS.jinx]: "/art/cards/OGN-251.webp",
+  [LEGENDS.annie]: "/art/cards/OGS-017.webp",
+  [LEGENDS.garen]: "/art/cards/OGS-023.webp",
+};
+
 const cardSummary = (c: (typeof demoCards)[number]): CardSummary => ({
-  id: c.id, name: c.name, setName: c.setName, code: null, rarity: null, imageUrl: null,
+  id: c.id, name: c.name, setName: c.setName, code: null, rarity: null, imageUrl: demoCardArt[c.id] ?? null,
 });
 
 export function demoSearchCards(term: string, limit: number): CardSummary[] {

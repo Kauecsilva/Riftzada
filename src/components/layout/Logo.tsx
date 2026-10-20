@@ -1,35 +1,22 @@
-import { useId } from "react";
 import { cn } from "@/lib/cn";
 
-/** Marca da Riftzada: um losango hextech partido pela fenda (o Rift) + o nome, nas cores de Riftbound. */
+/** Monograma R: a haste dourada se separa da perna violeta como uma fenda. */
 export function LogoMark({ size = 32, className }: { size?: number; className?: string }) {
-  // Ids únicos: com o mesmo id em dois SVGs, um escondido (display:none) apaga o degradê do outro
-  const id = useId();
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden className={className}>
-      <defs>
-        <linearGradient id={`${id}a`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#f0d9a0" />
-          <stop offset="0.55" stopColor="#d9b76c" />
-          <stop offset="1" stopColor="#785a28" />
-        </linearGradient>
-        <linearGradient id={`${id}b`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#ffc46b" />
-          <stop offset="1" stopColor="#f28a1f" />
-        </linearGradient>
-      </defs>
-      <path d="M32 4 L58 30 L36 30 L22 50 L32 60 L6 34 Z" fill={`url(#${id}a)`} />
-      <path d="M38 34 L58 34 L32 60 L26 54 Z" fill={`url(#${id}b)`} />
+      <path d="M9 10H43L55 23L41 37L32 32L41 24H27L18 18L24 31V49L10 60L14 45V23Z" fill="#e8c77e" stroke="#211a32" strokeWidth="1.2" strokeLinejoin="round" />
+      <path d="M18 28L29 32L41 49L34 52L24 40Z" fill="#e8c77e" stroke="#211a32" strokeWidth="1.2" strokeLinejoin="round" />
+      <path d="M32 35L42 36L59 58L48 56Z" fill="#b98ad3" stroke="#211a32" strokeWidth="1.2" strokeLinejoin="round" />
     </svg>
   );
 }
 
-export function Logo({ className, size = 28 }: { className?: string; size?: number }) {
+export function Logo({ className, size = 30, tone = "dark" }: { className?: string; size?: number; tone?: "light" | "dark" }) {
   return (
-    <span className={cn("inline-flex items-center gap-2", className)}>
+    <span className={cn("inline-flex items-center gap-2.5", tone === "light" ? "text-[#faf5eb]" : "text-ink", className)}>
       <LogoMark size={size} />
-      <span className="font-display text-2xl leading-none font-extrabold tracking-wide">
-        RIFT<span className="text-brand">ZADA</span>
+      <span className="font-ceremony text-[21px] leading-none font-bold tracking-[-0.045em] sm:text-[23px]">
+        RIFT<span className={tone === "light" ? "text-[#e8c77e]" : "text-rift"}>ZADA</span>
       </span>
     </span>
   );

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CardBack } from "@/components/cards/CardBack";
 import { KindTag } from "@/components/ui/Badge";
 import { Photo } from "@/components/ui/Photo";
 import { listingImageUrl } from "@/lib/cards";
@@ -10,16 +11,16 @@ import { AuthorLine } from "./AuthorLine";
 /** Anúncio no feed: "Rafael está vendendo uma Kai'Sa." */
 export function ListingFeedCard({ listing }: { listing: Listing }) {
   return (
-    <article className="card p-4">
+    <article className="card border-l-4 border-l-radiance p-4">
       <AuthorLine author={listing.seller} at={listing.createdAt} region={listing.sellerRegion}>{LISTING_KIND[listing.kind].verb}</AuthorLine>
-      <Link href={`/mercado/${listing.id}`} className="mt-3 flex gap-3 rounded-2xl border border-line bg-surface-2 p-2.5 transition-colors hover:bg-surface-3">
-        <div className="w-16 shrink-0"><Photo src={listingImageUrl(listing)} alt={listing.cardName} ratio="3/4" className="rounded-xl" sizes="64px" /></div>
-        <div className="min-w-0 flex-1 py-0.5">
-          <KindTag kind={listing.kind} />
-          <p className="mt-1.5 truncate font-semibold">{listing.cardName}</p>
-          <p className="truncate text-sm text-muted">{[listing.setName, listing.variant].filter(Boolean).join(" · ")}</p>
+      <Link href={`/mercado/${listing.id}`} className="group mt-3 flex min-w-0 gap-3 overflow-hidden border border-gold-line/65 bg-bg p-2 transition-colors hover:border-radiance hover:bg-radiance-soft focus-visible:outline-radiance">
+        <div className="w-18 shrink-0 border border-gold-line/60"><Photo src={listingImageUrl(listing)} alt={listing.cardName} ratio="3/4" sizes="72px" fallback={<CardBack kind={listing.kind} />} /></div>
+        <div className="flex min-w-0 flex-1 flex-col justify-center py-0.5">
+          <div><KindTag kind={listing.kind} className="rounded-[3px]" /></div>
+          <p className="mt-1.5 truncate font-display text-lg font-bold leading-tight text-ink">{listing.cardName}</p>
+          <p className="truncate text-xs text-muted">{[listing.setName, listing.variant].filter(Boolean).join(" · ")}</p>
+          {listing.priceCents != null && <p className="mt-1 font-display text-lg font-bold leading-none text-rift">{formatPrice(listing.priceCents)}</p>}
         </div>
-        {listing.priceCents != null && <p className="self-center pr-1 font-display text-lg font-bold">{formatPrice(listing.priceCents)}</p>}
       </Link>
     </article>
   );

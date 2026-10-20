@@ -51,8 +51,8 @@ insert into public.cards (id, name, set_name, set_code, card_type) values
   ('00000000-0000-4000-8000-200000000007', 'Volibear, Relentless Storm', 'Origins', 'OGN', 'legend'),
   ('00000000-0000-4000-8000-200000000008', 'Darius, Hand of Noxus', 'Origins', 'OGN', 'legend'),
   ('00000000-0000-4000-8000-200000000009', 'Miss Fortune, Bounty Hunter', 'Origins', 'OGN', 'legend'),
-  ('00000000-0000-4000-8000-200000000010', 'Garen, Might of Demacia', 'Origins', 'OGN', 'legend'),
-  ('00000000-0000-4000-8000-200000000011', 'Annie, Dark Child', 'Origins', 'OGN', 'legend'),
+  ('00000000-0000-4000-8000-200000000010', 'Garen, Might of Demacia', 'Proving Grounds', 'OGS', 'legend'),
+  ('00000000-0000-4000-8000-200000000011', 'Annie, Dark Child', 'Proving Grounds', 'OGS', 'legend'),
   ('00000000-0000-4000-8000-200000000012', 'Master Yi, Wuju Bladesman', 'Origins', 'OGN', 'legend');
 
 -- Perfis, contatos e papéis

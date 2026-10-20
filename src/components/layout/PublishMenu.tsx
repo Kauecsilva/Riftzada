@@ -14,10 +14,9 @@ const OPTIONS = [
   { href: "/sugestao", label: "Sugerir melhoria", text: "Ideia ou ajuste para o app", icon: Lightbulb, tone: "bg-surface-3 text-ink" },
 ];
 
-/** O "+" da barra: abre as opções de publicação. "Registrar resultado" só aparece para admin. */
-export function PublishMenu({ isAdmin, isStore, variant }: { isAdmin: boolean; isStore: boolean; variant: "fab" | "sidebar" }) {
+/** Abre as opções de publicação. "Registrar resultado" só aparece para admin. */
+export function PublishMenu({ isAdmin, isStore, variant }: { isAdmin: boolean; isStore: boolean; variant: "fab" | "header" }) {
   const [open, setOpen] = useState(false);
-  // Evento de loja só para conta de loja (e admin)
   const base = isAdmin || isStore ? OPTIONS : OPTIONS.filter((o) => o.href !== "/loja");
   const options = isAdmin
     ? [...base, { href: "/admin/eventos", label: "Registrar resultado", text: "Quem levou o último torneio?", icon: Trophy, tone: "bg-gold-soft text-gold" }]
@@ -31,16 +30,16 @@ export function PublishMenu({ isAdmin, isStore, variant }: { isAdmin: boolean; i
           onClick={() => setOpen(true)}
           aria-label="Publicar"
           aria-haspopup="dialog"
-          className="-mt-5 inline-flex size-12 items-center justify-center rotate-45 rounded-[14px] border border-gold-strong/60 bg-linear-to-br from-rift-strong to-rift text-on-rift shadow-glow ring-4 ring-bg transition-transform active:scale-95"
+          className="inline-flex size-12 items-center justify-center rounded-full border-2 border-[#d9bfe2] bg-[#6a3b83] text-white shadow-[0_4px_12px_rgb(87_48_112/0.25)] transition-transform hover:bg-[#754490] active:scale-95"
         >
-          <Plus size={26} strokeWidth={2.5} className="-rotate-45" aria-hidden />
+          <Plus size={25} strokeWidth={2.3} aria-hidden />
         </button>
       ) : (
         <button
           type="button"
           onClick={() => setOpen(true)}
           aria-haspopup="dialog"
-          className="flex min-h-12 w-full items-center justify-center gap-2 rounded-md border border-gold-strong/40 bg-linear-to-b from-rift-strong to-rift font-display text-lg font-bold tracking-wide text-on-rift uppercase shadow-glow transition-[filter] hover:brightness-110"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#dfc4e7] px-4 text-sm font-bold text-[#2a1938] transition-colors hover:bg-[#edd5f4]"
         >
           <Plus size={20} aria-hidden /> Publicar
         </button>

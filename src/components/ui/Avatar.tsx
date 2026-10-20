@@ -2,8 +2,8 @@ import Image from "next/image";
 import { cn } from "@/lib/cn";
 import { initials } from "@/lib/format";
 
-// Cor estável por nome, para as iniciais não ficarem todas iguais
-const TINTS = ["from-rift to-[#a8520d]", "from-energy to-[#086f6a]", "from-gold to-[#8a6a2c]", "from-sell to-[#b83a4c]", "from-[#5aa2ff] to-[#2d5fb8]"];
+// Tintas estáveis e escuras mantêm as iniciais brancas legíveis nos dois temas.
+const TINTS = ["from-[#603b87] to-[#a8520d]", "from-[#166d70] to-[#086f6a]", "from-[#96671f] to-[#8a6a2c]", "from-[#a73a57] to-[#b83a4c]", "from-[#3474be] to-[#2d5fb8]"];
 
 function tint(name: string): string {
   let hash = 0;
