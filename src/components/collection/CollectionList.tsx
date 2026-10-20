@@ -1,21 +1,29 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { CheckSquare, Trash2, X } from "lucide-react";
+import { CheckSquare, Tag, Trash2, X } from "lucide-react";
 import { buttonClass } from "@/components/ui/button";
 import { useToast } from "@/components/ui/Toast";
+import { listingQueueHref } from "@/lib/domain/listing-queue";
 import { removeCollectionItems } from "@/server/actions/collection";
-import type { CollectionItem } from "@/types/domain";
+import type { CollectionItem, PriceBase } from "@/types/domain";
 import { CollectionItemCard } from "./CollectionItemCard";
 
-/** Grade da coleção com modo de seleção para remover várias cartas de uma vez. */
-export function CollectionList({ items }: { items: CollectionItem[] }) {
+/**
+ * Grade da coleção com modo de seleção para remover várias cartas de uma vez ou colocá-las à venda numa
+ * fila de cadastro rápido. `prices` é o preço padrão de cada item (por id), quando tem.
+ */
+export function CollectionList({ items, prices }: { items: CollectionItem[]; prices: Record<string, { base: PriceBase; cents: number } | null> }) {
+  const router = useRouter();
   const [selecting, setSelecting] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pending, start] = useTransition();
   const toast = useToast();
   const allSelected = items.length > 0 && items.every((i) => selected.has(i.id));
   const count = items.filter((i) => selected.has(i.id)).length;
+  // Carta que já tem anúncio aberto não entra na fila de venda
+  const toSell = items.filter((i) => selected.has(i.id) && !i.listing);
 
   function toggle(id: string) {
     setSelected((prev) => {
@@ -44,6 +52,13 @@ export function CollectionList({ items }: { items: CollectionItem[] }) {
     });
   }
 
+  function sell() {
+    if (!toSell.length) return;
+    const skipped = count - toSell.length;
+    if (skipped) toast(`${skipped === 1 ? "1 carta já anunciada ficou" : `${skipped} cartas já anunciadas ficaram`} de fora.`, "ok");
+    router.push(listingQueueHref(toSell.map((i) => i.id)));
+  }
+
   return (
     <>
       {selecting ? (
@@ -56,6 +71,10 @@ export function CollectionList({ items }: { items: CollectionItem[] }) {
             <button type="button" onClick={exit} disabled={pending} className={buttonClass("ghost", "sm")}>
               <X size={15} aria-hidden /> Cancelar
             </button>
+            <button type="button" onClick={sell} disabled={pending || toSell.length === 0} className={buttonClass("secondary", "sm")}
+              title={count > 0 && toSell.length === 0 ? "As cartas selecionadas já estão anunciadas" : undefined}>
+              <Tag size={15} aria-hidden /> Vender{toSell.length > 0 ? ` (${toSell.length})` : ""}
+            </button>
             <button type="button" onClick={remove} disabled={pending || count === 0} className={buttonClass("danger", "sm")}>
               <Trash2 size={15} aria-hidden /> {pending ? "Removendo…" : "Remover"}
             </button>
@@ -64,14 +83,14 @@ export function CollectionList({ items }: { items: CollectionItem[] }) {
       ) : (
         <div className="mb-3 flex justify-end">
           <button type="button" onClick={() => setSelecting(true)} className={buttonClass("ghost", "sm")}>
-            <CheckSquare size={15} aria-hidden /> Selecionar várias
+            <CheckSquare size={15} aria-hidden /> Selecionar várias (vender ou remover)
           </button>
         </div>
       )}
       <ul className="grid gap-3 sm:grid-cols-2">
         {items.map((item) => (
           <li key={`${item.id}-${item.quantity}`} className="relative">
-            <CollectionItemCard item={item} />
+            <CollectionItemCard item={item} price={prices[item.id] ?? null} />
             {selecting && (
               <label className={`absolute inset-0 flex cursor-pointer items-start justify-end rounded-[var(--radius-card)] p-3 ${selected.has(item.id) ? "bg-rift-soft/60 ring-2 ring-rift" : "bg-surface/30"}`}>
                 <input type="checkbox" checked={selected.has(item.id)} onChange={() => toggle(item.id)} className="size-5 accent-rift" />

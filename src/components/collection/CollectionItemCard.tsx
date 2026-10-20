@@ -9,11 +9,13 @@ import { buttonClass } from "@/components/ui/button";
 import { useToast } from "@/components/ui/Toast";
 import { cardLine } from "@/lib/cards";
 import { CONDITION, LISTING_STATUS } from "@/lib/domain/labels";
+import { PRICE_BASE } from "@/lib/domain/pricing";
+import { formatPrice } from "@/lib/format";
 import { setCollectionQuantity } from "@/server/actions/collection";
-import type { CollectionItem } from "@/types/domain";
+import type { CollectionItem, PriceBase } from "@/types/domain";
 
-/** Uma carta da coleção: quantidade (+/−, zero remove) e o atalho para anunciar. */
-export function CollectionItemCard({ item }: { item: CollectionItem }) {
+/** Uma carta da coleção: preço padrão da cópia, quantidade (+/−, zero remove) e o atalho para anunciar. */
+export function CollectionItemCard({ item, price }: { item: CollectionItem; price: { base: PriceBase; cents: number } | null }) {
   const [quantity, setQuantity] = useState(item.quantity);
   const [pending, start] = useTransition();
   const toast = useToast();
@@ -39,6 +41,7 @@ export function CollectionItemCard({ item }: { item: CollectionItem }) {
           <Badge>{CONDITION[item.condition].short}</Badge>
           {item.variant && <Badge className="ml-1">{item.variant}</Badge>}
         </p>
+        {price && <p className="text-xs text-muted">{PRICE_BASE[price.base]}: <span className="font-semibold text-ink tabular-nums">{formatPrice(price.cents)}</span></p>}
         <div className="mt-auto flex items-center justify-between gap-2 pt-1">
           <div className="flex items-center rounded-full border border-line bg-surface-2" role="group" aria-label={`Quantidade de ${item.card.name}`}>
             <button type="button" disabled={pending} onClick={() => change(quantity - 1)} aria-label="Menos uma" className="inline-flex size-9 items-center justify-center rounded-full text-muted hover:text-ink disabled:opacity-50">

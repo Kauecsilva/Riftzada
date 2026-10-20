@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Loader2, Sparkles } from "lucide-react";
 import { buttonClass } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { CONDITION } from "@/lib/domain/labels";
 import {
-  applyDiscount, centsToInput, cheapestBase, DISCOUNT_STEPS, discountLabel, LIGA_LANGUAGE, ligaCardUrl, parseBrl, pickFinish,
+  applyDiscount, centsToInput, cheapestBase, defaultBase, DISCOUNT_STEPS, discountLabel, LIGA_LANGUAGE, ligaCardUrl, parseBrl, pickFinish,
   PRICE_BASE, tcgBrlCents,
 } from "@/lib/domain/pricing";
 import { formatPrice, shortDate } from "@/lib/format";
@@ -18,14 +18,15 @@ export type AppliedPrice = { base: PriceBase; baseCents: number; discountPct: nu
 const usd = (cents: number) => (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "USD" });
 
 /**
- * Preço sugerido no anúncio de venda: menor valor entre a LigaRiftbound (coletado automaticamente quando
- * tem, e o vendedor pode corrigir) e o TCGplayer (atualizado todo dia, convertido pelo dólar do dia),
- * com desconto opcional. "Usar esse preço" preenche o campo de preço.
+ * Preço sugerido no anúncio de venda: a base padrão é a LigaRiftbound (coletada automaticamente quando
+ * tem, e o vendedor pode corrigir); o TCGplayer (atualizado todo dia, convertido pelo dólar do dia) entra
+ * quando a Liga não tem preço ou o vendedor escolhe. Desconto opcional. "Usar esse preço" preenche o campo
+ * de preço; com `autoApply`, o primeiro preço sugerido já vai sozinho para o campo.
  */
 export function PriceSuggestion({
-  cardId, cardName, variant, listing, onApply,
+  cardId, cardName, variant, listing, autoApply = false, onApply,
 }: {
-  cardId: string | null; cardName: string; variant: string; listing?: Listing; onApply: (applied: AppliedPrice) => void;
+  cardId: string | null; cardName: string; variant: string; listing?: Listing; autoApply?: boolean; onApply: (applied: AppliedPrice) => void;
 }) {
   const [reference, setReference] = useState<PriceReference | null>(null);
   const [loadedFor, setLoadedFor] = useState<string | null>(null);
@@ -70,48 +71,23 @@ export function PriceSuggestion({
   const ligaCents = ligaParsed != null && !Number.isNaN(ligaParsed) && ligaParsed > 0 ? ligaParsed : null;
   const bases: Record<PriceBase, number | null> = { liga: ligaCents, tcgplayer: tcgCents };
   const cheapest = cheapestBase(bases);
-  const base = chosenBase && bases[chosenBase] != null ? chosenBase : cheapest;
+  const base = chosenBase && bases[chosenBase] != null ? chosenBase : defaultBase(bases);
   const baseCents = base ? bases[base] : null;
   const suggested = baseCents != null ? applyDiscount(baseCents, pct) : null;
+
+  // Preenche o preço uma vez, quando a referência da carta chega (cadastro rápido vindo da coleção)
+  const autoApplied = useRef(false);
+  useEffect(() => {
+    if (!autoApply || autoApplied.current || loading || !base || baseCents == null || suggested == null) return;
+    autoApplied.current = true;
+    onApply({ base, baseCents, discountPct: pct, cents: suggested });
+  }, [autoApply, loading, base, baseCents, suggested, pct, onApply]);
 
   return (
     <section className="card space-y-4 p-4" aria-labelledby="price-suggestion-title">
       <h2 id="price-suggestion-title" className="flex items-center gap-2 text-sm font-semibold">
         <Sparkles size={16} className="text-rift-strong" aria-hidden /> Preço sugerido
       </h2>
-
-      {/* TCGplayer */}
-      <div className="space-y-1 rounded-2xl border border-line bg-surface-2 p-3 text-sm">
-        <div className="flex items-baseline justify-between gap-2">
-          <span className="font-semibold">TCGplayer</span>
-          {tcg?.productUrl && (
-            <a href={tcg.productUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-muted hover:text-ink">
-              ver <ExternalLink size={12} aria-hidden />
-            </a>
-          )}
-        </div>
-        {!cardId ? (
-          <p className="text-muted">Escolhe a carta da lista para ver o preço do TCGplayer.</p>
-        ) : loading ? (
-          <p className="flex items-center gap-2 text-muted"><Loader2 size={14} className="animate-spin" aria-hidden /> Buscando preço…</p>
-        ) : tcg && tcgCents != null ? (
-          <>
-            <p>
-              <span className="font-display text-lg font-bold">{formatPrice(tcgCents)}</span>{" "}
-              <span className="text-muted">
-                ({usd(tcg.lowCents ?? tcg.marketCents!)} {tcg.lowCents != null ? "menor anúncio" : "preço de mercado"}, {tcg.finish === "foil" ? "Foil" : "Normal"})
-              </span>
-            </p>
-            <p className="text-xs text-faint">
-              Carta em inglês (americana), qualquer condição.
-              {tcg.marketCents != null && tcg.lowCents != null && <> Preço de mercado {usd(tcg.marketCents)}.</>}
-              {" "}Dólar a {ref!.usdBrl!.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · atualizado {shortDate(tcg.updatedAt)}.
-            </p>
-          </>
-        ) : (
-          <p className="text-muted">Ainda sem preço do TCGplayer para essa carta.</p>
-        )}
-      </div>
 
       {/* Liga */}
       <div className="space-y-2 rounded-2xl border border-line bg-surface-2 p-3 text-sm">
@@ -155,6 +131,39 @@ export function PriceSuggestion({
         </div>
         {ligaCents != null && conditionValue && conditionValue !== "nm" && (
           <p className="text-xs text-gold">Esse menor preço não é de carta NM. Vale conferir se tem NM mais cara.</p>
+        )}
+      </div>
+
+      {/* TCGplayer */}
+      <div className="space-y-1 rounded-2xl border border-line bg-surface-2 p-3 text-sm">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="font-semibold">TCGplayer</span>
+          {tcg?.productUrl && (
+            <a href={tcg.productUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-muted hover:text-ink">
+              ver <ExternalLink size={12} aria-hidden />
+            </a>
+          )}
+        </div>
+        {!cardId ? (
+          <p className="text-muted">Escolhe a carta da lista para ver o preço do TCGplayer.</p>
+        ) : loading ? (
+          <p className="flex items-center gap-2 text-muted"><Loader2 size={14} className="animate-spin" aria-hidden /> Buscando preço…</p>
+        ) : tcg && tcgCents != null ? (
+          <>
+            <p>
+              <span className="font-display text-lg font-bold">{formatPrice(tcgCents)}</span>{" "}
+              <span className="text-muted">
+                ({usd(tcg.lowCents ?? tcg.marketCents!)} {tcg.lowCents != null ? "menor anúncio" : "preço de mercado"}, {tcg.finish === "foil" ? "Foil" : "Normal"})
+              </span>
+            </p>
+            <p className="text-xs text-faint">
+              Carta em inglês (americana), qualquer condição.
+              {tcg.marketCents != null && tcg.lowCents != null && <> Preço de mercado {usd(tcg.marketCents)}.</>}
+              {" "}Dólar a {ref!.usdBrl!.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · atualizado {shortDate(tcg.updatedAt)}.
+            </p>
+          </>
+        ) : (
+          <p className="text-muted">Ainda sem preço do TCGplayer para essa carta.</p>
         )}
       </div>
 

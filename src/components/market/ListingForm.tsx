@@ -21,11 +21,12 @@ const KIND_HINT: Record<ListingKind, string> = {
 };
 
 /**
- * Novo anúncio, edição, ou anúncio a partir de um item da coleção (`fromCollection` já preenche tudo).
- * Quem ainda não compartilha WhatsApp pode deixar o número aqui mesmo (vai para o perfil).
+ * Novo anúncio, edição, ou anúncio a partir de um item da coleção (`fromCollection` já preenche tudo,
+ * inclusive o preço pela Liga). `queue` são os próximos itens da fila de cadastro rápido: ao salvar, o
+ * formulário abre a próxima carta. Quem ainda não compartilha WhatsApp pode deixar o número aqui mesmo (vai para o perfil).
  */
-export function ListingForm({ userId, listing, fromCollection, sharesWhatsapp }: {
-  userId: string; listing?: Listing; fromCollection?: CollectionItem; sharesWhatsapp: boolean;
+export function ListingForm({ userId, listing, fromCollection, queue = [], sharesWhatsapp }: {
+  userId: string; listing?: Listing; fromCollection?: CollectionItem; queue?: string[]; sharesWhatsapp: boolean;
 }) {
   const [state, action] = useActionState(saveListing.bind(null, listing?.id ?? null), initialActionState);
   const [kind, setKind] = useState<ListingKind>(listing?.kind ?? "sell");
@@ -47,6 +48,7 @@ export function ListingForm({ userId, listing, fromCollection, sharesWhatsapp }:
   return (
     <form action={action} className="space-y-5" noValidate>
       <input type="hidden" name="collectionItemId" value={collectionItemId} />
+      {queue.length > 0 && <input type="hidden" name="queue" value={queue.join(",")} />}
       <fieldset>
         <legend className="mb-2 text-sm font-semibold">Tá…</legend>
         <div className="grid grid-cols-3 gap-2">
@@ -100,6 +102,7 @@ export function ListingForm({ userId, listing, fromCollection, sharesWhatsapp }:
           cardName={card?.name ?? listing?.cardName ?? ""}
           variant={variant}
           listing={listing}
+          autoApply={Boolean(fromCollection)}
           onApply={(next) => {
             setApplied(next);
             setPrice(centsToInput(next.cents));
@@ -161,7 +164,7 @@ export function ListingForm({ userId, listing, fromCollection, sharesWhatsapp }:
       )}
 
       <FormMessage state={state} />
-      <SubmitButton>{listing ? "Salvar anúncio" : "Anunciar"}</SubmitButton>
+      <SubmitButton>{listing ? "Salvar anúncio" : queue.length ? "Anunciar e ir para a próxima" : "Anunciar"}</SubmitButton>
     </form>
   );
 }

@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
-  applyDiscount, centsToInput, cheapestBase, comparePrices, discountLabel, ligaCardUrl, parseBrl, pickFinish, tcgBrlCents, usdToBrlCents,
+  applyDiscount, centsToInput, cheapestBase, collectionValue, comparePrices, defaultBase, discountLabel, ligaCardUrl, parseBrl, pickFinish,
+  referencePrice, tcgBrlCents, usdToBrlCents,
 } from "@/lib/domain/pricing";
-import { listingSchema, offerSchema } from "@/lib/validation/schemas";
-import type { CardPrice } from "@/types/domain";
+import { listingQueueHref } from "@/lib/domain/listing-queue";
+import { listingQueue, listingSchema, offerSchema } from "@/lib/validation/schemas";
+import type { CardPrice, LigaPrice, PriceReference } from "@/types/domain";
 
 const at = "2026-10-17T20:00:00Z";
 const normal: CardPrice = { finish: "normal", lowCents: 1000, marketCents: 1200, productUrl: null, updatedAt: at };
@@ -44,6 +46,42 @@ describe("preço sugerido", () => {
     expect(cheapestBase({ liga: 20000, tcgplayer: 24396 })).toBe("liga");
     expect(cheapestBase({ liga: null, tcgplayer: 24396 })).toBe("tcgplayer");
     expect(cheapestBase({})).toBeNull();
+  });
+
+  it("usa a Liga como base padrão e o TCGplayer só sem Liga", () => {
+    expect(defaultBase({ liga: 33666, tcgplayer: 24396 })).toBe("liga");
+    expect(defaultBase({ liga: null, tcgplayer: 24396 })).toBe("tcgplayer");
+    expect(defaultBase({ liga: 0, tcgplayer: null })).toBeNull();
+  });
+
+  it("soma o valor da coleção pelo preço padrão vezes as cópias", () => {
+    const liga: LigaPrice = { finish: "normal", lowCents: 2000, avgCents: null, language: "en", condition: "nm", url: "https://www.ligariftbound.com.br/", updatedAt: at };
+    const refs: Record<string, PriceReference> = {
+      a: { tcgplayer: [normal], liga: [liga], usdBrl: 5, rateUpdatedAt: at },
+      b: { tcgplayer: [normal, foil], liga: [], usdBrl: 5, rateUpdatedAt: at },
+      c: { tcgplayer: [], liga: [], usdBrl: 5, rateUpdatedAt: at },
+    };
+    expect(referencePrice(refs.a, null)).toEqual({ base: "liga", cents: 2000 });
+    expect(referencePrice(refs.b, "Foil")).toEqual({ base: "tcgplayer", cents: 24000 });
+    expect(referencePrice(refs.c, null)).toBeNull();
+    expect(referencePrice(undefined, null)).toBeNull();
+    expect(collectionValue([
+      { cardId: "a", variant: null, quantity: 3 },
+      { cardId: "b", variant: "Foil", quantity: 1 },
+      { cardId: "c", variant: null, quantity: 2 },
+      { cardId: "sem-ref", variant: null, quantity: 1 },
+    ], refs)).toEqual({ totalCents: 30000, pricedCopies: 4, unpricedCopies: 3 });
+  });
+
+  it("monta a fila de cadastro rápido", () => {
+    const a = "11111111-1111-4111-8111-111111111111";
+    const b = "22222222-2222-4222-8222-222222222222";
+    expect(listingQueueHref([a, b])).toBe(`/mercado/novo?colecao=${a}&fila=${b}`);
+    expect(listingQueueHref([a])).toBe(`/mercado/novo?colecao=${a}&fila=`);
+    expect(listingQueueHref([])).toBe("/colecao");
+    expect(listingQueue.parse(`${a}, x,${b},${a}`)).toEqual([a, b]);
+    expect(listingQueue.parse(undefined)).toEqual([]);
+    expect(listingQueue.parse("")).toEqual([]);
   });
 
   it("compara Liga e TCGplayer", () => {

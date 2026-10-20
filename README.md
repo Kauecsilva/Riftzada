@@ -42,12 +42,13 @@ As cartas vêm do [Riftcodex](https://riftcodex.com), uma API pública e gratuit
 - As imagens são servidas pelo CDN da Riot (`cmsassets.rgpub.io`), liberado no `next.config.ts`.
 - Anúncios e coleção apontam para `cards`. No anúncio, a carta fora do catálogo ainda pode ser digitada à mão.
 - Em `/colecao/importar` dá para subir a coleção por CSV: exportação da LigaRiftbound ou qualquer CSV com nome e quantidade. O casamento com o catálogo é por sigla da edição + número (regras em `src/lib/domain/collection-import.ts`).
-- Em `/colecao`, "Selecionar várias" abre a seleção múltipla (com "Selecionar tudo", que respeita a busca) e remove as cartas marcadas depois de uma confirmação. Anúncios ligados a elas continuam no Mercado.
+- Em `/colecao`, "Selecionar várias" abre a seleção múltipla (com "Selecionar tudo", que respeita a busca). As cartas marcadas podem ser removidas depois de uma confirmação (anúncios ligados a elas continuam no Mercado) ou postas à venda: "Vender" monta uma fila de cadastro rápido (`/mercado/novo?colecao=<id>&fila=<ids>`) que abre o formulário de anúncio uma carta por vez, já com o preço da Liga; ao anunciar, abre a próxima. Cartas já anunciadas ficam fora da fila.
+- O topo de `/colecao` mostra o valor da coleção: preço da Liga de cada carta (no acabamento da variante) vezes as cópias, com o TCGplayer em reais quando a Liga não tem preço. Cópias sem preço nenhum ficam de fora e aparecem contadas.
 
 ## Preço sugerido e ofertas
 
 - A migration `0008_prices_offers.sql` importa todo dia (pg_cron, 19:30 de Brasília) os preços do TCGplayer pelo [tcgcsv.com](https://tcgcsv.com) e a cotação do dólar ([open.er-api.com](https://open.er-api.com)). Para rodar na hora: `select public.sync_card_prices();`.
-- O menor preço da LigaRiftbound vem de uma coleta diária na nuvem (veja abaixo). O formulário já abre com o preço coletado, que o vendedor pode corrigir, sugere o menor entre Liga e TCGplayer e aplica o desconto escolhido.
+- O menor preço da LigaRiftbound vem de uma coleta diária na nuvem (veja abaixo). O formulário já abre com o preço coletado, que o vendedor pode corrigir, usa a Liga como base padrão (o TCGplayer entra quando a Liga não tem preço ou o vendedor escolhe) e aplica o desconto escolhido.
 - Ofertas: o comprador oferece abaixo do preço; o vendedor aceita, recusa ou faz contraproposta. As regras ficam nas funções `make_listing_offer` e `respond_listing_offer`.
 - Troca: em anúncio de troca, ou venda que aceita troca, a oferta leva cartas e, se quiser, dinheiro junto (`0014_trade_offers_chat.sql`).
 - Conversa: cada anúncio tem uma conversa por interessado (`listing_messages`), em `/mensagens`. A migration 0014 adiciona a tabela à publicação `supabase_realtime` para as mensagens chegarem na hora.
