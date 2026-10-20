@@ -23,7 +23,7 @@ const FLASH: Record<string, string> = {
 const SHORTCUTS = [
   { href: "/arena", label: "Jogar", detail: "Torneios e ranking", icon: Swords },
   { href: "/mercado", label: "Trocar", detail: "Cartas da comunidade", icon: Store },
-  { href: "/colecao", label: "Coleção", detail: "Suas cartas", icon: Library },
+  { href: "/colecao", label: "Minha coleção", detail: "Suas cartas", icon: Library },
 ] as const;
 
 export default async function HomePage({ searchParams }: PageProps<"/">) {

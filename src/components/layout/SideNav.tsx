@@ -3,16 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Library, LogOut, Shield, UserRound } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Sheet } from "@/components/ui/Sheet";
 import { cn } from "@/lib/cn";
 import type { MiniProfile } from "@/types/domain";
+import { AccountLinks, AccountMenu } from "./AccountMenu";
 import { Logo } from "./Logo";
 import { NotificationBell } from "./NotificationBell";
 import { isActive, NAV_ITEMS } from "./nav-items";
 import { PublishMenu } from "./PublishMenu";
-import { ThemeToggle } from "./ThemeToggle";
 
 /** Masthead da comunidade: navegação completa no desktop e conta acessível no celular. */
 export function SideNav({ me, isAdmin, isStore, unread }: { me: MiniProfile; isAdmin: boolean; isStore: boolean; unread: number }) {
@@ -53,21 +52,7 @@ export function SideNav({ me, isAdmin, isStore, unread }: { me: MiniProfile; isA
           <div className="hidden shrink-0 items-center gap-2 lg:flex">
             <PublishMenu isAdmin={isAdmin} isStore={isStore} variant="header" />
             <NotificationBell unread={unread} className="text-[#d5c9da] hover:bg-white/10 hover:text-white" />
-            <ThemeToggle />
-            {isAdmin && (
-              <Link href="/admin" aria-label="Painel admin" title="Painel admin" className="inline-flex size-11 items-center justify-center rounded-lg text-[#d5c9da] hover:bg-white/10 hover:text-white">
-                <Shield size={19} aria-hidden />
-              </Link>
-            )}
-            <Link href={`/jogador/${me.username}`} aria-label={`Perfil de ${me.displayName}`} className="inline-flex min-h-11 items-center gap-2 rounded-lg px-1.5 hover:bg-white/10">
-              <Avatar name={me.displayName} src={me.avatarUrl} size={32} />
-              <span className="hidden max-w-24 truncate text-sm font-semibold xl:block">{me.displayName}</span>
-            </Link>
-            <form action="/auth/sair" method="post">
-              <button type="submit" aria-label="Sair" title="Sair" className="inline-flex size-11 items-center justify-center rounded-lg text-[#d5c9da] hover:bg-white/10 hover:text-white">
-                <LogOut size={19} aria-hidden />
-              </button>
-            </form>
+            <AccountMenu me={me} isAdmin={isAdmin} />
           </div>
 
           <div className="flex items-center gap-1 lg:hidden">
@@ -79,16 +64,8 @@ export function SideNav({ me, isAdmin, isStore, unread }: { me: MiniProfile; isA
         </div>
       </header>
       <Sheet open={accountOpen} onClose={() => setAccountOpen(false)} title="Sua conta">
-        <div className="space-y-1">
-          <p className="mb-3 border-b border-line pb-3 text-sm font-bold">{me.displayName}</p>
-          <Link href={`/jogador/${me.username}`} onClick={() => setAccountOpen(false)} className="flex min-h-12 items-center gap-3 rounded-lg px-3 text-sm font-semibold hover:bg-surface-2"><UserRound size={19} aria-hidden /> Meu perfil</Link>
-          <Link href="/colecao" onClick={() => setAccountOpen(false)} className="flex min-h-12 items-center gap-3 rounded-lg px-3 text-sm font-semibold hover:bg-surface-2"><Library size={19} aria-hidden /> Minha coleção</Link>
-          <ThemeToggle variant="row" />
-          {isAdmin && <Link href="/admin" onClick={() => setAccountOpen(false)} className="flex min-h-12 items-center gap-3 rounded-lg px-3 text-sm font-semibold hover:bg-surface-2"><Shield size={19} aria-hidden /> Painel admin</Link>}
-          <form action="/auth/sair" method="post" className="border-t border-line pt-2">
-            <button type="submit" className="flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-semibold hover:bg-surface-2"><LogOut size={19} aria-hidden /> Sair</button>
-          </form>
-        </div>
+        <p className="mb-3 border-b border-line pb-3 text-sm font-bold">{me.displayName}</p>
+        <AccountLinks me={me} isAdmin={isAdmin} onNavigate={() => setAccountOpen(false)} />
       </Sheet>
     </>
   );
