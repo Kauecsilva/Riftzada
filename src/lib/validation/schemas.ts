@@ -98,6 +98,15 @@ export const listingQueue = z
   .catch(undefined)
   .transform((text) => [...new Set((text ?? "").split(",").map((id) => id.trim()).filter((id) => z.uuid().safeParse(id).success))].slice(0, 200));
 
+/** Base e desconto da fila (`base`, `desconto`); qualquer coisa fora do esperado vira "sem preço da fila". */
+export const queuePrice = z
+  .object({
+    base: z.enum(["liga", "tcgplayer"]),
+    discountPct: z.coerce.number().int().min(0).max(90).catch(0),
+  })
+  .nullable()
+  .catch(null);
+
 export const listingSchema = z.object({
   kind: z.enum(["sell", "trade", "want"]),
   cardId: optionalUuid,
@@ -123,6 +132,8 @@ export const listingSchema = z.object({
   whatsapp: whatsapp.optional().transform((v) => v ?? null),
   /** Próximos itens da coleção na fila de cadastro rápido. */
   queue: listingQueue,
+  queueBase: z.enum(["liga", "tcgplayer"]).optional().catch(undefined),
+  queueDiscount: z.coerce.number().int().min(0).max(90).optional().catch(undefined),
 });
 
 const offerCard = z.object({

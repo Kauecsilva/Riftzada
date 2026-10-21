@@ -197,7 +197,10 @@ export async function saveListing(listingId: string | null, _: ActionState, form
   revalidatePath("/");
   if (parsed.data.collectionItemId) revalidatePath("/colecao");
   // Na fila do cadastro rápido, segue para a próxima carta em vez de abrir o anúncio
-  if (!listingId && parsed.data.queue.length) redirect(`${listingQueueHref(parsed.data.queue)}&anunciado=1`);
+  if (!listingId && parsed.data.queue.length) {
+    const { queueBase, queueDiscount } = parsed.data;
+    redirect(`${listingQueueHref(parsed.data.queue, queueBase ? { base: queueBase, discountPct: queueDiscount ?? 0 } : null)}&anunciado=1`);
+  }
   redirect(`/mercado/${id}?salvo=1`);
 }
 
