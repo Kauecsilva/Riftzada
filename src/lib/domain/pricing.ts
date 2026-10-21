@@ -1,7 +1,7 @@
 // Preço sugerido do anúncio: a LigaRiftbound é o padrão e o TCGplayer (convertido para real) entra quando a
 // Liga não tem preço, com desconto opcional. Regras puras, usadas no formulário, no anúncio e na coleção.
 
-import type { CardPrice, LigaLanguage, OfferStatus, PriceBase, PriceReference } from "@/types/domain";
+import type { CardPrice, LigaLanguage, LigaPrice, OfferStatus, PriceBase, PriceReference } from "@/types/domain";
 
 export const LIGA_LANGUAGE: Record<LigaLanguage, string> = {
   en: "Inglês (americana)",
@@ -85,6 +85,22 @@ export function referencePrice(ref: PriceReference | undefined, variant: string 
   };
   const base = defaultBase(bases);
   return base ? { base, cents: bases[base]! } : null;
+}
+
+/**
+ * Preço do anúncio na venda em massa: base escolhida (sem preço nela, usa a outra) com o desconto.
+ * Devolve também o menor preço da Liga, que o anúncio guarda como referência.
+ */
+export function bulkListingPrice(
+  ref: PriceReference | undefined, variant: string | null | undefined, preset: { base: PriceBase; discountPct: number },
+): { base: PriceBase; baseCents: number; cents: number; liga: LigaPrice | null } | null {
+  if (!ref) return null;
+  const liga = pickFinish(ref.liga, variant);
+  const bases: Record<PriceBase, number | null> = { liga: liga?.lowCents ?? null, tcgplayer: tcgBrlCents(pickFinish(ref.tcgplayer, variant), ref.usdBrl) };
+  const base = (bases[preset.base] ?? 0) > 0 ? preset.base : defaultBase(bases);
+  if (!base) return null;
+  const baseCents = bases[base]!;
+  return { base, baseCents, cents: applyDiscount(baseCents, preset.discountPct), liga };
 }
 
 /** Valor da coleção: preço padrão de cada carta vezes as cópias. Conta as cópias sem preço à parte. */

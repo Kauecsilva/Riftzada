@@ -191,6 +191,14 @@ export const collectionRemoveSchema = z.object({
   ids: z.array(uuid).min(1, "Escolhe pelo menos uma carta").max(5000, "Seleção grande demais"),
 });
 
+/** Venda em massa: anuncia os itens escolhidos da coleção com a mesma base e desconto. */
+export const collectionSellSchema = z.object({
+  ids: z.array(uuid).min(1, "Escolhe pelo menos uma carta").max(200, "Anuncia até 200 cartas por vez"),
+  base: z.enum(["liga", "tcgplayer"]),
+  discountPct: z.coerce.number().int().min(0).max(90),
+  allCopies: z.boolean(),
+});
+
 export const listingStatusSchema = z.object({ id: uuid, status: z.enum(["available", "reserved", "done"]) });
 
 export const deckSchema = z.object({

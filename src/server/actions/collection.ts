@@ -6,9 +6,12 @@ import { revalidatePath } from "next/cache";
 import {
   groupMatches, matchRows, publicCode, readCollectionCsv, type CatalogCard, type ImportFormat,
 } from "@/lib/domain/collection-import";
+import { bulkListingPrice } from "@/lib/domain/pricing";
 import { createClient } from "@/lib/supabase/server";
 import { formToObject, zodErrorState, type ActionState } from "@/lib/validation/common";
-import { collectionItemSchema, collectionQuantitySchema, collectionRemoveSchema } from "@/lib/validation/schemas";
+import { collectionItemSchema, collectionQuantitySchema, collectionRemoveSchema, collectionSellSchema } from "@/lib/validation/schemas";
+import type { CardCondition, PriceBase } from "@/types/domain";
+import { getCollectionPrices } from "../queries/prices";
 import { requireSession } from "../session";
 import { dbError, demoBlocked } from "./helpers";
 
@@ -92,6 +95,83 @@ export async function removeCollectionItems(ids: string[]): Promise<ActionState>
 
   revalidatePath("/colecao");
   return { ok: true, message: removed === 1 ? "1 carta removida da coleção." : `${removed} cartas removidas da coleção.` };
+}
+
+type SellRow = {
+  id: string; quantity: number; condition: CardCondition; variant: string | null;
+  card: { id: string; name: string; set_name: string | null }; listings: { status: string }[];
+};
+
+/**
+ * Venda em massa: anuncia de uma vez os itens escolhidos, cada um com o preço da base escolhida (Liga ou
+ * TCGplayer; sem preço nela, usa a outra) menos o desconto. Item já anunciado ou sem preço nenhum fica de fora.
+ */
+export async function sellCollectionItems(input: { ids: string[]; base: PriceBase; discountPct: number; allCopies: boolean }): Promise<ActionState> {
+  const blocked = demoBlocked();
+  if (blocked) return blocked;
+  const session = await requireSession();
+  const parsed = collectionSellSchema.safeParse(input);
+  if (!parsed.success) return zodErrorState(parsed.error);
+  const { ids, base, discountPct, allCopies } = parsed.data;
+
+  const supabase = await createClient();
+  const [results, refs] = await Promise.all([
+    Promise.all(chunks([...new Set(ids)], 100).map((part) => supabase
+      .from("collection_items")
+      .select("id, quantity, condition, variant, card:cards!collection_items_card_id_fkey(id, name, set_name), listings:market_listings!market_listings_collection_item_id_fkey(status)")
+      .eq("user_id", session.userId)
+      .in("id", part)
+      .returns<SellRow[]>())),
+    getCollectionPrices(session.userId),
+  ]);
+  const failed = results.find((r) => r.error);
+  if (failed?.error) return dbError(failed.error);
+  const items = results.flatMap((r) => r.data ?? []);
+  const open = items.filter((i) => i.listings.some((l) => l.status !== "done"));
+  const rows = [];
+  let unpriced = 0;
+  for (const item of items) {
+    if (open.includes(item)) continue;
+    const price = bulkListingPrice(refs[item.card.id], item.variant, { base, discountPct });
+    if (!price) {
+      unpriced++;
+      continue;
+    }
+    rows.push({
+      community_id: session.communityId,
+      seller_id: session.userId,
+      kind: "sell" as const,
+      card_id: item.card.id,
+      collection_item_id: item.id,
+      card_name: item.card.name,
+      set_name: item.card.set_name,
+      variant: item.variant,
+      condition: item.condition,
+      quantity: allCopies ? Math.min(99, item.quantity) : 1,
+      price_cents: price.cents,
+      accepts_trade: false,
+      price_base: price.base,
+      price_base_cents: price.baseCents,
+      discount_pct: discountPct,
+      liga_price_cents: price.liga?.lowCents ?? null,
+      liga_language: price.liga?.language ?? null,
+      liga_condition: price.liga?.condition ?? null,
+    });
+  }
+  if (rows.length) {
+    const { error } = await supabase.from("market_listings").insert(rows);
+    if (error) return dbError(error);
+    revalidatePath("/colecao");
+    revalidatePath("/mercado");
+    revalidatePath("/");
+  }
+
+  const left = [
+    open.length && `${open.length} já ${open.length === 1 ? "estava anunciada" : "estavam anunciadas"}`,
+    unpriced && `${unpriced} sem preço na Liga nem no TCGplayer (dá para anunciar uma a uma)`,
+  ].filter(Boolean).join("; ");
+  if (!rows.length) return { ok: false, message: left ? `Nada anunciado: ${left}.` : "Essas cartas não estão na tua coleção." };
+  return { ok: true, message: `${rows.length === 1 ? "1 carta anunciada" : `${rows.length} cartas anunciadas`} no Mercado.${left ? ` Ficaram de fora: ${left}.` : ""}` };
 }
 
 // ---------- Importação por CSV ----------

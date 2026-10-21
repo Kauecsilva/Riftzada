@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  applyDiscount, centsToInput, cheapestBase, collectionValue, comparePrices, defaultBase, discountLabel, ligaCardUrl, parseBrl, pickFinish,
+  applyDiscount, bulkListingPrice, centsToInput, cheapestBase, collectionValue, comparePrices, defaultBase, discountLabel, ligaCardUrl, parseBrl, pickFinish,
   referencePrice, tcgBrlCents, usdToBrlCents,
 } from "@/lib/domain/pricing";
 import { listingQueueHref } from "@/lib/domain/listing-queue";
@@ -71,6 +71,17 @@ describe("preço sugerido", () => {
       { cardId: "c", variant: null, quantity: 2 },
       { cardId: "sem-ref", variant: null, quantity: 1 },
     ], refs)).toEqual({ totalCents: 30000, pricedCopies: 4, unpricedCopies: 3 });
+  });
+
+  it("calcula o preço da venda em massa com a base escolhida e cai na outra sem preço", () => {
+    const liga: LigaPrice = { finish: "normal", lowCents: 2000, avgCents: null, language: "en", condition: "nm", url: "https://www.ligariftbound.com.br/", updatedAt: at };
+    const both: PriceReference = { tcgplayer: [normal], liga: [liga], usdBrl: 5, rateUpdatedAt: at };
+    const tcgOnly: PriceReference = { tcgplayer: [normal], liga: [], usdBrl: 5, rateUpdatedAt: at };
+    expect(bulkListingPrice(both, null, { base: "liga", discountPct: 15 })).toEqual({ base: "liga", baseCents: 2000, cents: 1700, liga });
+    expect(bulkListingPrice(both, null, { base: "tcgplayer", discountPct: 10 })).toEqual({ base: "tcgplayer", baseCents: 5000, cents: 4500, liga });
+    expect(bulkListingPrice(tcgOnly, null, { base: "liga", discountPct: 0 })).toEqual({ base: "tcgplayer", baseCents: 5000, cents: 5000, liga: null });
+    expect(bulkListingPrice({ tcgplayer: [], liga: [], usdBrl: null, rateUpdatedAt: null }, null, { base: "liga", discountPct: 0 })).toBeNull();
+    expect(bulkListingPrice(undefined, null, { base: "liga", discountPct: 0 })).toBeNull();
   });
 
   it("monta a fila de cadastro rápido", () => {
