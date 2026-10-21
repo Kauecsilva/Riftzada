@@ -1,13 +1,15 @@
 import Link from "next/link";
-import { AtSign, CalendarDays, MapPin, Pencil } from "lucide-react";
+import { AtSign, CalendarDays, MapPin, MessageCircle, Pencil } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { buttonClass } from "@/components/ui/button";
+import { whatsappLink } from "@/lib/domain/offers";
 import { formatRegion } from "@/lib/domain/region";
 import { longDate } from "@/lib/format";
 import type { Profile } from "@/types/domain";
 
-export function ProfileHeader({ profile, mine, champion }: { profile: Profile; mine: boolean; champion: boolean }) {
+/** `whatsapp` só vem quando a pessoa liberou o número no perfil (e a página já exige login). */
+export function ProfileHeader({ profile, mine, champion, whatsapp }: { profile: Profile; mine: boolean; champion: boolean; whatsapp: string | null }) {
   const region = formatRegion(profile.city, profile.state);
   return (
     <header className="relative overflow-hidden rounded-[28px] border border-line bg-linear-to-br from-rift-soft via-surface to-surface p-5 md:p-7">
@@ -25,6 +27,11 @@ export function ProfileHeader({ profile, mine, champion }: { profile: Profile; m
             {profile.instagram && (
               <a href={`https://instagram.com/${profile.instagram}`} target="_blank" rel="noopener noreferrer">
                 <Badge className="hover:text-ink"><AtSign size={12} aria-hidden /> {profile.instagram}</Badge>
+              </a>
+            )}
+            {whatsapp && (
+              <a href={whatsappLink(whatsapp, `Oi ${profile.displayName}! Te achei no Riftzada.`)} target="_blank" rel="noopener noreferrer">
+                <Badge className="hover:text-ink"><MessageCircle size={12} aria-hidden /> WhatsApp</Badge>
               </a>
             )}
           </div>

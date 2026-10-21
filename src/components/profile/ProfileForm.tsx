@@ -50,7 +50,7 @@ export function ProfileForm({ profile, legends, contact }: {
 
       <fieldset className="card space-y-4 p-4">
         <legend className="sr-only">Contato</legend>
-        <Field label="WhatsApp" name="whatsapp" error={err.whatsapp} optional hint="Só aparece se você liberar abaixo. Usado nos botões de WhatsApp do Mercado, já com a carta e a oferta na mensagem.">
+        <Field label="WhatsApp" name="whatsapp" error={err.whatsapp} optional hint="Só aparece se você liberar abaixo. Vira um botão de WhatsApp no teu perfil e nos teus anúncios do Mercado, já com a carta e a oferta na mensagem.">
           <input {...fieldProps("whatsapp", err.whatsapp, "hint")} value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} type="tel" inputMode="tel" className="input" placeholder="(11) 98765-4321" />
         </Field>
         <label className="flex min-h-11 cursor-pointer items-center gap-3">
