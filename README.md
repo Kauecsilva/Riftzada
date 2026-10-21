@@ -88,7 +88,7 @@ Importe o repositório, configure as mesmas variáveis do `.env.example` (com `N
 ```
 supabase/migrations   banco: tabelas, RLS, views (ranking, hall), storage
 src/app/(auth)        entrar, cadastro, recuperar senha
-src/app/(app)         app logado: Home/Mural, Arena, Mercado, Coleção, Decks, Perfil
+src/app/(app)         app logado: Home/Mural, Arena, Mercado, Coleção, Decks, Perfil (a vitrine do Mercado abre sem login)
 src/app/admin         painel administrativo (só admin)
 src/server/queries    leituras por domínio
 src/server/actions    Server Actions (validação Zod + sessão + RLS)

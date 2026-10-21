@@ -48,6 +48,7 @@ Navegador ──(upload)──▶ compressão no cliente ──▶ Supabase Stor
 
 | Papel | Onde mora | Pode |
 |---|---|---|
+| visitante (sem login) | papel `anon` do Supabase | Só ver a vitrine do mercado (`/mercado` e `/mercado/[id]`): anúncios não ocultos, carta, preços de referência e nome, avatar e região de quem anuncia. Qualquer interação (anunciar, oferta, conversa, WhatsApp, perfil) leva para `/entrar`. Migration `0017_public_market.sql`. |
 | `user` | `community_members.role` | Publicar no mural, anunciar, publicar deck, marcar "Vou jogar", editar o próprio perfil e o próprio conteúdo. |
 | `moderator` (futuro) | idem | Ocultar posts e anúncios. Já previsto no enum e nas funções. |
 | `admin` | idem | Tudo acima + eventos, resultados, ranking, destaque de posts, apagar anúncio de qualquer membro, usuários. |
@@ -286,8 +287,8 @@ O tema inicial segue a preferência de cores do sistema. O controle no menu da c
 | `/arena/resultados` | Quem levou essa? | Eventos finalizados com campeão e top 4. |
 | `/arena/ranking` | Ranking | Lista com posição, foto, pontos, títulos; destaque para o usuário logado. Explica a regra de pontos. |
 | `/arena/hall` | Hall da Riftzada | Cartões grandes com a foto num medalhão: títulos, top 4, torneios, último título. |
-| `/mercado` | Mercado | Filtros VENDE / TROCA / PROCURA, busca por nome, cards com foto, preço e status. |
-| `/mercado/[id]` | Anúncio | Foto, carta, set, variante, condição, quantidade, preço e uma frase que diz como negociar (venda, oferta em dinheiro, troca). Oferta com dinheiro e/ou cartas, "Conversar" (chat do app) e WhatsApp com a carta e a oferta na mensagem, se o vendedor liberou. Dono: editar, mudar status, apagar, responder ofertas e ver as conversas. |
+| `/mercado` | Mercado | Filtros VENDE / TROCA / PROCURA, busca por nome, cards com foto, preço e status. Aberto para visitante. |
+| `/mercado/[id]` | Anúncio | Foto, carta, set, variante, condição, quantidade, preço e uma frase que diz como negociar (venda, oferta em dinheiro, troca). Oferta com dinheiro e/ou cartas, "Conversar" (chat do app) e WhatsApp com a carta e a oferta na mensagem, se o vendedor liberou. Dono: editar, mudar status, apagar, responder ofertas e ver as conversas. Visitante vê o anúncio e um "Entrar para negociar" no lugar de oferta e conversa. |
 | `/mensagens`, `/mensagens/[anúncio]/[interessado]` | Conversas | Lista das conversas do mercado com não lidas (somadas ao contador de Avisos) e a conversa em si, atualizada pelo Realtime. |
 | `/mercado/novo`, `/mercado/[id]/editar` | Anunciar carta | Tipo, carta, set, condição, quantidade, preço, troca, foto, descrição. Quem ainda não compartilha WhatsApp pode informar ali (vai para o perfil, já compartilhado). |
 | `/notificacoes` | Notificações | Conversas com mensagem nova no topo (abrem o chat), depois propostas recebidas e respostas às suas, mais novas primeiro; não lidas destacadas. Tocar marca como lida e abre o anúncio. Um contador só (avisos + mensagens não lidas): sininho no topo do site (desktop e celular). |

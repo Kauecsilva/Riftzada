@@ -10,7 +10,7 @@ import { cn } from "@/lib/cn";
 import { LISTING_KIND } from "@/lib/domain/labels";
 import { getUnreadCount } from "@/server/queries/chat";
 import { getListings } from "@/server/queries/market";
-import { requireSession } from "@/server/session";
+import { getSession } from "@/server/session";
 import type { ListingKind } from "@/types/domain";
 
 export const metadata: Metadata = { title: "Mercado" };
@@ -21,8 +21,9 @@ export default async function MarketPage({ searchParams }: PageProps<"/mercado">
   const params = await searchParams;
   const kind = KINDS.find((k) => k === params.tipo);
   const search = typeof params.q === "string" ? params.q.trim().slice(0, 60) : "";
-  const session = await requireSession();
-  const [listings, unread] = await Promise.all([getListings({ kind, search: search || undefined }), getUnreadCount(session.userId)]);
+  // Visitante vê a vitrine; anunciar e as conversas levam para /entrar (proxy)
+  const session = await getSession();
+  const [listings, unread] = await Promise.all([getListings({ kind, search: search || undefined }), session ? getUnreadCount(session.userId) : 0]);
 
   const chip = (value: ListingKind | undefined, label: string) => {
     const query = new URLSearchParams({ ...(value ? { tipo: value } : {}), ...(search ? { q: search } : {}) });
@@ -51,7 +52,7 @@ export default async function MarketPage({ searchParams }: PageProps<"/mercado">
         title="Mercado"
         subtitle="Encontre, venda e troque cartas com jogadores da comunidade."
         art="/art/rift-market.webp"
-        action={
+        action={session &&
           <div className="flex gap-2">
             <Link href="/mensagens" className={buttonClass("secondary", "md", "relative border-white/40 bg-surface/90")} >
               <MessagesSquare size={18} aria-hidden /><span>Conversas</span>

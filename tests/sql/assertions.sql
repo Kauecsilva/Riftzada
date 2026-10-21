@@ -40,11 +40,41 @@ select pg_temp.login(null); -- sem usuário
 select pg_temp.check((select count(*) from posts) = 0, 'Sem login não lê posts');
 rollback;
 
+-- Visitante (anon) vê a vitrine do mercado e mais nada
 begin;
+update public.market_listings set is_hidden = true where id = '00000000-0000-4000-8000-500000000006';
 set local role anon;
+select pg_temp.check((select count(*) from market_listings) = 5, 'Visitante lê os anúncios visíveis');
+select pg_temp.check(not exists (select 1 from market_listings where id = '00000000-0000-4000-8000-500000000006'), 'Visitante não lê anúncio oculto');
+select pg_temp.check((select display_name from profiles where id = '00000000-0000-4000-8000-100000000003') is not null, 'Visitante lê o nome de quem anuncia');
+select pg_temp.check(not exists (select 1 from profiles where id = '00000000-0000-4000-8000-100000000002'), 'Visitante não lê perfil de quem não anuncia');
+select pg_temp.check((select count(*) from communities) > 0 and (select count(*) from cards) > 0, 'Visitante lê comunidade e catálogo');
+select pg_temp.check((select count(*) from listing_offers) = 0, 'Visitante não lê ofertas');
+select pg_temp.check((select count(*) from listing_messages) = 0, 'Visitante não lê conversas');
 do $$ begin
-  perform 1 from public.profiles;
-  raise exception 'FALHOU: anon leu profiles';
+  perform bio from public.profiles;
+  raise exception 'FALHOU: anon leu a bio';
+exception when insufficient_privilege then null;
+end $$;
+do $$ begin
+  perform 1 from public.profile_contacts;
+  raise exception 'FALHOU: anon leu contatos';
+exception when insufficient_privilege then null;
+end $$;
+do $$ begin
+  perform 1 from public.posts;
+  raise exception 'FALHOU: anon leu posts';
+exception when insufficient_privilege then null;
+end $$;
+do $$ begin
+  insert into public.market_listings (community_id, seller_id, kind, card_name)
+  values ('00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-100000000003', 'sell', 'Pirata');
+  raise exception 'FALHOU: anon anunciou';
+exception when insufficient_privilege then null;
+end $$;
+do $$ begin
+  update public.market_listings set price_cents = 1;
+  raise exception 'FALHOU: anon editou anúncio';
 exception when insufficient_privilege then null;
 end $$;
 rollback;
