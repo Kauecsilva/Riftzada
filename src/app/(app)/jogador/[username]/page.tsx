@@ -14,7 +14,7 @@ import { FlashToast } from "@/components/ui/Toast";
 import { earnedAchievements } from "@/lib/domain/achievements";
 import { shortDate } from "@/lib/format";
 import { getPosts } from "@/server/queries/feed";
-import { getListings } from "@/server/queries/market";
+import { getListings, getSharedWhatsapp } from "@/server/queries/market";
 import { getPlayerResults, getPlayerStats, getProfileByUsername } from "@/server/queries/profiles";
 import { canModerate, requireSession } from "@/server/session";
 
@@ -29,18 +29,19 @@ export default async function PlayerPage({ params, searchParams }: PageProps<"/j
   if (!profile) notFound();
   const mine = profile.id === session.userId;
 
-  const [stats, results, listings, posts] = await Promise.all([
+  const [stats, results, listings, posts, whatsapp] = await Promise.all([
     getPlayerStats(profile.id),
     getPlayerResults(profile.id, 10),
     getListings({ sellerId: profile.id, limit: 6 }),
     getPosts({ authorId: profile.id, limit: 3 }),
+    getSharedWhatsapp(profile.id),
   ]);
   const achievements = earnedAchievements(stats, { decks: 0, listings: listings.length });
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
       {query.salvo && <FlashToast text="Perfil atualizado!" />}
-      <ProfileHeader profile={profile} mine={mine} champion={(stats?.titles ?? 0) > 0} />
+      <ProfileHeader profile={profile} mine={mine} champion={(stats?.titles ?? 0) > 0} whatsapp={whatsapp} />
       <StatsGrid stats={stats} />
       {mine && (
         <Link href="/colecao" className="card flex items-center gap-4 p-4 transition-colors hover:border-rift/50">

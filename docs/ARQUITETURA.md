@@ -293,7 +293,7 @@ O tema inicial segue a preferência de cores do sistema. O controle no menu da c
 | `/mercado/novo`, `/mercado/[id]/editar` | Anunciar carta | Tipo, carta, set, condição, quantidade, preço, troca, foto, descrição. Quem ainda não compartilha WhatsApp pode informar ali (vai para o perfil, já compartilhado). |
 | `/notificacoes` | Notificações | Conversas com mensagem nova no topo (abrem o chat), depois propostas recebidas e respostas às suas, mais novas primeiro; não lidas destacadas. Tocar marca como lida e abre o anúncio. Um contador só (avisos + mensagens não lidas): sininho no topo do site (desktop e celular). |
 | `/decks/[id]`, `/decks/novo` | Deck | Lenda, autor, resultado, lista por seção, copiar lista, compartilhar. Novo deck por lista colada. |
-| `/jogador/[username]` | Perfil | Foto, nome, @, bio, deck favorito, Instagram · torneios, títulos, 2º, top 4 · histórico de resultados · decks · anúncios ativos · posts recentes. |
+| `/jogador/[username]` | Perfil | Foto, nome, @, bio, deck favorito, Instagram e WhatsApp (link wa.me, só se a pessoa liberou no perfil) · torneios, títulos, 2º, top 4 · histórico de resultados · decks · anúncios ativos · posts recentes. |
 | `/perfil/editar` | Editar perfil | Foto, nome, bio, lenda favorita, Instagram, WhatsApp e se quer mostrá-lo. |
 | `/arena/lojas` | Lojas | Cada loja com endereço, Instagram e agenda (semanal numa linha só: "Toda quarta · 19:30"). |
 | `/loja`, `/loja/[id]/eventos/novo` | Minha loja | Pedido de cadastro da loja (fica "Aguardando aprovação" até o admin aprovar em `/admin/lojas`) e os eventos dela. "Repetir toda semana" cria uma data por semana (4, 8 ou 12) com o mesmo `series_id`; "Mais semanas" estende. Resultado continua só com o admin. |
