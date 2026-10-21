@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 import { fromLocalInput } from "@/lib/format";
 import { isOwnMediaPath } from "@/lib/images";
 import { createClient } from "@/lib/supabase/server";
-import { formToObject, zodErrorState, type ActionState } from "@/lib/validation/common";
+import { formToObject, uuid, zodErrorState, type ActionState } from "@/lib/validation/common";
 import { eventSchema, legendSchema, rankingEntrySchema, rankingRulesSchema, resultsSchema } from "@/lib/validation/schemas";
 import type { MemberRole } from "@/types/domain";
 import { requireAdmin, requireSession, canModerate } from "../session";
@@ -180,6 +180,24 @@ export async function moderateListing(id: string, hidden: boolean): Promise<Acti
   revalidatePath("/mercado");
   revalidatePath("/admin/moderacao");
   return { ok: true, message: hidden ? "Anúncio ocultado." : "Anúncio visível de novo." };
+}
+
+/** Admin apaga o anúncio de qualquer membro. A RLS ("dono ou moderação apaga") confere de novo. */
+export async function adminDeleteListing(id: string, backToMarket = false): Promise<ActionState> {
+  const blocked = demoBlocked();
+  if (blocked) return blocked;
+  const session = await requireSession();
+  if (session.role !== "admin") return { ok: false, message: "Só admin pode apagar anúncio dos outros." };
+  if (!uuid.safeParse(id).success) return { ok: false, message: "Anúncio inválido." };
+  const supabase = await createClient();
+  const { error, count } = await supabase.from("market_listings").delete({ count: "exact" }).eq("id", id);
+  if (error) return dbError(error);
+  if (!count) return { ok: false, message: "Anúncio não encontrado." };
+  revalidatePath("/mercado");
+  revalidatePath("/admin/moderacao");
+  // Na página do anúncio não sobra nada para mostrar: volta ao mercado.
+  if (backToMarket) redirect("/mercado?apagado=1");
+  return { ok: true, message: "Anúncio apagado." };
 }
 
 // ---------- Usuários ----------

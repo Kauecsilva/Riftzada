@@ -4,7 +4,7 @@ import {
   referencePrice, tcgBrlCents, usdToBrlCents,
 } from "@/lib/domain/pricing";
 import { listingQueueHref } from "@/lib/domain/listing-queue";
-import { listingQueue, listingSchema, offerSchema } from "@/lib/validation/schemas";
+import { listingQueue, listingSchema, offerSchema, queuePrice } from "@/lib/validation/schemas";
 import type { CardPrice, LigaPrice, PriceReference } from "@/types/domain";
 
 const at = "2026-10-17T20:00:00Z";
@@ -82,6 +82,16 @@ describe("preço sugerido", () => {
     expect(listingQueue.parse(`${a}, x,${b},${a}`)).toEqual([a, b]);
     expect(listingQueue.parse(undefined)).toEqual([]);
     expect(listingQueue.parse("")).toEqual([]);
+  });
+
+  it("leva a base e o desconto da fila para todas as cartas", () => {
+    const a = "11111111-1111-4111-8111-111111111111";
+    const b = "22222222-2222-4222-8222-222222222222";
+    expect(listingQueueHref([a, b], { base: "liga", discountPct: 15 })).toBe(`/mercado/novo?colecao=${a}&fila=${b}&base=liga&desconto=15`);
+    expect(listingQueueHref([a], null)).toBe(`/mercado/novo?colecao=${a}&fila=`);
+    expect(queuePrice.parse({ base: "liga", discountPct: "15" })).toEqual({ base: "liga", discountPct: 15 });
+    expect(queuePrice.parse({ base: "tcgplayer", discountPct: "200" })).toEqual({ base: "tcgplayer", discountPct: 0 });
+    expect(queuePrice.parse({ base: "ebay", discountPct: "10" })).toBeNull();
   });
 
   it("compara Liga e TCGplayer", () => {

@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Eye, EyeOff, Pin, PinOff } from "lucide-react";
+import { Eye, EyeOff, Pin, PinOff, Trash2 } from "lucide-react";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge, KindTag } from "@/components/ui/Badge";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { POST_KIND } from "@/lib/domain/labels";
 import { timeAgo } from "@/lib/format";
-import { moderateListing, moderatePost } from "@/server/actions/admin";
+import { adminDeleteListing, moderateListing, moderatePost } from "@/server/actions/admin";
 import { getPosts } from "@/server/queries/feed";
 import { getListings } from "@/server/queries/market";
 
@@ -56,9 +56,14 @@ export default async function ModerationPage() {
                 <p className="text-xs text-muted">{l.seller.displayName} · {timeAgo(l.createdAt)}</p>
               </Link>
               {l.isHidden && <Badge tone="danger">Oculto</Badge>}
-              <ActionButton action={moderateListing.bind(null, l.id, !l.isHidden)} label={l.isHidden ? "Mostrar" : "Ocultar"} variant={l.isHidden ? "secondary" : "danger"}>
-                {l.isHidden ? <Eye size={15} aria-hidden /> : <EyeOff size={15} aria-hidden />}
-              </ActionButton>
+              <div className="flex gap-2">
+                <ActionButton action={moderateListing.bind(null, l.id, !l.isHidden)} label={l.isHidden ? "Mostrar" : "Ocultar"} variant={l.isHidden ? "secondary" : "danger"}>
+                  {l.isHidden ? <Eye size={15} aria-hidden /> : <EyeOff size={15} aria-hidden />}
+                </ActionButton>
+                <ActionButton action={adminDeleteListing.bind(null, l.id, false)} label="Apagar" confirm={`Apagar o anúncio de ${l.seller.displayName}? Não dá para desfazer.`} variant="danger">
+                  <Trash2 size={15} aria-hidden />
+                </ActionButton>
+              </div>
             </li>
           ))}
         </ul>

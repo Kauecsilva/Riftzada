@@ -24,17 +24,20 @@ const usd = (cents: number) => (cents / 100).toLocaleString("pt-BR", { style: "c
  * de preço; com `autoApply`, o primeiro preço sugerido já vai sozinho para o campo.
  */
 export function PriceSuggestion({
-  cardId, cardName, variant, listing, autoApply = false, onApply,
+  cardId, cardName, variant, listing, autoApply = false, initialPrice, onApply,
 }: {
-  cardId: string | null; cardName: string; variant: string; listing?: Listing; autoApply?: boolean; onApply: (applied: AppliedPrice) => void;
+  cardId: string | null; cardName: string; variant: string; listing?: Listing; autoApply?: boolean;
+  /** Base e desconto que já vêm escolhidos (fila de venda em massa). Sem a base escolhida, cai na outra. */
+  initialPrice?: { base: PriceBase; discountPct: number } | null;
+  onApply: (applied: AppliedPrice) => void;
 }) {
   const [reference, setReference] = useState<PriceReference | null>(null);
   const [loadedFor, setLoadedFor] = useState<string | null>(null);
   const [ligaText, setLigaText] = useState(centsToInput(listing?.liga?.priceCents));
   const [ligaLanguage, setLigaLanguage] = useState<LigaLanguage | "">(listing?.liga?.language ?? "en");
   const [ligaCondition, setLigaCondition] = useState<CardCondition | "">(listing?.liga?.condition ?? "nm");
-  const [chosenBase, setChosenBase] = useState<PriceBase | null>(listing?.priceBase ?? null);
-  const [pct, setPct] = useState(listing?.discountPct ?? 0);
+  const [chosenBase, setChosenBase] = useState<PriceBase | null>(listing?.priceBase ?? initialPrice?.base ?? null);
+  const [pct, setPct] = useState(listing?.discountPct ?? initialPrice?.discountPct ?? 0);
   // Enquanto o vendedor não mexe nos campos da Liga, eles mostram o preço coletado
   const [ligaEdited, setLigaEdited] = useState(Boolean(listing?.liga));
 

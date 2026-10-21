@@ -51,7 +51,7 @@ Navegador ──(upload)──▶ compressão no cliente ──▶ Supabase Stor
 | visitante (sem login) | papel `anon` do Supabase | Só ver a vitrine do mercado (`/mercado` e `/mercado/[id]`): anúncios não ocultos, carta, preços de referência e nome, avatar e região de quem anuncia. Qualquer interação (anunciar, oferta, conversa, WhatsApp, perfil) leva para `/entrar`. Migration `0017_public_market.sql`. |
 | `user` | `community_members.role` | Publicar no mural, anunciar, publicar deck, marcar "Vou jogar", editar o próprio perfil e o próprio conteúdo. |
 | `moderator` (futuro) | idem | Ocultar posts e anúncios. Já previsto no enum e nas funções. |
-| `admin` | idem | Tudo acima + eventos, resultados, ranking, destaque de posts, usuários. |
+| `admin` | idem | Tudo acima + eventos, resultados, ranking, destaque de posts, apagar anúncio de qualquer membro, usuários. |
 
 - Funções SQL `is_member(community)`, `is_moderator(community)` e `is_admin(community)` (security definer, `search_path` fixo) são usadas em todas as policies.
 - O painel `/admin` checa o papel no servidor (layout do admin) **e** o banco recusa a escrita via RLS. Duas camadas.
@@ -301,7 +301,7 @@ O tema inicial segue a preferência de cores do sistema. O controle no menu da c
 | `/admin/eventos`, `/admin/eventos/novo`, `/admin/eventos/[id]` | Eventos | Criar, editar, excluir, mudar status. |
 | `/admin/eventos/[id]/resultado` | Registrar resultado | Quem jogou (checklist dos "Vou jogar"), nº de jogadores, top 4 (jogador ou convidado, lenda, record), foto, observações, "publicar campeão no mural". |
 | `/admin/lojas` | Pedidos de loja | Lojas pendentes: aprovar (libera os eventos) ou recusar (apaga o pedido). |
-| `/admin/moderacao` | Moderação | Posts e anúncios recentes: ocultar, mostrar, destacar. |
+| `/admin/moderacao` | Moderação | Posts e anúncios recentes: ocultar, mostrar, destacar, apagar anúncio. |
 | `/admin/usuarios` | Usuários | Lista de membros, mudar papel, banir. |
 | `/admin/ranking` | Ranking | Pontos por colocação e presença; ajustes manuais com motivo. |
 

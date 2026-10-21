@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { EyeOff, HandCoins, LogIn, MessagesSquare, Repeat } from "lucide-react";
+import { EyeOff, HandCoins, LogIn, MessagesSquare, Repeat, Trash2 } from "lucide-react";
 import { AuthorLine } from "@/components/feed/AuthorLine";
 import { InterestButton } from "@/components/market/InterestButton";
 import { OfferBox } from "@/components/market/OfferBox";
@@ -19,7 +19,7 @@ import { listingPhotos, offerVerb } from "@/lib/cards";
 import { CONDITION, LISTING_STATUS } from "@/lib/domain/labels";
 import { pickFinish, tcgBrlCents } from "@/lib/domain/pricing";
 import { formatPrice } from "@/lib/format";
-import { moderateListing } from "@/server/actions/admin";
+import { adminDeleteListing, moderateListing } from "@/server/actions/admin";
 import { getListing, getListingOffers, getOffersFor, getSharedWhatsapp, getSharedWhatsapps } from "@/server/queries/market";
 import { getConversations } from "@/server/queries/chat";
 import { chatHref } from "@/lib/domain/chat";
@@ -182,9 +182,16 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
             </>
           )}
           {!mine && canModerate(session) && (
-            <ActionButton action={moderateListing.bind(null, listing.id, !listing.isHidden)} confirm={listing.isHidden ? undefined : "Ocultar este anúncio da comunidade?"}>
-              <EyeOff size={15} aria-hidden /> {listing.isHidden ? "Mostrar de novo" : "Ocultar anúncio"}
-            </ActionButton>
+            <div className="flex flex-wrap gap-2">
+              <ActionButton action={moderateListing.bind(null, listing.id, !listing.isHidden)} confirm={listing.isHidden ? undefined : "Ocultar este anúncio da comunidade?"}>
+                <EyeOff size={15} aria-hidden /> {listing.isHidden ? "Mostrar de novo" : "Ocultar anúncio"}
+              </ActionButton>
+              {session?.role === "admin" && (
+                <ActionButton action={adminDeleteListing.bind(null, listing.id, true)} confirm={`Apagar o anúncio de ${listing.seller.displayName}? Não dá para desfazer.`} variant="danger">
+                  <Trash2 size={15} aria-hidden /> Apagar anúncio
+                </ActionButton>
+              )}
+            </div>
           )}
         </div>
       </div>
