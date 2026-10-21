@@ -8,6 +8,7 @@ import { ImageInput } from "@/components/ui/ImageInput";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { cn } from "@/lib/cn";
 import { CONDITION, LISTING_KIND } from "@/lib/domain/labels";
+import type { QueuePrice } from "@/lib/domain/listing-queue";
 import { centsToInput, discountLabel, parseBrl } from "@/lib/domain/pricing";
 import { initialActionState } from "@/lib/validation/common";
 import { saveListing } from "@/server/actions/content";
@@ -22,11 +23,12 @@ const KIND_HINT: Record<ListingKind, string> = {
 
 /**
  * Novo anúncio, edição, ou anúncio a partir de um item da coleção (`fromCollection` já preenche tudo,
- * inclusive o preço pela Liga). `queue` são os próximos itens da fila de cadastro rápido: ao salvar, o
+ * inclusive o preço pela Liga). `queue` são os próximos itens da fila de cadastro rápido (com `queuePrice`, a base e
+ * o desconto escolhidos para a fila inteira): ao salvar, o
  * formulário abre a próxima carta. Quem ainda não compartilha WhatsApp pode deixar o número aqui mesmo (vai para o perfil).
  */
-export function ListingForm({ userId, listing, fromCollection, queue = [], sharesWhatsapp }: {
-  userId: string; listing?: Listing; fromCollection?: CollectionItem; queue?: string[]; sharesWhatsapp: boolean;
+export function ListingForm({ userId, listing, fromCollection, queue = [], queuePrice, sharesWhatsapp }: {
+  userId: string; listing?: Listing; fromCollection?: CollectionItem; queue?: string[]; queuePrice?: QueuePrice | null; sharesWhatsapp: boolean;
 }) {
   const [state, action] = useActionState(saveListing.bind(null, listing?.id ?? null), initialActionState);
   const [kind, setKind] = useState<ListingKind>(listing?.kind ?? "sell");
@@ -49,6 +51,12 @@ export function ListingForm({ userId, listing, fromCollection, queue = [], share
     <form action={action} className="space-y-5" noValidate>
       <input type="hidden" name="collectionItemId" value={collectionItemId} />
       {queue.length > 0 && <input type="hidden" name="queue" value={queue.join(",")} />}
+      {queue.length > 0 && queuePrice && (
+        <>
+          <input type="hidden" name="queueBase" value={queuePrice.base} />
+          <input type="hidden" name="queueDiscount" value={queuePrice.discountPct} />
+        </>
+      )}
       <fieldset>
         <legend className="mb-2 text-sm font-semibold">Tá…</legend>
         <div className="grid grid-cols-3 gap-2">
@@ -103,6 +111,7 @@ export function ListingForm({ userId, listing, fromCollection, queue = [], share
           variant={variant}
           listing={listing}
           autoApply={Boolean(fromCollection)}
+          initialPrice={queuePrice}
           onApply={(next) => {
             setApplied(next);
             setPrice(centsToInput(next.cents));
