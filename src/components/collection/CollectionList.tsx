@@ -8,7 +8,7 @@ import { useToast } from "@/components/ui/Toast";
 import { cn } from "@/lib/cn";
 import { listingQueueHref } from "@/lib/domain/listing-queue";
 import { DISCOUNT_STEPS, discountLabel, PRICE_BASE } from "@/lib/domain/pricing";
-import { removeCollectionItems } from "@/server/actions/collection";
+import { removeCollectionItems, sellCollectionItems } from "@/server/actions/collection";
 import type { CollectionItem, PriceBase } from "@/types/domain";
 import { CollectionItemCard } from "./CollectionItemCard";
 
@@ -24,6 +24,7 @@ export function CollectionList({ items, prices }: { items: CollectionItem[]; pri
   const [pricing, setPricing] = useState(false);
   const [base, setBase] = useState<PriceBase>("liga");
   const [pct, setPct] = useState(0);
+  const [allCopies, setAllCopies] = useState(true);
   const [pending, start] = useTransition();
   const toast = useToast();
   const allSelected = items.length > 0 && items.every((i) => selected.has(i.id));
@@ -54,6 +55,17 @@ export function CollectionList({ items, prices }: { items: CollectionItem[]; pri
     if (!window.confirm(`Tirar ${what} da coleção (${copies} ${copies === 1 ? "cópia" : "cópias"})? Não dá para desfazer.`)) return;
     start(async () => {
       const result = await removeCollectionItems(ids);
+      if (result.message) toast(result.message, result.ok ? "ok" : "error");
+      if (result.ok) exit();
+    });
+  }
+
+  function sellAll() {
+    if (!toSell.length) return;
+    const what = toSell.length === 1 ? "1 carta" : `${toSell.length} cartas`;
+    if (!window.confirm(`Anunciar ${what} no Mercado agora? Preço: ${discountLabel(base, pct)}.`)) return;
+    start(async () => {
+      const result = await sellCollectionItems({ ids: toSell.map((i) => i.id), base, discountPct: pct, allCopies });
       if (result.message) toast(result.message, result.ok ? "ok" : "error");
       if (result.ok) exit();
     });
@@ -90,7 +102,7 @@ export function CollectionList({ items, prices }: { items: CollectionItem[]; pri
           {pricing && toSell.length > 0 && (
             <div id="preco-da-fila" className="w-full space-y-3 border-t border-line pt-3">
               <p className="text-sm">
-                Preço para as {toSell.length === 1 ? "1 carta" : `${toSell.length} cartas`} da fila. Cada uma abre já com ele, e dá para ajustar carta a carta.
+                Preço para {toSell.length === 1 ? "a carta selecionada" : `as ${toSell.length} cartas selecionadas`}. &quot;Anunciar tudo&quot; já publica no Mercado; &quot;Revisar uma a uma&quot; abre o formulário de cada carta com esse preço.
               </p>
               <fieldset>
                 <legend className="mb-1.5 text-xs font-semibold text-muted">Base</legend>
@@ -119,10 +131,22 @@ export function CollectionList({ items, prices }: { items: CollectionItem[]; pri
                   </label>
                 </div>
               </fieldset>
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs text-faint">{discountLabel(base, pct)}. Carta sem preço {base === "liga" ? "na Liga usa o TCGplayer" : "no TCGplayer usa a Liga"}.</p>
-                <button type="button" onClick={sell} className={buttonClass("primary", "sm")}>
-                  <Tag size={15} aria-hidden /> Começar fila ({toSell.length})
+              <fieldset>
+                <legend className="mb-1.5 text-xs font-semibold text-muted">Quantidade</legend>
+                <div className="grid max-w-xs grid-cols-2 gap-1.5 rounded-full border border-line bg-surface-2 p-1">
+                  {[true, false].map((all) => (
+                    <button key={String(all)} type="button" aria-pressed={allCopies === all} onClick={() => setAllCopies(all)}
+                      className={cn("min-h-9 rounded-full text-sm font-semibold transition-colors", allCopies === all ? "bg-rift text-on-rift" : "text-muted hover:text-ink")}>
+                      {all ? "Todas as cópias" : "1 de cada"}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+              <p className="text-xs text-faint">{discountLabel(base, pct)}. Carta sem preço {base === "liga" ? "na Liga usa o TCGplayer" : "no TCGplayer usa a Liga"}; sem nenhum dos dois, fica de fora.</p>
+              <div className="flex flex-wrap justify-end gap-2">
+                <button type="button" onClick={sell} disabled={pending} className={buttonClass("ghost", "sm")}>Revisar uma a uma</button>
+                <button type="button" onClick={sellAll} disabled={pending} className={buttonClass("primary", "sm")}>
+                  <Tag size={15} aria-hidden /> {pending ? "Anunciando…" : `Anunciar tudo (${toSell.length})`}
                 </button>
               </div>
             </div>
