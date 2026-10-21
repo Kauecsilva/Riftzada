@@ -3,18 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { LogIn } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Sheet } from "@/components/ui/Sheet";
+import { buttonClass } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import type { MiniProfile } from "@/types/domain";
 import { AccountLinks, AccountMenu } from "./AccountMenu";
 import { Logo } from "./Logo";
 import { NotificationBell } from "./NotificationBell";
-import { isActive, NAV_ITEMS } from "./nav-items";
+import { isActive, NAV_ITEMS, signInHref } from "./nav-items";
 import { PublishMenu } from "./PublishMenu";
 
-/** Masthead da comunidade: navegação completa no desktop e conta acessível no celular. */
-export function SideNav({ me, isAdmin, isStore, unread }: { me: MiniProfile; isAdmin: boolean; isStore: boolean; unread: number }) {
+/** Masthead da comunidade: navegação completa no desktop e conta acessível no celular. Visitante (me nulo) vê Entrar e Criar conta. */
+export function SideNav({ me, isAdmin, isStore, unread }: { me: MiniProfile | null; isAdmin: boolean; isStore: boolean; unread: number }) {
   const path = usePathname();
   const [accountOpen, setAccountOpen] = useState(false);
 
@@ -49,24 +51,33 @@ export function SideNav({ me, isAdmin, isStore, unread }: { me: MiniProfile; isA
             </ul>
           </nav>
 
-          <div className="hidden shrink-0 items-center gap-2 lg:flex">
-            <PublishMenu isAdmin={isAdmin} isStore={isStore} variant="header" />
-            <NotificationBell unread={unread} className="text-[#d5c9da] hover:bg-white/10 hover:text-white" />
-            <AccountMenu me={me} isAdmin={isAdmin} />
-          </div>
+          {me ? (
+            <>
+              <div className="hidden shrink-0 items-center gap-2 lg:flex">
+                <PublishMenu isAdmin={isAdmin} isStore={isStore} variant="header" />
+                <NotificationBell unread={unread} className="text-[#d5c9da] hover:bg-white/10 hover:text-white" />
+                <AccountMenu me={me} isAdmin={isAdmin} />
+              </div>
 
-          <div className="flex items-center gap-1 lg:hidden">
-            <NotificationBell unread={unread} className="text-[#d5c9da] hover:bg-white/10 hover:text-white" />
-            <button type="button" onClick={() => setAccountOpen(true)} aria-label="Abrir menu da conta" aria-haspopup="dialog" className="inline-flex size-11 items-center justify-center rounded-full border border-[#9e84ae] bg-[#40304f]">
-              <Avatar name={me.displayName} src={me.avatarUrl} size={32} />
-            </button>
-          </div>
+              <div className="flex items-center gap-1 lg:hidden">
+                <NotificationBell unread={unread} className="text-[#d5c9da] hover:bg-white/10 hover:text-white" />
+                <button type="button" onClick={() => setAccountOpen(true)} aria-label="Abrir menu da conta" aria-haspopup="dialog" className="inline-flex size-11 items-center justify-center rounded-full border border-[#9e84ae] bg-[#40304f]">
+                  <Avatar name={me.displayName} src={me.avatarUrl} size={32} />
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="flex shrink-0 items-center gap-2">
+              <Link href="/cadastro" className="hidden min-h-11 items-center rounded-lg px-3.5 text-sm font-semibold text-[#d5c9da] hover:bg-white/10 hover:text-white sm:inline-flex">Criar conta</Link>
+              <Link href={signInHref(path)} className={buttonClass("primary", "md", "shrink-0")}><LogIn size={18} aria-hidden /> Entrar</Link>
+            </div>
+          )}
         </div>
       </header>
-      <Sheet open={accountOpen} onClose={() => setAccountOpen(false)} title="Sua conta">
+      {me && <Sheet open={accountOpen} onClose={() => setAccountOpen(false)} title="Sua conta">
         <p className="mb-3 border-b border-line pb-3 text-sm font-bold">{me.displayName}</p>
         <AccountLinks me={me} isAdmin={isAdmin} onNavigate={() => setAccountOpen(false)} />
-      </Sheet>
+      </Sheet>}
     </>
   );
 }

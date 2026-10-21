@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LogIn } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { isActive, NAV_ITEMS } from "./nav-items";
+import { isActive, NAV_ITEMS, signInHref } from "./nav-items";
 import { PublishMenu } from "./PublishMenu";
 
-/** Navegação principal do celular, sempre visível acima da área segura. */
-export function BottomNav({ isAdmin, isStore }: { isAdmin: boolean; isStore: boolean }) {
+/** Navegação principal do celular, sempre visível acima da área segura. Visitante tem Entrar no lugar de Publicar. */
+export function BottomNav({ isAdmin, isStore, visitor = false }: { isAdmin: boolean; isStore: boolean; visitor?: boolean }) {
   const path = usePathname();
   const [home, arena, market, profile] = NAV_ITEMS;
 
@@ -36,7 +37,16 @@ export function BottomNav({ isAdmin, isStore }: { isAdmin: boolean; isStore: boo
       <ul className="mx-auto flex max-w-lg items-center px-2">
         {item(home)}
         {item(arena)}
-        <li className="flex min-w-0 flex-1 justify-center"><PublishMenu isAdmin={isAdmin} isStore={isStore} variant="fab" /></li>
+        {visitor ? (
+          <li className="min-w-0 flex-1">
+            <Link href={signInHref(path)} className="flex min-h-[62px] flex-col items-center justify-center gap-0.5 rounded-lg text-[11px] font-semibold text-rift hover:text-rift-strong">
+              <LogIn size={21} strokeWidth={2.25} aria-hidden />
+              Entrar
+            </Link>
+          </li>
+        ) : (
+          <li className="flex min-w-0 flex-1 justify-center"><PublishMenu isAdmin={isAdmin} isStore={isStore} variant="fab" /></li>
+        )}
         {item(market)}
         {item(profile)}
       </ul>

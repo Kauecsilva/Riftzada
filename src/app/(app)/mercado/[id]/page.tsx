@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { EyeOff, HandCoins, MessagesSquare, Repeat } from "lucide-react";
+import { EyeOff, HandCoins, LogIn, MessagesSquare, Repeat } from "lucide-react";
 import { AuthorLine } from "@/components/feed/AuthorLine";
 import { InterestButton } from "@/components/market/InterestButton";
 import { OfferBox } from "@/components/market/OfferBox";
@@ -9,6 +9,7 @@ import { OwnerActions } from "@/components/market/OwnerActions";
 import { PriceReferenceNote } from "@/components/market/PriceReferenceNote";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Badge, KindTag } from "@/components/ui/Badge";
+import { buttonClass } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Photo } from "@/components/ui/Photo";
 import { FlashToast } from "@/components/ui/Toast";
@@ -24,7 +25,8 @@ import { getConversations } from "@/server/queries/chat";
 import { chatHref } from "@/lib/domain/chat";
 import { dealSummary, offerModes } from "@/lib/domain/offers";
 import { getPriceReference } from "@/server/queries/prices";
-import { canModerate, requireSession } from "@/server/session";
+import { signInHref } from "@/components/layout/nav-items";
+import { canModerate, getSession } from "@/server/session";
 
 export async function generateMetadata({ params }: PageProps<"/mercado/[id]">): Promise<Metadata> {
   const listing = await getListing((await params).id);
@@ -32,17 +34,18 @@ export async function generateMetadata({ params }: PageProps<"/mercado/[id]">): 
 }
 
 export default async function ListingPage({ params, searchParams }: PageProps<"/mercado/[id]">) {
-  const [{ id }, query, session] = await Promise.all([params, searchParams, requireSession()]);
+  // Visitante vê o anúncio; ofertas, conversa, WhatsApp e moderação pedem login
+  const [{ id }, query, session] = await Promise.all([params, searchParams, getSession()]);
   const listing = await getListing(id);
   if (!listing) notFound();
-  const mine = listing.seller.id === session.userId;
+  const mine = listing.seller.id === session?.userId;
   const modes = offerModes(listing);
   const [whatsapp, offers, holders, priceRef, conversations] = await Promise.all([
-    mine ? null : getSharedWhatsapp(listing.seller.id),
-    listing.kind !== "want" ? getListingOffers(listing.id) : [],
+    mine || !session ? null : getSharedWhatsapp(listing.seller.id),
+    listing.kind !== "want" && session ? getListingOffers(listing.id) : [],
     listing.kind === "want" && listing.status !== "done" ? getOffersFor(listing) : [],
     listing.kind === "sell" && listing.card ? getPriceReference(listing.card.id) : null,
-    mine ? getConversations(session.userId) : [],
+    mine && session ? getConversations(session.userId) : [],
   ]);
   const buyerWhatsapps = mine ? await getSharedWhatsapps(offers.map((o) => o.buyer.id)) : {};
   // Conversas deste anúncio sem oferta (as com oferta já têm o botão no painel)
@@ -157,6 +160,19 @@ export default async function ListingPage({ params, searchParams }: PageProps<"/
                 </section>
               )}
             </>
+          ) : !session ? (
+            listing.status !== "done" && (
+              <section aria-labelledby="entrar-title" className="card space-y-3 p-4">
+                <h2 id="entrar-title" className="font-semibold">Quer negociar essa carta?</h2>
+                <p className="text-sm text-muted">Entre na Riftzada para fazer oferta, conversar com {listing.seller.displayName} e ver o contato.</p>
+                <Link href={signInHref(`/mercado/${listing.id}`)} className={buttonClass("primary", "lg", "w-full")}>
+                  <LogIn size={20} aria-hidden /> Entrar para negociar
+                </Link>
+                <p className="text-center text-sm text-muted">
+                  Ainda não tem conta? <Link href="/cadastro" className="font-semibold text-rift hover:underline">Criar conta</Link>
+                </p>
+              </section>
+            )
           ) : (
             <>
               {((listing.status === "available" && (modes.money || modes.trade)) || offers.length > 0) && (

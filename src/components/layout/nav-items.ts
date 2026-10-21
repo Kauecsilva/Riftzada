@@ -18,3 +18,8 @@ export function isActive(path: string, href: string, exact?: boolean): boolean {
   if (href === "/mercado" && path.startsWith("/mensagens")) return true;
   return path === href || path.startsWith(`${href}/`);
 }
+
+/** Tela de entrar que volta para onde a pessoa estava. */
+export function signInHref(path: string): string {
+  return path === "/" ? "/entrar" : `/entrar?next=${encodeURIComponent(path)}`;
+}

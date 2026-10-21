@@ -7,6 +7,11 @@ const PUBLIC_PATHS = ["/entrar", "/cadastro", "/esqueci-senha", "/auth", "/manif
 
 const matches = (path: string, list: string[]) => list.some((p) => path === p || path.startsWith(`${p}/`));
 
+// Vitrine do mercado: visitante vê a lista e o anúncio; anunciar, editar e negociar pedem login
+const PUBLIC_MARKET = /^\/mercado(?:\/(?!novo$)[^/]+)?$/;
+
+export const isPublicPath = (path: string) => matches(path, PUBLIC_PATHS) || PUBLIC_MARKET.test(path);
+
 /** Renova os cookies da sessão e manda quem não está logado para /entrar. */
 export async function updateSession(request: NextRequest) {
   if (isDemoMode) return NextResponse.next({ request });
@@ -30,7 +35,7 @@ export async function updateSession(request: NextRequest) {
   const loggedIn = Boolean(data?.claims);
   const path = request.nextUrl.pathname;
 
-  if (!loggedIn && !matches(path, PUBLIC_PATHS)) {
+  if (!loggedIn && !isPublicPath(path)) {
     const url = request.nextUrl.clone();
     url.pathname = "/entrar";
     url.search = path === "/" ? "" : `?next=${encodeURIComponent(path)}`;
