@@ -49,6 +49,16 @@ exception when insufficient_privilege then null;
 end $$;
 rollback;
 
+-- ---------- Admin apaga anúncio dos outros ----------
+begin;
+select pg_temp.login('00000000-0000-4000-8000-100000000002'); -- João (user)
+delete from public.market_listings where id = '00000000-0000-4000-8000-500000000001';
+select pg_temp.login('00000000-0000-4000-8000-100000000001'); -- Kauê (admin)
+select pg_temp.check((select count(*) from market_listings where id = '00000000-0000-4000-8000-500000000001') = 1, 'Usuário comum não apaga anúncio alheio');
+delete from public.market_listings where id = '00000000-0000-4000-8000-500000000001';
+select pg_temp.check((select count(*) from market_listings where id = '00000000-0000-4000-8000-500000000001') = 0, 'Admin apaga anúncio alheio');
+rollback;
+
 -- ---------- Permissões de escrita ----------
 begin;
 select pg_temp.login('00000000-0000-4000-8000-100000000002'); -- João (user)
