@@ -191,6 +191,12 @@ export const collectionRemoveSchema = z.object({
   ids: z.array(uuid).min(1, "Escolhe pelo menos uma carta").max(5000, "Seleção grande demais"),
 });
 
+/** Revisão de preço: atualizar pela regra ou manter os anúncios escolhidos (atualizar sem ids: todos os que estão longe). */
+export const priceReviewSchema = z.object({
+  mode: z.enum(["update", "keep"]),
+  ids: z.array(uuid).max(500, "Seleção grande demais").optional(),
+});
+
 /** Venda em massa: anuncia os itens escolhidos da coleção com a mesma base e desconto. */
 export const collectionSellSchema = z.object({
   ids: z.array(uuid).min(1, "Escolhe pelo menos uma carta").max(200, "Anuncia até 200 cartas por vez"),

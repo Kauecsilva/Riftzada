@@ -8,7 +8,7 @@ describe("rotas abertas para visitante", () => {
   });
 
   it("pede login para anunciar, editar e o resto do app", () => {
-    for (const path of ["/mercado/novo", "/mercado/abc/editar", "/mensagens", "/mensagens/a/b", "/", "/arena", "/perfil", "/mercadox"]) {
+    for (const path of ["/mercado/novo", "/mercado/revisar-precos", "/mercado/abc/editar", "/mensagens", "/mensagens/a/b", "/", "/arena", "/perfil", "/mercadox"]) {
       expect(isPublicPath(path), path).toBe(false);
     }
   });

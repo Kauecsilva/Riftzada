@@ -19,6 +19,7 @@ export async function openNotification(form: FormData): Promise<void> {
     if (error) console.error("[db]", error.code, error.message);
     revalidatePath("/", "layout");
   }
+  if (form.get("kind") === "price_review") redirect("/mercado/revisar-precos");
   redirect(listing.success && listing.data ? `/mercado/${listing.data}` : "/notificacoes");
 }
 

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { notificationText } from "@/lib/domain/notifications";
+import { isSystemNotification, notificationText } from "@/lib/domain/notifications";
 import { formatPrice } from "@/lib/format";
 
-const base = { cardName: "Kai'Sa, Survivor", amountCents: 7500 };
+const base = { cardName: "Kai'Sa, Survivor", amountCents: 7500, body: null };
 const r75 = formatPrice(7500)!;
 
 describe("texto das notificações", () => {
@@ -14,7 +14,14 @@ describe("texto das notificações", () => {
   });
 
   it("funciona sem valor e sem nome da carta (anúncio oculto)", () => {
-    expect(notificationText({ kind: "offer_received", cardName: null, amountCents: null })).toBe("fez uma oferta por um anúncio seu");
-    expect(notificationText({ kind: "offer_received", cardName: "Ahri", amountCents: 0 })).toBe("fez uma oferta por Ahri");
+    expect(notificationText({ kind: "offer_received", cardName: null, amountCents: null, body: null })).toBe("fez uma oferta por um anúncio seu");
+    expect(notificationText({ kind: "offer_received", cardName: "Ahri", amountCents: 0, body: null })).toBe("fez uma oferta por Ahri");
+  });
+
+  it("aviso de preço desatualizado usa a frase do banco e é do app", () => {
+    const body = "2 anúncios seus estão com o preço longe da referência de hoje.";
+    expect(notificationText({ kind: "price_review", cardName: null, amountCents: null, body })).toBe(body);
+    expect(isSystemNotification("price_review")).toBe(true);
+    expect(isSystemNotification("offer_received")).toBe(false);
   });
 });
