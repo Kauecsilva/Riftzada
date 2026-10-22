@@ -255,6 +255,19 @@ export type FeedItem =
   | { type: "post"; at: string; post: Post }
   | { type: "listing"; at: string; listing: Listing };
 
+/** Anúncio feito pela regra (ex.: Liga −10%) com o preço que a mesma regra dá hoje. */
+export type PriceDrift = {
+  listingId: string;
+  cardName: string;
+  variant: string | null;
+  priceCents: number;
+  base: PriceBase;
+  baseCents: number;
+  baseNowCents: number;
+  discountPct: number;
+  expectedCents: number;
+};
+
 export type Member = MiniProfile & { role: MemberRole; isBanned: boolean; joinedAt: string };
 
 export type Session = {
@@ -266,9 +279,9 @@ export type Session = {
 
 export type NotificationKind =
   | "offer_received" | "offer_countered" | "offer_accepted" | "offer_declined" | "offer_withdrawn"
-  | "trade_offer" | "message";
+  | "trade_offer" | "message" | "price_review";
 
-/** Aviso para o usuário logado sobre algo que outro jogador fez (oferta, contraproposta, mensagem…). */
+/** Aviso para o usuário logado sobre algo que outro jogador fez (oferta, contraproposta, mensagem…) ou do próprio app (preço desatualizado). */
 export type AppNotification = {
   id: string;
   kind: NotificationKind;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  applyDiscount, bulkListingPrice, centsToInput, cheapestBase, collectionValue, comparePrices, defaultBase, discountLabel, ligaCardUrl, parseBrl, pickFinish,
+  applyDiscount, bulkListingPrice, centsToInput, cheapestBase, collectionValue, comparePrices, defaultBase, discountLabel, driftPct, ligaCardUrl, parseBrl, pickFinish,
   referencePrice, tcgBrlCents, usdToBrlCents,
 } from "@/lib/domain/pricing";
 import { listingQueueHref } from "@/lib/domain/listing-queue";
@@ -141,5 +141,12 @@ describe("validação do anúncio e da oferta", () => {
     expect(offerSchema.parse({ listingId, amount: "75,00", message: "" })).toEqual({ listingId, amount: 7500, cards: [], message: null });
     expect(offerSchema.safeParse({ listingId, amount: "" }).success).toBe(false);
     expect(offerSchema.safeParse({ listingId, amount: "0" }).success).toBe(false);
+  });
+});
+
+describe("preço desatualizado", () => {
+  it("diz quanto a regra de hoje está acima ou abaixo do anunciado", () => {
+    expect(driftPct(9000, 13500)).toBe(50);
+    expect(driftPct(10000, 7000)).toBe(-30);
   });
 });

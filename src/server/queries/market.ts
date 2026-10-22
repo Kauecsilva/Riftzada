@@ -2,7 +2,7 @@ import "server-only";
 import { isDemoMode } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import * as demo from "@/lib/demo/store";
-import type { Listing, ListingKind, ListingOffer } from "@/types/domain";
+import type { Listing, ListingKind, ListingOffer, PriceBase, PriceDrift } from "@/types/domain";
 import { getCommunityId } from "../session";
 import { LISTING_FIELDS, mapListing, mapOffer, OFFER_FIELDS, type ListingRow, type OfferRow } from "./mappers";
 
@@ -112,4 +112,27 @@ export async function getListingOffers(listingId: string): Promise<ListingOffer[
   if (error) throw error;
   const open = (o: ListingOffer) => (o.status === "pending" || o.status === "countered" ? 0 : 1);
   return data.map(mapOffer).sort((a, b) => open(a) - open(b));
+}
+
+type DriftRow = {
+  listing_id: string; card_name: string; variant: string | null; price_cents: number; price_base: PriceBase;
+  price_base_cents: number; base_now_cents: number; discount_pct: number; expected_cents: number;
+};
+
+/** Anúncios do vendedor feitos pela regra (ex.: Liga −10%) cujo preço ficou longe do que a regra dá hoje. */
+export async function getPriceDrift(userId: string): Promise<PriceDrift[]> {
+  if (isDemoMode) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("listing_price_drift")
+    .select("listing_id, card_name, variant, price_cents, price_base, price_base_cents, base_now_cents, discount_pct, expected_cents")
+    .eq("seller_id", userId)
+    .eq("drifted", true)
+    .order("card_name")
+    .returns<DriftRow[]>();
+  if (error) throw error;
+  return data.map((r) => ({
+    listingId: r.listing_id, cardName: r.card_name, variant: r.variant, priceCents: r.price_cents, base: r.price_base,
+    baseCents: r.price_base_cents, baseNowCents: r.base_now_cents, discountPct: r.discount_pct, expectedCents: r.expected_cents,
+  }));
 }

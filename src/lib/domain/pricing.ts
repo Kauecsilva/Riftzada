@@ -15,6 +15,17 @@ export const PRICE_BASE: Record<PriceBase, string> = { liga: "Liga", tcgplayer: 
 /** Preço da Liga que a coleta não renovou numa semana (carta sem oferta na Liga) não vale mais. */
 export const LIGA_MAX_AGE_MS = 7 * 86_400_000;
 
+/**
+ * Anúncio pela regra cujo preço ficou longe do que a regra dá hoje: diferença de pelo menos 20% do preço de hoje
+ * e de pelo menos R$ 2. Quem decide é public.price_drifted (migration 0018); aqui só para o texto.
+ */
+export const PRICE_DRIFT = { pct: 20, minCents: 200 } as const;
+
+/** Quanto o preço de hoje pela regra está acima (+) ou abaixo (−) do anunciado, em %. */
+export function driftPct(priceCents: number, expectedCents: number): number {
+  return Math.round(((expectedCents - priceCents) / priceCents) * 100);
+}
+
 export const DISCOUNT_STEPS = [0, 5, 10, 15, 20] as const;
 
 export const OFFER_STATUS: Record<OfferStatus, string> = {

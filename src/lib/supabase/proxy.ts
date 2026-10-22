@@ -8,7 +8,7 @@ const PUBLIC_PATHS = ["/entrar", "/cadastro", "/esqueci-senha", "/auth", "/manif
 const matches = (path: string, list: string[]) => list.some((p) => path === p || path.startsWith(`${p}/`));
 
 // Vitrine do mercado: visitante vê a lista e o anúncio; anunciar, editar e negociar pedem login
-const PUBLIC_MARKET = /^\/mercado(?:\/(?!novo$)[^/]+)?$/;
+const PUBLIC_MARKET = /^\/mercado(?:\/(?!novo$|revisar-precos$)[^/]+)?$/;
 
 export const isPublicPath = (path: string) => matches(path, PUBLIC_PATHS) || PUBLIC_MARKET.test(path);
 

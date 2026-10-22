@@ -547,3 +547,35 @@ select pg_temp.check((select count(*) from listing_messages) = 0, 'Terceiro não
 select pg_temp.login('00000000-0000-4000-8000-100000000002');
 select pg_temp.check((select count(*) from listing_messages) = 2, 'Quem chamou vê as duas mensagens');
 rollback;
+
+-- ---------- Preço desatualizado ----------
+begin;
+-- Kai'Sa do Rafael anunciada a Liga −10% (base R$ 100, R$ 90). Hoje a Liga está em R$ 150 (foil).
+update public.market_listings set card_id = '00000000-0000-4000-8000-200000000002' where id = '00000000-0000-4000-8000-500000000001';
+insert into public.liga_prices (card_id, finish, low_cents, language, condition, url) values
+  ('00000000-0000-4000-8000-200000000002', 'normal', 11000, 'en', 'nm', 'https://www.ligariftbound.com.br/?view=cards/card&card=x'),
+  ('00000000-0000-4000-8000-200000000002', 'foil', 15000, 'pt', 'lp', 'https://www.ligariftbound.com.br/?view=cards/card&card=x');
+select pg_temp.check((select expected_cents from listing_price_drift where listing_id = '00000000-0000-4000-8000-500000000001') = 13500, 'Preço de hoje pela regra usa o foil da Liga com o desconto');
+select pg_temp.check(public.price_drifted(9000, 13500) and not public.price_drifted(9000, 10000) and not public.price_drifted(100, 250), 'Limite: 20% e R$ 2');
+select pg_temp.check(public.notify_price_drift() = 1, 'Cron avisa o vendedor');
+select pg_temp.check(public.notify_price_drift() = 0, 'Mesmo anúncio não avisa de novo');
+select pg_temp.check((select count(*) from notifications where kind = 'price_review' and user_id = '00000000-0000-4000-8000-100000000003') = 1, 'Um aviso só');
+
+select pg_temp.login('00000000-0000-4000-8000-100000000002'); -- João não mexe no anúncio do Rafael
+select pg_temp.check(public.reprice_listings() = 0 and public.keep_listing_prices(array['00000000-0000-4000-8000-500000000001'::uuid]) = 0, 'Outro usuário não atualiza nem mantém');
+select pg_temp.check((select count(*) from notifications where kind = 'price_review') = 0, 'Aviso de preço é só do vendedor');
+
+select pg_temp.login('00000000-0000-4000-8000-100000000003'); -- Rafael
+select pg_temp.check((select count(*) from listing_price_drift where seller_id = auth.uid() and drifted) = 1, 'Vendedor vê o anúncio longe');
+select pg_temp.check(public.keep_listing_prices(array['00000000-0000-4000-8000-500000000001'::uuid]) = 1, 'Vendedor mantém o preço');
+select pg_temp.check((select count(*) from listing_price_drift where drifted) = 0, 'Mantido sai da revisão');
+select pg_temp.check((select price_cents from market_listings where id = '00000000-0000-4000-8000-500000000001') = 9000, 'Manter não muda o preço');
+reset role;
+update public.liga_prices set low_cents = 20000 where finish = 'foil';
+select pg_temp.login('00000000-0000-4000-8000-100000000003');
+select pg_temp.check((select count(*) from listing_price_drift where drifted) = 1, 'Referência andou mais 20%: volta para a revisão');
+select pg_temp.check(public.reprice_listings() = 1, 'Vendedor atualiza todos pela regra');
+select pg_temp.check((select (price_cents, price_base_cents, discount_pct, liga_price_cents, liga_language, price_ack_cents) from market_listings where id = '00000000-0000-4000-8000-500000000001')
+  = (18000, 20000, 10, 20000, 'pt'::text, null::int), 'Preço novo pela regra, referência da Liga atualizada e revisão zerada');
+select pg_temp.check((select count(*) from listing_price_drift where drifted) = 0, 'Atualizado sai da revisão');
+rollback;

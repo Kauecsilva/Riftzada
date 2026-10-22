@@ -1,8 +1,11 @@
 import { formatPrice } from "@/lib/format";
-import type { AppNotification } from "@/types/domain";
+import type { AppNotification, NotificationKind } from "@/types/domain";
 
-/** O que o outro jogador fez, sem o nome dele: "ofereceu R$ 75 por Kai'Sa". */
-export function notificationText(n: Pick<AppNotification, "kind" | "cardName" | "amountCents">): string {
+/** Aviso do próprio app, sem outro jogador: o texto vem pronto do banco e abre a revisão de preços. */
+export const isSystemNotification = (kind: NotificationKind) => kind === "price_review";
+
+/** O que o outro jogador fez, sem o nome dele: "ofereceu R$ 75 por Kai'Sa". Aviso do app: a frase inteira. */
+export function notificationText(n: Pick<AppNotification, "kind" | "cardName" | "amountCents" | "body">): string {
   const card = n.cardName ?? "um anúncio seu";
   // Oferta só em cartas vem com valor 0: sem "R$ 0" no texto
   const value = n.amountCents ? formatPrice(n.amountCents) : null;
@@ -21,6 +24,8 @@ export function notificationText(n: Pick<AppNotification, "kind" | "cardName" | 
       return `propôs uma troca por ${card}`;
     case "message":
       return `te mandou uma mensagem sobre ${card}`;
+    case "price_review":
+      return n.body ?? "Tem anúncio seu com o preço longe da referência de hoje.";
   }
 }
 
